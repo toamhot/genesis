@@ -1,0 +1,14 @@
+# Genesis Skills Framework Dependencies
+
+# Core dependencies (Python 3.10+ required for dataclasses features)
+# No external dependencies required for the base framework
+
+# Optional: For using skills with Claude API directly
+anthropic>=0.18.0
+
+# Development dependencies
+pytest>=7.0.0
+pytest-cov>=4.0.0
+black>=23.0.0
+ruff>=0.1.0
+mypy>=1.0.0
