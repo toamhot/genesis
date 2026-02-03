@@ -34,6 +34,38 @@ rss_feeds:
     category: "innovation"
     priority: 2
 
+  # Presse économique et financière française
+  - name: "Les Echos - Finance"
+    url: "https://www.lesechos.fr/rss/rss_finance_marches.xml"
+    category: "french_banks"
+    priority: 1
+
+  - name: "Les Echos - Banque & Assurance"
+    url: "https://www.lesechos.fr/rss/rss_banque_assurance.xml"
+    category: "french_banks"
+    priority: 1
+
+  - name: "L'Agefi"
+    url: "https://www.agefi.fr/rss"
+    category: "french_banks"
+    priority: 1
+
+  - name: "La Tribune - Finance"
+    url: "https://www.latribune.fr/rss/rubriques/entreprises-finance/banques-finance.html"
+    category: "french_banks"
+    priority: 2
+
+  - name: "Option Finance"
+    url: "https://www.optionfinance.fr/rss.xml"
+    category: "french_banks"
+    priority: 2
+
+  # Blogs et analyses
+  - name: "C'est pas mon idée"
+    url: "https://cestpasmonidee.blogspot.com/feeds/posts/default?alt=rss"
+    category: "innovation"
+    priority: 2
+
 web_sources:
   # Pages à scraper (sources sans RSS)
   - name: "ACPR - Actualités"
