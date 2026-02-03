@@ -90,24 +90,49 @@ L'introduction doit :
     def _call_claude(self, system: str, prompt: str) -> str:
         """Appelle Claude API"""
         if not self.client:
-            return "[Introduction éditoriale à rédiger manuellement]"
+            console.print("[yellow]⚠ Pas de client Claude API - éditorial non généré[/yellow]")
+            return "[Introduction éditoriale à rédiger manuellement - Clé API manquante]"
 
-        message = self.client.messages.create(
-            model=self.model,
-            max_tokens=1024,
-            system=system,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return message.content[0].text
+        try:
+            message = self.client.messages.create(
+                model=self.model,
+                max_tokens=1024,
+                system=system,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return message.content[0].text
+        except Exception as e:
+            console.print(f"[red]✗ Erreur API Claude pour éditorial: {str(e)[:100]}[/red]")
+            return f"[Erreur génération éditorial: {str(e)[:50]}]"
 
-    def generate_editorial(self, selection: CuratedSelection, month: str) -> str:
-        """Génère l'introduction éditoriale avec Claude"""
+    def generate_editorial(
+        self,
+        selection: CuratedSelection,
+        month: str,
+        all_articles: Optional[list] = None
+    ) -> str:
+        """
+        Génère l'introduction éditoriale avec Claude.
+
+        Args:
+            selection: La sélection curée d'articles
+            month: Le mois de la newsletter
+            all_articles: Tous les articles analysés (optionnel, pour une vision plus large)
+        """
         console.print("\n[bold blue]✍️  Génération de l'éditorial...[/bold blue]")
 
-        # Préparer le contexte pour Claude
+        # Utiliser tous les articles si fournis, sinon la sélection
+        if all_articles and len(all_articles) > 0:
+            # Prendre les 20 meilleurs pour l'éditorial (vision large)
+            articles_for_editorial = all_articles[:20]
+            console.print(f"  [dim]Basé sur {len(articles_for_editorial)} articles analysés[/dim]")
+        else:
+            articles_for_editorial = selection.top_articles[:10]
+
+        # Préparer le contexte pour Claude - utiliser les titres français si disponibles
         articles_summary = "\n".join([
-            f"- {a.article.title}: {a.ai_summary}"
-            for a in selection.top_articles[:10]
+            f"- {a.title_fr if a.title_fr else a.article.title}: {a.ai_summary}"
+            for a in articles_for_editorial
         ])
 
         categories_summary = "\n".join([
@@ -117,13 +142,18 @@ L'introduction doit :
 
         prompt = f"""Rédige l'introduction éditoriale de la newsletter bancaire Ares & Co pour {month}.
 
-**Articles sélectionnés ce mois-ci :**
+**Actualités du mois analysées :**
 {articles_summary}
 
-**Répartition thématique :**
+**Répartition thématique dans la newsletter :**
 {categories_summary}
 
-Rédige une introduction de 2-3 paragraphes qui met en perspective ces actualités."""
+Rédige une introduction de 2-3 paragraphes EN FRANÇAIS qui :
+1. Identifie les tendances et thèmes majeurs du mois
+2. Met en perspective les événements clés pour les dirigeants bancaires
+3. Donne une vision prospective stratégique
+
+IMPORTANT: L'éditorial doit être entièrement en français, professionnel et analytique."""
 
         editorial = self._call_claude(self.EDITORIAL_SYSTEM_PROMPT, prompt)
         console.print("[green]✓ Éditorial généré[/green]")

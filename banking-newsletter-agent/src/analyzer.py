@@ -43,19 +43,22 @@ class Analyzer:
 
 Ta mission est d'analyser des articles d'actualité bancaire et de produire une analyse structurée ENTIÈREMENT EN FRANÇAIS.
 
-IMPORTANT : Même si l'article source est en anglais, TOUT ton output doit être en français :
-- Le résumé doit être en français
-- Les faits clés doivent être en français
-- Si le titre original est en anglais, propose une traduction française dans le résumé
+RÈGLES CRITIQUES DE TRADUCTION :
+- TOUS les contenus doivent être EN FRANÇAIS, même si l'article source est en anglais
+- Le champ "title_fr" DOIT OBLIGATOIREMENT contenir le titre TRADUIT EN FRANÇAIS
+- Exemple: "ECB maintains interest rates" → title_fr: "La BCE maintient ses taux d'intérêt"
+- Le résumé (summary) doit être en français
+- Les faits clés (key_facts) doivent être en français
 
 Pour chaque article, tu dois :
-1. Rédiger un résumé concis (2-3 phrases) EN FRANÇAIS
-2. Évaluer la pertinence pour une newsletter destinée aux dirigeants bancaires (score 0-10)
-3. Identifier la catégorie principale
-4. Extraire les faits clés EN FRANÇAIS (bullet points)
-5. Identifier les entités mentionnées (banques, régulateurs, personnes)
-6. Déterminer le sentiment général
-7. Attribuer une priorité newsletter (1=critique, 5=informatif)
+1. TRADUIRE le titre en français dans "title_fr" (OBLIGATOIRE)
+2. Rédiger un résumé concis (2-3 phrases) EN FRANÇAIS
+3. Évaluer la pertinence pour une newsletter destinée aux dirigeants bancaires (score 0-10)
+4. Identifier la catégorie principale
+5. Extraire les faits clés EN FRANÇAIS (bullet points)
+6. Identifier les entités mentionnées (banques, régulateurs, personnes)
+7. Déterminer le sentiment général
+8. Attribuer une priorité newsletter (1=critique, 5=informatif)
 
 Catégories possibles :
 - regulation : Évolutions réglementaires (Bâle, DORA, MiCA, etc.)
@@ -64,8 +67,10 @@ Catégories possibles :
 - innovation : Fintech, digital banking, IA
 - ma : Fusions, acquisitions, restructurations
 - market : Tendances générales du marché
+- regulateur : Actualités des régulateurs (BCE, EBA, ACPR, AMF)
+- fintech : Actualités fintech et néobanques
 
-Réponds UNIQUEMENT en JSON valide, avec tout le contenu EN FRANÇAIS."""
+Réponds UNIQUEMENT en JSON valide, avec TOUT le contenu EN FRANÇAIS."""
 
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
@@ -95,15 +100,17 @@ Réponds UNIQUEMENT en JSON valide, avec tout le contenu EN FRANÇAIS."""
         """Analyse un article individuel avec Claude"""
         prompt = f"""Analyse cet article d'actualité bancaire :
 
-**Titre** : {article.title}
+**Titre original** : {article.title}
 **Source** : {article.source}
 **Date** : {article.published_date.strftime('%Y-%m-%d') if article.published_date else 'Non spécifiée'}
 **Contenu** : {article.content[:1500] if article.content else article.summary}
 
+IMPORTANT: Si le titre est en anglais, tu DOIS le traduire en français dans "title_fr".
+
 Réponds en JSON avec cette structure exacte :
 {{
-    "title_fr": "Titre en français (traduit si l'original est en anglais, sinon identique)",
-    "summary": "Résumé en français (2-3 phrases)",
+    "title_fr": "TITRE TRADUIT EN FRANÇAIS (obligatoire même si le titre original est déjà en français)",
+    "summary": "Résumé en français (2-3 phrases analytiques)",
     "relevance_score": 7.5,
     "category": "regulation",
     "key_facts": ["fait clé 1 en français", "fait clé 2 en français"],
@@ -253,7 +260,11 @@ Réponds en JSON avec cette structure exacte :
         ])
 
         prompt = f"""Analyse ces {len(articles)} articles d'actualité bancaire.
-IMPORTANT : Tous les contenus (résumés, titres, faits clés) doivent être EN FRANÇAIS, même si l'article original est en anglais.
+
+RÈGLES CRITIQUES :
+1. TOUS les contenus (title_fr, summary, key_facts) DOIVENT être EN FRANÇAIS
+2. Le champ "title_fr" DOIT contenir une TRADUCTION FRANÇAISE du titre original
+3. Exemple: "ECB cuts rates" → title_fr: "La BCE réduit ses taux"
 
 {articles_text}
 
@@ -262,12 +273,12 @@ Réponds en JSON avec un tableau d'analyses, une par article :
     "analyses": [
         {{
             "article_id": "id de l'article",
-            "title_fr": "Titre en français (traduit si anglais)",
-            "summary": "Résumé en français",
+            "title_fr": "TITRE TRADUIT EN FRANÇAIS (obligatoire)",
+            "summary": "Résumé analytique en français (2-3 phrases)",
             "relevance_score": 7.5,
             "category": "regulation",
-            "key_facts": ["fait clé en français"],
-            "entities": ["BCE"],
+            "key_facts": ["fait clé 1 en français", "fait clé 2 en français"],
+            "entities": ["BCE", "BNP Paribas"],
             "sentiment": "neutral",
             "newsletter_priority": 2
         }}

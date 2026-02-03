@@ -49,12 +49,14 @@ class Curator:
         min_relevance_score: float = 5.0,
         max_articles_per_category: int = 3,
         max_total_articles: int = 10,
+        min_articles_per_category: int = 2,
         target_month: Optional[datetime] = None,
         days_back: int = 30
     ):
         self.min_relevance_score = min_relevance_score
         self.max_articles_per_category = max_articles_per_category
         self.max_total_articles = max_total_articles
+        self.min_articles_per_category = min_articles_per_category
 
         # Configuration de la période cible
         if target_month is None:
@@ -195,6 +197,49 @@ class Curator:
 
         return dict(grouped)
 
+    def ensure_minimum_per_category(
+        self,
+        articles: List[AnalyzedArticle],
+        all_articles: List[AnalyzedArticle]
+    ) -> List[AnalyzedArticle]:
+        """
+        S'assure qu'il y a au moins min_articles_per_category par catégorie.
+        Remplit les catégories sous-représentées avec des articles supplémentaires.
+        """
+        # Grouper les articles sélectionnés par catégorie
+        by_category = defaultdict(list)
+        for article in articles:
+            by_category[article.assigned_category].append(article)
+
+        # Grouper TOUS les articles disponibles par catégorie
+        all_by_category = defaultdict(list)
+        for article in all_articles:
+            all_by_category[article.assigned_category].append(article)
+
+        # IDs déjà sélectionnés
+        selected_ids = {a.article.id for a in articles}
+
+        # Identifier les catégories qui ont des articles disponibles mais sous-représentées
+        result = list(articles)
+
+        for category, all_cat_articles in all_by_category.items():
+            current_count = len(by_category.get(category, []))
+
+            # Si cette catégorie a moins que le minimum requis
+            if current_count < self.min_articles_per_category:
+                # Chercher des articles supplémentaires dans cette catégorie
+                for article in all_cat_articles:
+                    if article.article.id not in selected_ids:
+                        result.append(article)
+                        selected_ids.add(article.article.id)
+                        by_category[category].append(article)
+                        current_count += 1
+
+                        if current_count >= self.min_articles_per_category:
+                            break
+
+        return result
+
     def deduplicate_similar(
         self,
         articles: List[AnalyzedArticle],
@@ -239,8 +284,9 @@ class Curator:
         1. Validation des dates
         2. Filtre et ranking
         3. Déduplication
-        4. Groupement par catégorie
-        5. Sélection finale
+        4. Assurer minimum par catégorie
+        5. Groupement par catégorie
+        6. Sélection finale
 
         Args:
             articles: Liste des articles analysés
@@ -263,12 +309,21 @@ class Curator:
         deduplicated = self.deduplicate_similar(ranked)
         console.print(f"  [dim]• {len(deduplicated)} articles après déduplication[/dim]")
 
-        # Étape 4: Sélectionner le top
+        # Étape 4: Sélectionner le top initial
         top_articles = deduplicated[:self.max_total_articles]
-        console.print(f"  [dim]• {len(top_articles)} articles sélectionnés pour la newsletter[/dim]")
 
-        # Étape 5: Grouper par catégorie
+        # Étape 5: Assurer le minimum par catégorie (2 articles minimum)
+        top_articles = self.ensure_minimum_per_category(top_articles, deduplicated)
+        console.print(f"  [dim]• {len(top_articles)} articles après équilibrage des catégories[/dim]")
+
+        # Étape 6: Grouper par catégorie
         by_category = self.group_by_category(top_articles)
+
+        # Afficher les catégories avec moins de 2 articles
+        for cat, cat_articles in by_category.items():
+            if len(cat_articles) < self.min_articles_per_category:
+                cat_name = self.CATEGORY_NAMES.get(cat, cat)
+                console.print(f"  [yellow]⚠ {cat_name}: seulement {len(cat_articles)} article(s) disponible(s)[/yellow]")
 
         selection = CuratedSelection(
             top_articles=top_articles,

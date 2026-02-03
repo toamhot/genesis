@@ -66,7 +66,8 @@ class BankingNewsletterAgent:
         self.curator = Curator(
             min_relevance_score=3.0,  # Seuil bas pour garder plus d'articles
             max_articles_per_category=5,  # Plus d'articles par catégorie
-            max_total_articles=15  # Top 15 pour sélectionner les 10 meilleurs
+            max_total_articles=15,  # Top 15 pour sélectionner les 10 meilleurs
+            min_articles_per_category=2  # Minimum 2 articles par catégorie
         )
         self.writer = NewsletterWriter(api_key=self.api_key)
 
@@ -214,8 +215,8 @@ class BankingNewsletterAgent:
             # ═══════════════════════════════════════════════════════════
             console.print(Panel("[bold]ÉTAPE 4/4 : GÉNÉRATION[/bold]", style="blue"))
 
-            # Générer l'éditorial une seule fois
-            editorial = self.writer.generate_editorial(selection, month)
+            # Générer l'éditorial basé sur TOUS les articles analysés (vision large)
+            editorial = self.writer.generate_editorial(selection, month, all_articles=analyzed_articles)
 
             # Markdown
             if output_format in ("markdown", "both"):
