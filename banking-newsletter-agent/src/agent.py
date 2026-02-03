@@ -97,9 +97,12 @@ class BankingNewsletterAgent:
         Returns:
             dict: Résultats de l'exécution
         """
-        # Déterminer le mois
+        # Déterminer le mois (mois précédent = mois des actualités collectées)
         if month is None:
-            month = datetime.now().strftime("%B %Y").capitalize()
+            from dateutil.relativedelta import relativedelta
+            # La newsletter couvre le mois précédent (mois des actualités)
+            last_month = datetime.now() - relativedelta(months=1)
+            month = last_month.strftime("%B %Y").capitalize()
             # Traduction française
             month_translations = {
                 "January": "Janvier", "February": "Février", "March": "Mars",

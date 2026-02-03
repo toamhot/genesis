@@ -224,7 +224,7 @@ def generate_mock_analyzed_articles(articles):
 
 def run_demo():
     """Exécute la démo complète"""
-    month = "Février 2026"
+    month = "Janvier 2026"
 
     banner = f"""
 [bold blue]╔══════════════════════════════════════════════════════════════╗

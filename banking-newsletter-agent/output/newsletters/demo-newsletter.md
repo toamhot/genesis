@@ -1,4 +1,4 @@
-# Newsletter Banque - Février 2026
+# Newsletter Banque - Janvier 2026
 
 **Ares & Co** | Conseil en Stratégie
 
@@ -14,28 +14,30 @@ L'écosystème fintech français continue par ailleurs de démontrer son dynamis
 
 ---
 
-## 📜 Actualités Réglementaires
+## 💶 Politique Monétaire
 
-### L'EBA publie les nouvelles guidelines sur les risques ESG
+### La BCE maintient ses taux directeurs inchangés à 2,00%
 
-*Source: EBA - Press Releases*
- | *27/01/2026*
+*Source: BCE - Communiqués*
+ | *10/01/2026*
 
-L'Autorité bancaire européenne a publié ses lignes directrices finales sur la gestion des risques environnementaux, sociaux et de gouvernance (ESG). Ces guidelines entrent en application immédiate et concernent toutes les banques européennes.
+Le Conseil des gouverneurs de la BCE a décidé de maintenir les trois taux directeurs inchangés. Le taux de la facilité de dépôt reste à 2,00%, le taux des opérations principales de refinancement à 2,15% et le taux de la facilité de prêt marginal à 2,40%.
 
 **Points clés :**
-- Intégration ESG obligatoire dans le processus ICAAP
-- Nouveaux stress tests climatiques requis
-- Délai de mise en conformité : 12 mois
+- Taux de dépôt maintenu à 2,00%
+- Inflation sous-jacente toujours au-dessus de l'objectif
+- Prochaine réunion le 6 mars 2026
 
-[Lire l'article](https://example.com/article/1)
+[Lire l'article](https://example.com/article/0)
 
 ---
+
+## 📜 Actualités Réglementaires
 
 ### AMLA opérationnelle : transfert des compétences AML depuis l'EBA
 
 *Source: EBA - Press Releases*
- | *01/02/2026*
+ | *21/01/2026*
 
 L'Autorité européenne de lutte contre le blanchiment (AMLA) est désormais pleinement opérationnelle après le transfert de toutes les compétences AML/CFT depuis l'EBA. Un protocole de coopération a été signé entre les deux autorités.
 
@@ -51,7 +53,7 @@ L'Autorité européenne de lutte contre le blanchiment (AMLA) est désormais ple
 ### Report d'un an pour le FRTB : la Commission européenne accorde un délai
 
 *Source: Commission Européenne*
- | *12/01/2026*
+ | *30/01/2026*
 
 La Commission européenne a adopté un acte délégué reportant d'un an supplémentaire l'application du Fundamental Review of the Trading Book (FRTB). Les exigences de risque de marché s'appliqueront au 1er janvier 2027.
 
@@ -64,21 +66,19 @@ La Commission européenne a adopté un acte délégué reportant d'un an supplé
 
 ---
 
-## 💶 Politique Monétaire
+### L'EBA publie les nouvelles guidelines sur les risques ESG
 
-### La BCE maintient ses taux directeurs inchangés à 2,00%
+*Source: EBA - Press Releases*
+ | *14/01/2026*
 
-*Source: BCE - Communiqués*
- | *12/01/2026*
-
-Le Conseil des gouverneurs de la BCE a décidé de maintenir les trois taux directeurs inchangés. Le taux de la facilité de dépôt reste à 2,00%, le taux des opérations principales de refinancement à 2,15% et le taux de la facilité de prêt marginal à 2,40%.
+L'Autorité bancaire européenne a publié ses lignes directrices finales sur la gestion des risques environnementaux, sociaux et de gouvernance (ESG). Ces guidelines entrent en application immédiate et concernent toutes les banques européennes.
 
 **Points clés :**
-- Taux de dépôt maintenu à 2,00%
-- Inflation sous-jacente toujours au-dessus de l'objectif
-- Prochaine réunion le 6 mars 2026
+- Intégration ESG obligatoire dans le processus ICAAP
+- Nouveaux stress tests climatiques requis
+- Délai de mise en conformité : 12 mois
 
-[Lire l'article](https://example.com/article/0)
+[Lire l'article](https://example.com/article/1)
 
 ---
 
@@ -87,7 +87,7 @@ Le Conseil des gouverneurs de la BCE a décidé de maintenir les trois taux dire
 ### BNP Paribas annonce un plan de transformation digitale de 500M€
 
 *Source: Finextra*
- | *30/01/2026*
+ | *20/01/2026*
 
 BNP Paribas a dévoilé un plan d'investissement massif de 500 millions d'euros sur trois ans pour accélérer sa transformation digitale. Le plan prévoit notamment le déploiement de l'IA générative dans la relation client.
 
@@ -103,7 +103,7 @@ BNP Paribas a dévoilé un plan d'investissement massif de 500 millions d'euros 
 ### Société Générale finalise la cession de ses activités en Russie
 
 *Source: Les Echos*
- | *27/01/2026*
+ | *01/02/2026*
 
 Société Générale a finalisé la vente de Rosbank et de ses filiales russes, mettant fin à sa présence historique en Russie. L'opération génère une perte comptable mais libère des fonds propres significatifs.
 
@@ -118,10 +118,26 @@ Société Générale a finalisé la vente de Rosbank et de ses filiales russes, 
 
 ## 🚀 Innovation & Digital
 
+### Open Banking : l'usage des APIs explose en Europe
+
+*Source: Fintech Futures*
+ | *31/01/2026*
+
+Le nombre d'appels API en Open Banking a augmenté de 70% en Europe en 2025, porté par l'agrégation de comptes et l'initiation de paiements. Le Royaume-Uni reste leader mais la France progresse.
+
+**Points clés :**
+- +70% d'appels API en 2025
+- France : 3ème marché européen
+- Paiement par virement : adoption croissante
+
+[Lire l'article](https://example.com/article/9)
+
+---
+
 ### France FinTech : record de levées de fonds pour les néobanques en 2025
 
 *Source: France FinTech*
- | *15/01/2026*
+ | *11/01/2026*
 
 L'écosystème fintech français a enregistré un record de levées de fonds en 2025, porté notamment par les néobanques et les solutions de paiement B2B. Le total atteint 2,3 milliards d'euros.
 
@@ -137,7 +153,7 @@ L'écosystème fintech français a enregistré un record de levées de fonds en 
 ### Crédit Agricole lance une offre de Banking-as-a-Service
 
 *Source: Finextra*
- | *26/01/2026*
+ | *17/01/2026*
 
 Crédit Agricole a annoncé le lancement de CA BaaS, une plateforme permettant aux entreprises d'intégrer des services bancaires via API. L'offre cible les marketplaces et les fintechs.
 
@@ -150,26 +166,10 @@ Crédit Agricole a annoncé le lancement de CA BaaS, une plateforme permettant a
 
 ---
 
-### Open Banking : l'usage des APIs explose en Europe
-
-*Source: Fintech Futures*
- | *11/01/2026*
-
-Le nombre d'appels API en Open Banking a augmenté de 70% en Europe en 2025, porté par l'agrégation de comptes et l'initiation de paiements. Le Royaume-Uni reste leader mais la France progresse.
-
-**Points clés :**
-- +70% d'appels API en 2025
-- France : 3ème marché européen
-- Paiement par virement : adoption croissante
-
-[Lire l'article](https://example.com/article/9)
-
----
-
 ## À propos
 
 Cette newsletter est produite par **Ares & Co**, cabinet de conseil en stratégie.
 
 Pour plus d'informations sur notre practice Banque, contactez-nous.
 
-*Généré le 03/02/2026 à 21:10*
+*Généré le 03/02/2026 à 21:12*
