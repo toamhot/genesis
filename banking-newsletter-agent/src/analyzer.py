@@ -33,6 +33,7 @@ class AnalyzedArticle:
     entities: List[str]  # Banques, régulateurs, personnes mentionnées
     sentiment: str  # positive, negative, neutral
     newsletter_priority: int  # 1-5, 1 = très important
+    title_fr: str = ""  # Titre traduit en français si source anglaise
 
 
 class Analyzer:
@@ -40,13 +41,18 @@ class Analyzer:
 
     SYSTEM_PROMPT = """Tu es un analyste expert du secteur bancaire européen travaillant pour Ares & Co, un cabinet de conseil en stratégie.
 
-Ta mission est d'analyser des articles d'actualité bancaire et de produire une analyse structurée.
+Ta mission est d'analyser des articles d'actualité bancaire et de produire une analyse structurée ENTIÈREMENT EN FRANÇAIS.
+
+IMPORTANT : Même si l'article source est en anglais, TOUT ton output doit être en français :
+- Le résumé doit être en français
+- Les faits clés doivent être en français
+- Si le titre original est en anglais, propose une traduction française dans le résumé
 
 Pour chaque article, tu dois :
-1. Rédiger un résumé concis (2-3 phrases) en français
+1. Rédiger un résumé concis (2-3 phrases) EN FRANÇAIS
 2. Évaluer la pertinence pour une newsletter destinée aux dirigeants bancaires (score 0-10)
 3. Identifier la catégorie principale
-4. Extraire les faits clés (bullet points)
+4. Extraire les faits clés EN FRANÇAIS (bullet points)
 5. Identifier les entités mentionnées (banques, régulateurs, personnes)
 6. Déterminer le sentiment général
 7. Attribuer une priorité newsletter (1=critique, 5=informatif)
@@ -59,7 +65,7 @@ Catégories possibles :
 - ma : Fusions, acquisitions, restructurations
 - market : Tendances générales du marché
 
-Réponds UNIQUEMENT en JSON valide."""
+Réponds UNIQUEMENT en JSON valide, avec tout le contenu EN FRANÇAIS."""
 
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
@@ -96,10 +102,11 @@ Réponds UNIQUEMENT en JSON valide."""
 
 Réponds en JSON avec cette structure exacte :
 {{
+    "title_fr": "Titre en français (traduit si l'original est en anglais, sinon identique)",
     "summary": "Résumé en français (2-3 phrases)",
     "relevance_score": 7.5,
     "category": "regulation",
-    "key_facts": ["fait 1", "fait 2"],
+    "key_facts": ["fait clé 1 en français", "fait clé 2 en français"],
     "entities": ["BCE", "BNP Paribas"],
     "sentiment": "neutral",
     "newsletter_priority": 2
@@ -127,7 +134,8 @@ Réponds en JSON avec cette structure exacte :
                 key_facts=analysis.get("key_facts", []),
                 entities=analysis.get("entities", []),
                 sentiment=analysis.get("sentiment", "neutral"),
-                newsletter_priority=int(analysis.get("newsletter_priority", 3))
+                newsletter_priority=int(analysis.get("newsletter_priority", 3)),
+                title_fr=analysis.get("title_fr", article.title)
             )
 
         except json.JSONDecodeError as e:
@@ -141,7 +149,8 @@ Réponds en JSON avec cette structure exacte :
                 key_facts=[],
                 entities=[],
                 sentiment="neutral",
-                newsletter_priority=3
+                newsletter_priority=3,
+                title_fr=article.title
             )
 
         except Exception as e:
@@ -243,7 +252,8 @@ Réponds en JSON avec cette structure exacte :
             for i, a in enumerate(articles)
         ])
 
-        prompt = f"""Analyse ces {len(articles)} articles d'actualité bancaire :
+        prompt = f"""Analyse ces {len(articles)} articles d'actualité bancaire.
+IMPORTANT : Tous les contenus (résumés, titres, faits clés) doivent être EN FRANÇAIS, même si l'article original est en anglais.
 
 {articles_text}
 
@@ -252,10 +262,11 @@ Réponds en JSON avec un tableau d'analyses, une par article :
     "analyses": [
         {{
             "article_id": "id de l'article",
+            "title_fr": "Titre en français (traduit si anglais)",
             "summary": "Résumé en français",
             "relevance_score": 7.5,
             "category": "regulation",
-            "key_facts": ["fait 1"],
+            "key_facts": ["fait clé en français"],
             "entities": ["BCE"],
             "sentiment": "neutral",
             "newsletter_priority": 2
@@ -289,7 +300,8 @@ Réponds en JSON avec un tableau d'analyses, une par article :
                 key_facts=analysis.get("key_facts", []),
                 entities=analysis.get("entities", []),
                 sentiment=analysis.get("sentiment", "neutral"),
-                newsletter_priority=int(analysis.get("newsletter_priority", 3))
+                newsletter_priority=int(analysis.get("newsletter_priority", 3)),
+                title_fr=analysis.get("title_fr", article.title)
             ))
 
         return results

@@ -173,7 +173,9 @@ Rédige une introduction de 2-3 paragraphes qui met en perspective ces actualit�
             lines.append("")
 
             for article in articles:
-                lines.append(f"### {article.article.title}")
+                # Utiliser le titre français si disponible
+                title = article.title_fr if article.title_fr else article.article.title
+                lines.append(f"### {title}")
                 lines.append("")
                 lines.append(f"*Source: {article.article.source}*")
                 if article.article.published_date:
@@ -491,7 +493,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
             {% for article in articles %}
             <div class="article">
-                <h3>{{ article.article.title }}</h3>
+                <h3>{{ article.title_fr if article.title_fr else article.article.title }}</h3>
                 <div class="meta">
                     {{ article.article.source }}
                     {% if article.article.published_date %}
