@@ -267,7 +267,7 @@ Rédige une introduction de 2-3 paragraphes qui met en perspective ces actualit�
         return filepath
 
 
-# Template HTML professionnel
+# Template HTML professionnel - Ares & Co
 HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -276,9 +276,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <title>Newsletter Banque - {{ month }} | Ares & Co</title>
     <style>
         :root {
-            --primary-color: #1a365d;
-            --secondary-color: #2c5282;
-            --accent-color: #3182ce;
+            --primary-color: #051E5B;
+            --secondary-color: #0a2d7a;
+            --accent-color: #1e4db7;
             --text-color: #2d3748;
             --light-bg: #f7fafc;
             --border-color: #e2e8f0;
@@ -457,11 +457,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <body>
     <div class="container">
         <div class="header">
-            {% if logo_url %}
-            <img src="{{ logo_url }}" alt="Ares & Co" style="height: 50px; margin-bottom: 20px;">
-            {% endif %}
+            <img src="{{ logo_url if logo_url else 'https://www.aresandco.com/img/footer-logo.png' }}" alt="Ares & Co" style="max-height: 60px; margin-bottom: 20px;">
             <h1>Newsletter Banque</h1>
-            <div class="subtitle">Ares & Co | Conseil en Stratégie</div>
+            <div class="subtitle">Conseil en Stratégie</div>
             <div class="month">{{ month }}</div>
         </div>
 
@@ -507,10 +505,39 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         {% endfor %}
 
         <div class="footer">
+            <img src="https://www.aresandco.com/img/footer-logo.png" alt="Ares & Co" style="max-height: 40px; margin-bottom: 15px; filter: brightness(0) invert(1);">
             <h3>Ares & Co</h3>
             <p>Cabinet de conseil en stratégie</p>
-            <p>Pour plus d'informations sur notre practice Banque, contactez-nous.</p>
-            <div class="generation-date">Généré le {{ generation_date }}</div>
+
+            <div class="contact-info" style="margin: 20px 0; font-size: 13px;">
+                <p style="margin: 5px 0;">
+                    <span style="opacity: 0.8;">📍</span> 15 Av. de la Grande Armée, 75116 Paris, France
+                </p>
+                <p style="margin: 5px 0;">
+                    <span style="opacity: 0.8;">📞</span> +33 1 40 20 44 49
+                </p>
+                <p style="margin: 5px 0;">
+                    <span style="opacity: 0.8;">✉️</span> <a href="mailto:contact@aresandco.com" style="color: white;">contact@aresandco.com</a>
+                </p>
+            </div>
+
+            <div class="social-links" style="margin: 15px 0;">
+                <a href="https://www.aresandco.com/" style="color: white; text-decoration: none; margin: 0 10px;">🌐 Site web</a>
+                <a href="https://www.linkedin.com/company/ares-&-company/" style="color: white; text-decoration: none; margin: 0 10px;">💼 LinkedIn</a>
+            </div>
+
+            <div class="legal" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 11px; opacity: 0.7;">
+                <p>Cette newsletter est envoyée aux clients et partenaires d'Ares & Co.</p>
+                <p style="margin-top: 5px;">
+                    <a href="#" style="color: white;">Mentions légales</a> |
+                    <a href="#" style="color: white;">Politique de confidentialité</a> |
+                    <a href="mailto:contact@aresandco.com?subject=Désabonnement Newsletter Banque" style="color: white;">Se désabonner</a>
+                </p>
+            </div>
+
+            <div class="generation-date" style="margin-top: 15px; font-size: 10px; opacity: 0.5;">
+                Généré le {{ generation_date }}
+            </div>
         </div>
     </div>
 </body>
