@@ -133,11 +133,11 @@ Réponds UNIQUEMENT en JSON valide, avec TOUT le contenu EN FRANÇAIS."""
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10)
     )
-    def _call_claude(self, prompt: str) -> str:
+    def _call_claude(self, prompt: str, max_tokens: int = 2048) -> str:
         """Appelle Claude API avec retry automatique"""
         message = self.client.messages.create(
             model=self.model,
-            max_tokens=1024,
+            max_tokens=max_tokens,
             system=self.SYSTEM_PROMPT,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -246,7 +246,7 @@ Réponds en JSON avec cette structure exacte :
     def analyze_batch_optimized(
         self,
         articles: List[Article],
-        batch_size: int = 5,
+        batch_size: int = 3,  # Réduit de 5 à 3 pour éviter troncature
         max_articles: int = 100
     ) -> List[AnalyzedArticle]:
         """
@@ -364,7 +364,8 @@ Réponds en JSON avec un tableau d'analyses, une par article :
     ]
 }}"""
 
-        response = self._call_claude(prompt)
+        # Utiliser plus de tokens pour les lots (3 articles = ~1500 tokens de réponse)
+        response = self._call_claude(prompt, max_tokens=4096)
 
         # Parser le JSON avec nettoyage robuste
         clean_response = clean_json_response(response)
@@ -374,7 +375,7 @@ Réponds en JSON avec un tableau d'analyses, une par article :
         except json.JSONDecodeError as e:
             # Log l'erreur et la réponse pour debug
             console.print(f"[red]Erreur JSON: {e}[/red]")
-            console.print(f"[dim]Réponse brute (100 premiers chars): {response[:100]}...[/dim]")
+            console.print(f"[dim]Réponse (derniers 200 chars): ...{response[-200:]}[/dim]")
             raise
 
         # Mapper les résultats aux articles
