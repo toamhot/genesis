@@ -458,7 +458,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <div class="container">
         <div class="header">
             <a href="https://www.aresandco.com/fr" target="_blank" style="text-decoration: none;">
-                <img src="{{ logo_url if logo_url else 'https://www.aresandco.com/img/footer-logo.png' }}" alt="Ares & Co" style="max-height: 60px; margin-bottom: 15px;">
+                <img src="{{ logo_url if logo_url else 'https://www.aresandco.com/images/common-contents/logo-image/62c2a7a87e751_logo.png' }}" alt="Ares & Co" style="max-height: 60px; margin-bottom: 15px;">
             </a>
             <div class="baseline" style="font-size: 12px; opacity: 0.9; margin-bottom: 20px; letter-spacing: 1px;">Cabinet de conseil de Direction Générale</div>
             <h1>Newsletter Banque</h1>
