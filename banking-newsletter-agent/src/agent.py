@@ -22,7 +22,15 @@ from typing import Optional
 from dotenv import load_dotenv
 # Charger .env depuis le dossier parent de src/ (racine du projet)
 env_path = Path(__file__).parent.parent / '.env'
-load_dotenv(dotenv_path=env_path)
+loaded = load_dotenv(dotenv_path=env_path)
+
+# Debug: afficher si le fichier .env a été trouvé
+if not loaded:
+    print(f"[DEBUG] Fichier .env non trouvé à: {env_path.absolute()}")
+    print(f"[DEBUG] Créez ce fichier avec: ANTHROPIC_API_KEY=votre-clé")
+elif not os.environ.get("ANTHROPIC_API_KEY"):
+    print(f"[DEBUG] Fichier .env chargé depuis: {env_path.absolute()}")
+    print(f"[DEBUG] Mais ANTHROPIC_API_KEY n'est pas définie dans le fichier")
 
 from rich.console import Console
 from rich.panel import Panel
