@@ -276,9 +276,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <title>Newsletter Banque - {{ month }} | Ares & Co</title>
     <style>
         :root {
-            --primary-color: #051E5B;
-            --secondary-color: #0a2d7a;
-            --accent-color: #1e4db7;
+            --primary-color: #051E3B;
+            --secondary-color: #051E5B;
+            --accent-color: #57AEE0;
             --text-color: #2d3748;
             --light-bg: #f7fafc;
             --border-color: #e2e8f0;
