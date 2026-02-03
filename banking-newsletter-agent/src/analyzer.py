@@ -10,6 +10,7 @@ Ce module gère :
 
 import os
 import time
+import re
 from typing import List, Dict, Optional
 from dataclasses import dataclass
 import json
@@ -21,6 +22,51 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskPr
 from collector import Article
 
 console = Console()
+
+
+def clean_json_response(response: str) -> str:
+    """
+    Nettoie une réponse JSON de Claude pour la rendre parsable.
+    Gère les cas courants de malformation.
+    """
+    text = response.strip()
+
+    # Retirer les blocs de code markdown
+    if "```" in text:
+        # Extraire le contenu entre les backticks
+        match = re.search(r'```(?:json)?\s*([\s\S]*?)```', text)
+        if match:
+            text = match.group(1).strip()
+
+    # Trouver le début du JSON (premier { ou [)
+    json_start = -1
+    for i, c in enumerate(text):
+        if c in '{[':
+            json_start = i
+            break
+
+    if json_start > 0:
+        text = text[json_start:]
+
+    # Trouver la fin du JSON (dernier } ou ])
+    json_end = -1
+    for i in range(len(text) - 1, -1, -1):
+        if text[i] in '}]':
+            json_end = i + 1
+            break
+
+    if json_end > 0:
+        text = text[:json_end]
+
+    # Remplacer les guillemets simples par des doubles (attention aux apostrophes)
+    # Seulement si le JSON est vraiment malformé avec des single quotes
+    if "'" in text and '"' not in text[:50]:
+        text = text.replace("'", '"')
+
+    # Retirer les virgules trailing avant } ou ]
+    text = re.sub(r',(\s*[}\]])', r'\1', text)
+
+    return text
 
 
 @dataclass
@@ -123,15 +169,8 @@ Réponds en JSON avec cette structure exacte :
         try:
             response = self._call_claude(prompt)
 
-            # Parser le JSON
-            # Nettoyer la réponse si elle contient des backticks
-            clean_response = response.strip()
-            if clean_response.startswith("```"):
-                clean_response = clean_response.split("```")[1]
-                if clean_response.startswith("json"):
-                    clean_response = clean_response[4:]
-            clean_response = clean_response.strip()
-
+            # Parser le JSON avec nettoyage robuste
+            clean_response = clean_json_response(response)
             analysis = json.loads(clean_response)
 
             return AnalyzedArticle(
@@ -327,15 +366,16 @@ Réponds en JSON avec un tableau d'analyses, une par article :
 
         response = self._call_claude(prompt)
 
-        # Parser le JSON
-        clean_response = response.strip()
-        if clean_response.startswith("```"):
-            clean_response = clean_response.split("```")[1]
-            if clean_response.startswith("json"):
-                clean_response = clean_response[4:]
-        clean_response = clean_response.strip()
+        # Parser le JSON avec nettoyage robuste
+        clean_response = clean_json_response(response)
 
-        data = json.loads(clean_response)
+        try:
+            data = json.loads(clean_response)
+        except json.JSONDecodeError as e:
+            # Log l'erreur et la réponse pour debug
+            console.print(f"[red]Erreur JSON: {e}[/red]")
+            console.print(f"[dim]Réponse brute (100 premiers chars): {response[:100]}...[/dim]")
+            raise
 
         # Mapper les résultats aux articles
         results = []
