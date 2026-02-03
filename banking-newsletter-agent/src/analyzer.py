@@ -9,6 +9,7 @@ Ce module gère :
 """
 
 import os
+import time
 from typing import List, Dict, Optional
 from dataclasses import dataclass
 import json
@@ -206,12 +207,27 @@ Réponds en JSON avec cette structure exacte :
     def analyze_batch_optimized(
         self,
         articles: List[Article],
-        batch_size: int = 5
+        batch_size: int = 5,
+        max_articles: int = 100
     ) -> List[AnalyzedArticle]:
         """
         Analyse optimisée par lots pour réduire les appels API.
         Envoie plusieurs articles dans un seul prompt.
+
+        Args:
+            articles: Liste des articles à analyser
+            batch_size: Nombre d'articles par lot
+            max_articles: Nombre maximum d'articles à analyser (pour éviter rate limiting)
         """
+        # Limiter le nombre d'articles pour éviter rate limiting
+        if len(articles) > max_articles:
+            console.print(f"[yellow]⚠ {len(articles)} articles collectés, analyse limitée aux {max_articles} plus récents[/yellow]")
+            # Trier par date et prendre les plus récents
+            articles_with_date = [a for a in articles if a.published_date]
+            articles_without_date = [a for a in articles if not a.published_date]
+            articles_with_date.sort(key=lambda x: x.published_date, reverse=True)
+            articles = (articles_with_date + articles_without_date)[:max_articles]
+
         console.print(f"\n[bold blue]🔍 Analyse optimisée de {len(articles)} articles...[/bold blue]\n")
 
         analyzed = []
@@ -228,21 +244,45 @@ Réponds en JSON avec cette structure exacte :
         ) as progress:
             task = progress.add_task("[cyan]Analyse par lots...", total=len(batches))
 
-            for batch in batches:
+            for batch_num, batch in enumerate(batches):
                 try:
                     batch_results = self._analyze_batch_single_call(batch)
                     analyzed.extend(batch_results)
+                except anthropic.RateLimitError as e:
+                    console.print(f"[yellow]⚠ Rate limit atteint, pause de 30s...[/yellow]")
+                    time.sleep(30)
+                    # Réessayer après pause
+                    try:
+                        batch_results = self._analyze_batch_single_call(batch)
+                        analyzed.extend(batch_results)
+                    except Exception as retry_e:
+                        console.print(f"[red]✗ Échec après retry: {str(retry_e)[:80]}[/red]")
+                except anthropic.APIError as e:
+                    console.print(f"[red]✗ Erreur API: {str(e)[:100]}[/red]")
+                    # Fallback : analyser individuellement avec délai
+                    for article in batch:
+                        try:
+                            time.sleep(1)  # Petit délai entre chaque
+                            result = self.analyze_article(article)
+                            analyzed.append(result)
+                        except Exception as ind_e:
+                            console.print(f"[red]  → {article.title[:30]}: {str(ind_e)[:50]}[/red]")
                 except Exception as e:
-                    console.print(f"[yellow]⚠ Erreur lot, analyse individuelle...[/yellow]")
+                    console.print(f"[yellow]⚠ Erreur lot {batch_num+1}: {str(e)[:80]}[/yellow]")
                     # Fallback : analyser individuellement
                     for article in batch:
                         try:
+                            time.sleep(0.5)
                             result = self.analyze_article(article)
                             analyzed.append(result)
-                        except Exception:
-                            pass
+                        except Exception as ind_e:
+                            console.print(f"[red]  → Échec: {str(ind_e)[:50]}[/red]")
 
                 progress.update(task, advance=1)
+
+                # Petit délai entre les lots pour éviter rate limiting
+                if batch_num < len(batches) - 1:
+                    time.sleep(1)
 
         console.print(f"\n[bold green]✅ {len(analyzed)} articles analysés[/bold green]")
         return analyzed
