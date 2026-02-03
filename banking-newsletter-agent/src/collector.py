@@ -27,6 +27,19 @@ console = Console()
 class DateValidator:
     """Validateur de dates pour les articles"""
 
+    @staticmethod
+    def normalize_datetime(dt: Optional[datetime]) -> Optional[datetime]:
+        """
+        Normalise une datetime en supprimant les informations de timezone.
+        Permet de comparer des dates timezone-aware et timezone-naive.
+        """
+        if dt is None:
+            return None
+        if dt.tzinfo is not None:
+            # Convertir en UTC puis supprimer la timezone
+            return dt.replace(tzinfo=None)
+        return dt
+
     def __init__(self, target_month: Optional[datetime] = None, days_back: int = 30):
         """
         Initialise le validateur de dates.
@@ -78,13 +91,17 @@ class DateValidator:
                 return False, "no_date"
             return True, "no_date_accepted"  # Accepter avec avertissement
 
+        # Normaliser la date pour comparaison (supprimer timezone)
+        pub_date_normalized = self.normalize_datetime(pub_date)
+        now = datetime.now()
+
         # Date dans le futur (erreur de parsing probable)
-        if pub_date > datetime.now() + timedelta(days=1):
+        if pub_date_normalized > now + timedelta(days=1):
             self.stats["future"] += 1
             return False, "future_date"
 
         # Date trop ancienne
-        if pub_date < self.cutoff_date:
+        if pub_date_normalized < self.cutoff_date:
             self.stats["too_old"] += 1
             return False, f"too_old ({pub_date.strftime('%d/%m/%Y')})"
 
@@ -95,8 +112,9 @@ class DateValidator:
         """Vérifie si l'article est dans le mois cible"""
         if pub_date is None:
             return False
-        return (pub_date.year == self.target_year and
-                pub_date.month == self.target_month_num)
+        pub_date_normalized = self.normalize_datetime(pub_date)
+        return (pub_date_normalized.year == self.target_year and
+                pub_date_normalized.month == self.target_month_num)
 
     def get_stats_summary(self) -> str:
         """Retourne un résumé des statistiques de validation"""

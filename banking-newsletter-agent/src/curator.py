@@ -84,8 +84,11 @@ class Curator:
         # Bonus pour les articles récents (si date disponible)
         recency_bonus = 0
         if article.article.published_date:
-            from datetime import datetime, timedelta
-            days_old = (datetime.now() - article.article.published_date).days
+            # Normaliser la date pour éviter les erreurs timezone
+            pub_date = article.article.published_date
+            if pub_date.tzinfo is not None:
+                pub_date = pub_date.replace(tzinfo=None)
+            days_old = (datetime.now() - pub_date).days
             if days_old <= 7:
                 recency_bonus = 1.0
             elif days_old <= 14:
@@ -93,6 +96,18 @@ class Curator:
 
         final_score = base_score + source_bonus + priority_bonus + recency_bonus
         return min(final_score, 15.0)  # Cap à 15
+
+    @staticmethod
+    def normalize_datetime(dt: Optional[datetime]) -> Optional[datetime]:
+        """
+        Normalise une datetime en supprimant les informations de timezone.
+        Permet de comparer des dates timezone-aware et timezone-naive.
+        """
+        if dt is None:
+            return None
+        if dt.tzinfo is not None:
+            return dt.replace(tzinfo=None)
+        return dt
 
     def filter_by_date(
         self,
@@ -112,6 +127,7 @@ class Curator:
         valid_articles = []
         rejected_count = 0
         no_date_count = 0
+        now = datetime.now()
 
         for article in articles:
             pub_date = article.article.published_date
@@ -125,13 +141,16 @@ class Curator:
                     rejected_count += 1
                 continue
 
+            # Normaliser la date pour comparaison
+            pub_date_normalized = self.normalize_datetime(pub_date)
+
             # Date dans le futur (erreur)
-            if pub_date > datetime.now() + timedelta(days=1):
+            if pub_date_normalized > now + timedelta(days=1):
                 rejected_count += 1
                 continue
 
             # Date trop ancienne
-            if pub_date < self.cutoff_date:
+            if pub_date_normalized < self.cutoff_date:
                 rejected_count += 1
                 continue
 
