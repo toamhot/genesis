@@ -291,7 +291,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             line-height: 1.6;
             color: var(--text-color);
             background-color: #f0f4f8;
@@ -457,9 +457,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <body>
     <div class="container">
         <div class="header">
-            <img src="{{ logo_url if logo_url else 'https://www.aresandco.com/img/footer-logo.png' }}" alt="Ares & Co" style="max-height: 60px; margin-bottom: 20px;">
+            <a href="https://www.aresandco.com/fr" target="_blank" style="text-decoration: none;">
+                <img src="{{ logo_url if logo_url else 'https://www.aresandco.com/img/footer-logo.png' }}" alt="Ares & Co" style="max-height: 60px; margin-bottom: 15px;">
+            </a>
+            <div class="baseline" style="font-size: 12px; opacity: 0.9; margin-bottom: 20px; letter-spacing: 1px;">Cabinet de conseil de Direction Générale</div>
             <h1>Newsletter Banque</h1>
-            <div class="subtitle">Conseil en Stratégie</div>
             <div class="month">{{ month }}</div>
         </div>
 
@@ -505,24 +507,25 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         {% endfor %}
 
         <div class="footer">
-            <img src="https://www.aresandco.com/img/footer-logo.png" alt="Ares & Co" style="max-height: 40px; margin-bottom: 15px; filter: brightness(0) invert(1);">
-            <h3>Ares & Co</h3>
-            <p>Cabinet de conseil en stratégie</p>
+            <a href="https://www.aresandco.com/fr" target="_blank">
+                <img src="https://www.aresandco.com/img/footer-logo.png" alt="Ares & Co" style="max-height: 40px; margin-bottom: 10px; filter: brightness(0) invert(1);">
+            </a>
+            <p style="font-size: 12px; opacity: 0.9; margin-bottom: 15px;">Cabinet de conseil de Direction Générale</p>
 
             <div class="contact-info" style="margin: 20px 0; font-size: 13px;">
                 <p style="margin: 5px 0;">
-                    <span style="opacity: 0.8;">📍</span> 15 Av. de la Grande Armée, 75116 Paris, France
+                    📍 15 Av. de la Grande Armée, 75116 Paris, France
                 </p>
                 <p style="margin: 5px 0;">
-                    <span style="opacity: 0.8;">📞</span> +33 1 40 20 44 49
+                    📞 +33 1 40 20 44 49
                 </p>
                 <p style="margin: 5px 0;">
-                    <span style="opacity: 0.8;">✉️</span> <a href="mailto:contact@aresandco.com" style="color: white;">contact@aresandco.com</a>
+                    ✉️ <a href="mailto:contact@aresandco.com" style="color: white;">contact@aresandco.com</a>
                 </p>
             </div>
 
             <div class="social-links" style="margin: 15px 0;">
-                <a href="https://www.aresandco.com/" style="color: white; text-decoration: none; margin: 0 10px;">🌐 Site web</a>
+                <a href="https://www.aresandco.com/fr" style="color: white; text-decoration: none; margin: 0 10px;">🌐 Site web</a>
                 <a href="https://www.linkedin.com/company/ares-&-company/" style="color: white; text-decoration: none; margin: 0 10px;">💼 LinkedIn</a>
             </div>
 
