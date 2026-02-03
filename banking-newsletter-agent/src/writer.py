@@ -36,15 +36,28 @@ class NewsletterWriter:
         "fintech": "Fintech",
     }
 
+    # Emojis pour Markdown
     CATEGORY_EMOJI = {
-        "regulation": "📜",
-        "monetary_policy": "💶",
-        "french_banks": "🏦",
-        "innovation": "🚀",
-        "ma": "🤝",
-        "market": "📊",
-        "regulateur": "⚖️",
-        "fintech": "💡",
+        "regulation": "•",
+        "monetary_policy": "•",
+        "french_banks": "•",
+        "innovation": "•",
+        "ma": "•",
+        "market": "•",
+        "regulateur": "•",
+        "fintech": "•",
+    }
+
+    # Icônes Font Awesome pour HTML
+    CATEGORY_ICONS = {
+        "regulation": "fa-scale-balanced",
+        "monetary_policy": "fa-euro-sign",
+        "french_banks": "fa-building-columns",
+        "innovation": "fa-lightbulb",
+        "ma": "fa-handshake",
+        "market": "fa-chart-line",
+        "regulateur": "fa-gavel",
+        "fintech": "fa-microchip",
     }
 
     EDITORIAL_SYSTEM_PROMPT = """Tu es le rédacteur en chef de la newsletter bancaire d'Ares & Co, un cabinet de conseil en stratégie.
@@ -236,7 +249,7 @@ Rédige une introduction de 2-3 paragraphes qui met en perspective ces actualit�
             editorial=editorial,
             categories=selection.articles_by_category,
             category_names=self.CATEGORY_NAMES,
-            category_emoji=self.CATEGORY_EMOJI,
+            category_icons=self.CATEGORY_ICONS,
             generation_date=datetime.now().strftime('%d/%m/%Y'),
             logo_url=logo_url or ""
         )
@@ -274,6 +287,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Newsletter Banque - {{ month }} | Ares & Co</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
             --primary-color: #051E3B;
@@ -473,7 +487,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         {% for category, articles in categories.items() %}
         {% if articles %}
         <div class="category">
-            <h2>{{ category_emoji.get(category, '📰') }} {{ category_names.get(category, category) }}</h2>
+            <h2><i class="fas {{ category_icons.get(category, 'fa-newspaper') }}" style="margin-right: 10px; color: var(--accent-color);"></i>{{ category_names.get(category, category) }}</h2>
 
             {% for article in articles %}
             <div class="article">
@@ -512,19 +526,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
             <div class="contact-info" style="margin: 20px 0; font-size: 13px;">
                 <p style="margin: 5px 0;">
-                    📍 15 Av. de la Grande Armée, 75116 Paris, France
+                    <i class="fas fa-map-marker-alt" style="width: 16px; opacity: 0.8;"></i> 15 Av. de la Grande Armée, 75116 Paris, France
                 </p>
                 <p style="margin: 5px 0;">
-                    📞 +33 1 40 20 44 49
+                    <i class="fas fa-phone" style="width: 16px; opacity: 0.8;"></i> +33 1 40 20 44 49
                 </p>
                 <p style="margin: 5px 0;">
-                    ✉️ <a href="mailto:contact@aresandco.com" style="color: white;">contact@aresandco.com</a>
+                    <i class="fas fa-envelope" style="width: 16px; opacity: 0.8;"></i> <a href="mailto:contact@aresandco.com" style="color: white;">contact@aresandco.com</a>
                 </p>
             </div>
 
             <div class="social-links" style="margin: 15px 0;">
-                <a href="https://www.aresandco.com/fr" style="color: white; text-decoration: none; margin: 0 10px;">🌐 Site web</a>
-                <a href="https://www.linkedin.com/company/ares-&-company/" style="color: white; text-decoration: none; margin: 0 10px;">💼 LinkedIn</a>
+                <a href="https://www.aresandco.com/fr" style="color: white; text-decoration: none; margin: 0 10px;"><i class="fas fa-globe"></i> Site web</a>
+                <a href="https://www.linkedin.com/company/ares-&-company/" style="color: white; text-decoration: none; margin: 0 10px;"><i class="fab fa-linkedin"></i> LinkedIn</a>
             </div>
 
             <div class="legal" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 11px; opacity: 0.7;">
