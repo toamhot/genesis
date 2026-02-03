@@ -60,6 +60,12 @@ rss_feeds:
     category: "french_banks"
     priority: 2
 
+  # Médias spécialisés Fintech
+  - name: "Mind Fintech"
+    url: "https://www.mind.eu.com/fintech/feed/"
+    category: "fintech"
+    priority: 1
+
   # Blogs et analyses
   - name: "C'est pas mon idée"
     url: "https://cestpasmonidee.blogspot.com/feeds/posts/default?alt=rss"
