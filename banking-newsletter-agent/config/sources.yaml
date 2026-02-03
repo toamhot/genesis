@@ -9,7 +9,7 @@ rss_feeds:
     priority: 1
 
   - name: "EBA - Press Releases"
-    url: "https://www.eba.europa.eu/rss/press-releases.xml"
+    url: "https://www.eba.europa.eu/news-press/news/rss.xml"
     category: "regulateur"
     priority: 1
 
