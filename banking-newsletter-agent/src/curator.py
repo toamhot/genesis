@@ -11,6 +11,8 @@ Ce module gère :
 from typing import List, Dict, Optional
 from dataclasses import dataclass
 from collections import defaultdict
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from rich.console import Console
 from rich.table import Table
 
@@ -46,11 +48,20 @@ class Curator:
         self,
         min_relevance_score: float = 5.0,
         max_articles_per_category: int = 3,
-        max_total_articles: int = 10
+        max_total_articles: int = 10,
+        target_month: Optional[datetime] = None,
+        days_back: int = 30
     ):
         self.min_relevance_score = min_relevance_score
         self.max_articles_per_category = max_articles_per_category
         self.max_total_articles = max_total_articles
+
+        # Configuration de la période cible
+        if target_month is None:
+            target_month = datetime.now() - relativedelta(months=1)
+        self.target_month = target_month
+        self.days_back = days_back
+        self.cutoff_date = datetime.now() - timedelta(days=days_back)
 
     def calculate_final_score(self, article: AnalyzedArticle) -> float:
         """
@@ -82,6 +93,54 @@ class Curator:
 
         final_score = base_score + source_bonus + priority_bonus + recency_bonus
         return min(final_score, 15.0)  # Cap à 15
+
+    def filter_by_date(
+        self,
+        articles: List[AnalyzedArticle],
+        strict: bool = False
+    ) -> tuple[List[AnalyzedArticle], int]:
+        """
+        Filtre les articles par date.
+
+        Args:
+            articles: Liste des articles à filtrer
+            strict: Si True, rejette les articles sans date
+
+        Returns:
+            Tuple (articles filtrés, nombre d'articles rejetés)
+        """
+        valid_articles = []
+        rejected_count = 0
+        no_date_count = 0
+
+        for article in articles:
+            pub_date = article.article.published_date
+
+            # Pas de date
+            if pub_date is None:
+                no_date_count += 1
+                if not strict:
+                    valid_articles.append(article)
+                else:
+                    rejected_count += 1
+                continue
+
+            # Date dans le futur (erreur)
+            if pub_date > datetime.now() + timedelta(days=1):
+                rejected_count += 1
+                continue
+
+            # Date trop ancienne
+            if pub_date < self.cutoff_date:
+                rejected_count += 1
+                continue
+
+            valid_articles.append(article)
+
+        if no_date_count > 0:
+            console.print(f"  [yellow]⚠ {no_date_count} articles sans date (acceptés par défaut)[/yellow]")
+
+        return valid_articles, rejected_count
 
     def filter_and_rank(
         self,
@@ -155,29 +214,41 @@ class Curator:
 
         return unique
 
-    def curate(self, articles: List[AnalyzedArticle]) -> CuratedSelection:
+    def curate(self, articles: List[AnalyzedArticle], strict_date: bool = False) -> CuratedSelection:
         """
         Pipeline complet de curation :
-        1. Filtre et ranking
-        2. Déduplication
-        3. Groupement par catégorie
-        4. Sélection finale
+        1. Validation des dates
+        2. Filtre et ranking
+        3. Déduplication
+        4. Groupement par catégorie
+        5. Sélection finale
+
+        Args:
+            articles: Liste des articles analysés
+            strict_date: Si True, rejette les articles sans date
         """
         console.print(f"\n[bold blue]📋 Curation de {len(articles)} articles...[/bold blue]\n")
+        console.print(f"  [dim]Période cible: depuis {self.cutoff_date.strftime('%d/%m/%Y')}[/dim]\n")
 
-        # Étape 1: Filtrer et classer
-        ranked = self.filter_and_rank(articles)
+        # Étape 1: Valider les dates
+        date_filtered, date_rejected = self.filter_by_date(articles, strict=strict_date)
+        if date_rejected > 0:
+            console.print(f"  [yellow]• {date_rejected} articles rejetés (hors période)[/yellow]")
+        console.print(f"  [dim]• {len(date_filtered)} articles dans la période cible[/dim]")
+
+        # Étape 2: Filtrer et classer
+        ranked = self.filter_and_rank(date_filtered)
         console.print(f"  [dim]• {len(ranked)} articles après filtrage (score >= {self.min_relevance_score})[/dim]")
 
-        # Étape 2: Dédupliquer
+        # Étape 3: Dédupliquer
         deduplicated = self.deduplicate_similar(ranked)
         console.print(f"  [dim]• {len(deduplicated)} articles après déduplication[/dim]")
 
-        # Étape 3: Sélectionner le top
+        # Étape 4: Sélectionner le top
         top_articles = deduplicated[:self.max_total_articles]
         console.print(f"  [dim]• {len(top_articles)} articles sélectionnés pour la newsletter[/dim]")
 
-        # Étape 4: Grouper par catégorie
+        # Étape 5: Grouper par catégorie
         by_category = self.group_by_category(top_articles)
 
         selection = CuratedSelection(

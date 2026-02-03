@@ -12,15 +12,101 @@ import feedparser
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, asdict
 from dateutil import parser as date_parser
+from dateutil.relativedelta import relativedelta
 import yaml
 import hashlib
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 console = Console()
+
+
+class DateValidator:
+    """Validateur de dates pour les articles"""
+
+    def __init__(self, target_month: Optional[datetime] = None, days_back: int = 30):
+        """
+        Initialise le validateur de dates.
+
+        Args:
+            target_month: Mois cible pour la newsletter (par défaut: mois précédent)
+            days_back: Nombre de jours en arrière pour la collecte
+        """
+        if target_month is None:
+            # Par défaut, le mois précédent
+            target_month = datetime.now() - relativedelta(months=1)
+
+        self.target_month = target_month
+        self.target_year = target_month.year
+        self.target_month_num = target_month.month
+
+        # Période de collecte : du 1er du mois cible jusqu'à aujourd'hui
+        self.start_date = datetime(self.target_year, self.target_month_num, 1)
+        self.end_date = datetime.now()
+
+        # Alternative : période glissante
+        self.cutoff_date = datetime.now() - timedelta(days=days_back)
+
+        self.stats = {
+            "total": 0,
+            "valid": 0,
+            "no_date": 0,
+            "too_old": 0,
+            "future": 0
+        }
+
+    def validate(self, pub_date: Optional[datetime], strict: bool = False) -> Tuple[bool, str]:
+        """
+        Valide si une date d'article est dans la période acceptable.
+
+        Args:
+            pub_date: Date de publication de l'article
+            strict: Si True, rejette les articles sans date
+
+        Returns:
+            Tuple (is_valid, reason)
+        """
+        self.stats["total"] += 1
+
+        # Pas de date
+        if pub_date is None:
+            self.stats["no_date"] += 1
+            if strict:
+                return False, "no_date"
+            return True, "no_date_accepted"  # Accepter avec avertissement
+
+        # Date dans le futur (erreur de parsing probable)
+        if pub_date > datetime.now() + timedelta(days=1):
+            self.stats["future"] += 1
+            return False, "future_date"
+
+        # Date trop ancienne
+        if pub_date < self.cutoff_date:
+            self.stats["too_old"] += 1
+            return False, f"too_old ({pub_date.strftime('%d/%m/%Y')})"
+
+        self.stats["valid"] += 1
+        return True, "valid"
+
+    def is_in_target_month(self, pub_date: Optional[datetime]) -> bool:
+        """Vérifie si l'article est dans le mois cible"""
+        if pub_date is None:
+            return False
+        return (pub_date.year == self.target_year and
+                pub_date.month == self.target_month_num)
+
+    def get_stats_summary(self) -> str:
+        """Retourne un résumé des statistiques de validation"""
+        return (
+            f"Total: {self.stats['total']} | "
+            f"Valides: {self.stats['valid']} | "
+            f"Sans date: {self.stats['no_date']} | "
+            f"Trop anciens: {self.stats['too_old']} | "
+            f"Futurs: {self.stats['future']}"
+        )
 
 
 @dataclass
@@ -74,12 +160,22 @@ class Collector:
         except (ValueError, TypeError):
             return None
 
-    def collect_rss(self, days_back: int = 30) -> List[Article]:
-        """Collecte les articles depuis les flux RSS configurés"""
+    def collect_rss(self, days_back: int = 30, strict_date: bool = False) -> List[Article]:
+        """
+        Collecte les articles depuis les flux RSS configurés.
+
+        Args:
+            days_back: Nombre de jours en arrière pour la collecte
+            strict_date: Si True, rejette les articles sans date
+        """
         articles = []
-        cutoff_date = datetime.now() - timedelta(days=days_back)
+        rejected_count = 0
+
+        # Initialiser le validateur de dates
+        self.date_validator = DateValidator(days_back=days_back)
 
         console.print("\n[bold blue]📡 Collecte des flux RSS...[/bold blue]\n")
+        console.print(f"[dim]Période: derniers {days_back} jours (depuis {self.date_validator.cutoff_date.strftime('%d/%m/%Y')})[/dim]\n")
 
         with Progress(
             SpinnerColumn(),
@@ -88,6 +184,8 @@ class Collector:
         ) as progress:
             for feed_config in self.config.get('rss_feeds', []):
                 task = progress.add_task(f"[cyan]{feed_config['name']}...", total=None)
+                feed_articles = 0
+                feed_rejected = 0
 
                 try:
                     feed = feedparser.parse(feed_config['url'])
@@ -98,8 +196,11 @@ class Collector:
                             entry.get('published') or entry.get('updated')
                         )
 
-                        # Filtrer les articles trop anciens
-                        if pub_date and pub_date < cutoff_date:
+                        # Valider la date
+                        is_valid, reason = self.date_validator.validate(pub_date, strict=strict_date)
+                        if not is_valid:
+                            feed_rejected += 1
+                            rejected_count += 1
                             continue
 
                         # Extraire le contenu
@@ -126,13 +227,21 @@ class Collector:
                             priority=feed_config.get('priority', 3)
                         )
                         articles.append(article)
+                        feed_articles += 1
 
-                    progress.update(task, description=f"[green]✓ {feed_config['name']} ({len(feed.entries)} articles)")
+                    # Afficher le résultat avec les rejets éventuels
+                    if feed_rejected > 0:
+                        progress.update(task, description=f"[green]✓ {feed_config['name']} ({feed_articles} articles, {feed_rejected} hors période)[/green]")
+                    else:
+                        progress.update(task, description=f"[green]✓ {feed_config['name']} ({feed_articles} articles)[/green]")
 
                 except Exception as e:
                     progress.update(task, description=f"[red]✗ {feed_config['name']}: {str(e)[:50]}")
 
         console.print(f"\n[green]✓ {len(articles)} articles collectés depuis les flux RSS[/green]")
+        if rejected_count > 0:
+            console.print(f"[yellow]⚠ {rejected_count} articles rejetés (hors période ou date invalide)[/yellow]")
+        console.print(f"[dim]{self.date_validator.get_stats_summary()}[/dim]")
         return articles
 
     def collect_web(self, days_back: int = 30) -> List[Article]:
