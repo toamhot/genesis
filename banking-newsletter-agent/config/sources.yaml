@@ -1,0 +1,112 @@
+# Configuration des sources de veille bancaire
+# Banking Newsletter Agent - Ares & Co
+
+rss_feeds:
+  # Régulateurs européens
+  - name: "BCE - Communiqués de presse"
+    url: "https://www.ecb.europa.eu/rss/press.html"
+    category: "regulateur"
+    priority: 1
+
+  - name: "EBA - Press Releases"
+    url: "https://www.eba.europa.eu/rss/press-releases.xml"
+    category: "regulateur"
+    priority: 1
+
+  - name: "Banque de France - Actualités"
+    url: "https://www.banque-france.fr/rss/actualites.xml"
+    category: "regulateur"
+    priority: 1
+
+  # Écosystème Fintech
+  - name: "France FinTech"
+    url: "https://francefintech.org/feed/"
+    category: "fintech"
+    priority: 2
+
+  - name: "Finextra"
+    url: "https://www.finextra.com/rss/headlines.aspx"
+    category: "innovation"
+    priority: 2
+
+  - name: "Fintech Futures"
+    url: "https://www.fintechfutures.com/feed/"
+    category: "innovation"
+    priority: 2
+
+web_sources:
+  # Pages à scraper (sources sans RSS)
+  - name: "ACPR - Actualités"
+    url: "https://acpr.banque-france.fr/actualites"
+    category: "regulateur"
+    selector: ".news-item"
+    priority: 1
+
+# Mots-clés pour le filtrage et scoring
+keywords:
+  high_priority:
+    - "réglementation"
+    - "regulation"
+    - "Bâle"
+    - "Basel"
+    - "BCE"
+    - "ECB"
+    - "EBA"
+    - "ACPR"
+    - "taux directeur"
+    - "interest rate"
+    - "banque française"
+    - "French bank"
+    - "BNP"
+    - "Société Générale"
+    - "Crédit Agricole"
+    - "BPCE"
+    - "fintech"
+    - "digital banking"
+    - "open banking"
+    - "DORA"
+    - "MiCA"
+    - "ESG"
+    - "AML"
+    - "M&A"
+    - "fusion"
+    - "acquisition"
+
+  medium_priority:
+    - "paiement"
+    - "payment"
+    - "crédit"
+    - "credit"
+    - "innovation"
+    - "transformation"
+    - "digital"
+    - "IA"
+    - "AI"
+    - "blockchain"
+    - "crypto"
+
+# Catégories pour la newsletter
+categories:
+  - id: "regulation"
+    name: "Actualités Réglementaires"
+    description: "Évolutions réglementaires et décisions des superviseurs"
+
+  - id: "monetary_policy"
+    name: "Politique Monétaire"
+    description: "Décisions BCE, évolution des taux"
+
+  - id: "french_banks"
+    name: "Banques Françaises"
+    description: "Actualités des grandes banques françaises"
+
+  - id: "innovation"
+    name: "Innovation & Digital"
+    description: "Fintech, digital banking, nouvelles technologies"
+
+  - id: "ma"
+    name: "M&A et Restructurations"
+    description: "Fusions, acquisitions, réorganisations"
+
+  - id: "market"
+    name: "Tendances Marché"
+    description: "Évolutions du marché bancaire européen"
