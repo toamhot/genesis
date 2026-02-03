@@ -233,6 +233,16 @@ class Collector:
                             soup = BeautifulSoup(content, 'html.parser')
                             content = soup.get_text(separator=' ', strip=True)
 
+                        # Extraire et nettoyer le résumé
+                        summary = entry.get('summary', '') or entry.get('description', '')
+                        if summary:
+                            soup = BeautifulSoup(summary, 'html.parser')
+                            summary = soup.get_text(separator=' ', strip=True)
+
+                        # Fallback: utiliser le titre si pas de contenu ni résumé
+                        if not content and not summary:
+                            summary = entry.title
+
                         article = Article(
                             id=self._generate_id(entry.link),
                             title=entry.title,
@@ -240,8 +250,8 @@ class Collector:
                             source=feed_config['name'],
                             category=feed_config['category'],
                             published_date=pub_date,
-                            content=content[:2000],  # Limiter la taille
-                            summary=entry.get('summary', '')[:500],
+                            content=content[:2000] if content else summary[:2000],
+                            summary=summary[:500] if summary else entry.title[:500],
                             priority=feed_config.get('priority', 3)
                         )
                         articles.append(article)

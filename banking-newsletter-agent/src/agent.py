@@ -18,6 +18,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+# Charger les variables d'environnement depuis .env
+from dotenv import load_dotenv
+load_dotenv()
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
@@ -50,9 +54,9 @@ class BankingNewsletterAgent:
         self.collector = Collector(config_path)
         self.analyzer = None  # Initialisé si API key disponible
         self.curator = Curator(
-            min_relevance_score=5.0,
-            max_articles_per_category=3,
-            max_total_articles=10
+            min_relevance_score=3.0,  # Seuil bas pour garder plus d'articles
+            max_articles_per_category=5,  # Plus d'articles par catégorie
+            max_total_articles=15  # Top 15 pour sélectionner les 10 meilleurs
         )
         self.writer = NewsletterWriter(api_key=self.api_key)
 
@@ -147,20 +151,31 @@ class BankingNewsletterAgent:
                 if not self.analyzer:
                     console.print("[yellow]⚠ Pas de clé API Claude. Analyse basique.[/yellow]")
 
-                # Analyse basique sans IA
-                analyzed_articles = [
-                    AnalyzedArticle(
+                # Analyse basique sans IA - scores plus généreux
+                analyzed_articles = []
+                for a in articles:
+                    # Score basé sur la priorité de la source
+                    if a.priority == 1:
+                        score = 8.0
+                    elif a.priority == 2:
+                        score = 6.5
+                    else:
+                        score = 5.0
+
+                    # Résumé basique
+                    summary = a.summary[:300] if a.summary else (a.content[:300] if a.content else a.title)
+
+                    analyzed_articles.append(AnalyzedArticle(
                         article=a,
-                        ai_summary=a.summary[:200] if a.summary else a.content[:200],
-                        relevance_score=7.0 if a.priority == 1 else 5.0,
+                        ai_summary=summary,
+                        relevance_score=score,
                         assigned_category=a.category,
                         key_facts=[],
                         entities=[],
                         sentiment="neutral",
-                        newsletter_priority=a.priority
-                    )
-                    for a in articles
-                ]
+                        newsletter_priority=a.priority,
+                        title_fr=a.title  # Titre original (pas de traduction sans IA)
+                    ))
             else:
                 # Analyse avec Claude API
                 articles_to_analyze = articles[:max_articles] if max_articles else articles
