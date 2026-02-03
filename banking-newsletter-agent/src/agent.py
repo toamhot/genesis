@@ -18,9 +18,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-# Charger les variables d'environnement depuis .env
+# Charger les variables d'environnement depuis .env (chemin explicite)
 from dotenv import load_dotenv
-load_dotenv()
+# Charger .env depuis le dossier parent de src/ (racine du projet)
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 from rich.console import Console
 from rich.panel import Panel
