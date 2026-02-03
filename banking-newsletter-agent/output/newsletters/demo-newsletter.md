@@ -19,7 +19,7 @@ L'écosystème fintech français continue par ailleurs de démontrer son dynamis
 ### La BCE maintient ses taux directeurs inchangés à 2,00%
 
 *Source: BCE - Communiqués*
- | *24/01/2026*
+ | *30/01/2026*
 
 Le Conseil des gouverneurs de la BCE a décidé de maintenir les trois taux directeurs inchangés. Le taux de la facilité de dépôt reste à 2,00%, le taux des opérations principales de refinancement à 2,15% et le taux de la facilité de prêt marginal à 2,40%.
 
@@ -37,7 +37,7 @@ Le Conseil des gouverneurs de la BCE a décidé de maintenir les trois taux dire
 ### AMLA opérationnelle : transfert des compétences AML depuis l'EBA
 
 *Source: EBA - Press Releases*
- | *28/01/2026*
+ | *26/01/2026*
 
 L'Autorité européenne de lutte contre le blanchiment (AMLA) est désormais pleinement opérationnelle après le transfert de toutes les compétences AML/CFT depuis l'EBA. Un protocole de coopération a été signé entre les deux autorités.
 
@@ -53,7 +53,7 @@ L'Autorité européenne de lutte contre le blanchiment (AMLA) est désormais ple
 ### L'EBA publie les nouvelles guidelines sur les risques ESG
 
 *Source: EBA - Press Releases*
- | *25/01/2026*
+ | *13/01/2026*
 
 L'Autorité bancaire européenne a publié ses lignes directrices finales sur la gestion des risques environnementaux, sociaux et de gouvernance (ESG). Ces guidelines entrent en application immédiate et concernent toutes les banques européennes.
 
@@ -66,19 +66,19 @@ L'Autorité bancaire européenne a publié ses lignes directrices finales sur la
 
 ---
 
-### DORA : les banques européennes finalisent leur mise en conformité
+### Report d'un an pour le FRTB : la Commission européenne accorde un délai
 
-*Source: EBA - Press Releases*
- | *02/02/2026*
+*Source: Commission Européenne*
+ | *10/01/2026*
 
-À l'approche de l'échéance de janvier 2026, les banques européennes accélèrent leur mise en conformité avec le règlement DORA sur la résilience opérationnelle numérique. L'EBA publie un état des lieux.
+La Commission européenne a adopté un acte délégué reportant d'un an supplémentaire l'application du Fundamental Review of the Trading Book (FRTB). Les exigences de risque de marché s'appliqueront au 1er janvier 2027.
 
 **Points clés :**
-- 85% des banques conformes ou en voie de l'être
-- Tests de résilience cyber obligatoires
-- Cartographie des prestataires IT critiques
+- Report au 1er janvier 2027
+- Alignement avec les calendriers internationaux
+- Banques saluent cette décision
 
-[Lire l'article](https://example.com/article/8)
+[Lire l'article](https://example.com/article/6)
 
 ---
 
@@ -87,7 +87,7 @@ L'Autorité bancaire européenne a publié ses lignes directrices finales sur la
 ### BNP Paribas annonce un plan de transformation digitale de 500M€
 
 *Source: Finextra*
- | *27/01/2026*
+ | *23/01/2026*
 
 BNP Paribas a dévoilé un plan d'investissement massif de 500 millions d'euros sur trois ans pour accélérer sa transformation digitale. Le plan prévoit notamment le déploiement de l'IA générative dans la relation client.
 
@@ -103,7 +103,7 @@ BNP Paribas a dévoilé un plan d'investissement massif de 500 millions d'euros 
 ### Société Générale finalise la cession de ses activités en Russie
 
 *Source: Les Echos*
- | *02/02/2026*
+ | *18/01/2026*
 
 Société Générale a finalisé la vente de Rosbank et de ses filiales russes, mettant fin à sa présence historique en Russie. L'opération génère une perte comptable mais libère des fonds propres significatifs.
 
@@ -121,7 +121,7 @@ Société Générale a finalisé la vente de Rosbank et de ses filiales russes, 
 ### France FinTech : record de levées de fonds pour les néobanques en 2025
 
 *Source: France FinTech*
- | *21/01/2026*
+ | *19/01/2026*
 
 L'écosystème fintech français a enregistré un record de levées de fonds en 2025, porté notamment par les néobanques et les solutions de paiement B2B. Le total atteint 2,3 milliards d'euros.
 
@@ -137,7 +137,7 @@ L'écosystème fintech français a enregistré un record de levées de fonds en 
 ### Crédit Agricole lance une offre de Banking-as-a-Service
 
 *Source: Finextra*
- | *02/02/2026*
+ | *14/01/2026*
 
 Crédit Agricole a annoncé le lancement de CA BaaS, une plateforme permettant aux entreprises d'intégrer des services bancaires via API. L'offre cible les marketplaces et les fintechs.
 
@@ -153,7 +153,7 @@ Crédit Agricole a annoncé le lancement de CA BaaS, une plateforme permettant a
 ### Open Banking : l'usage des APIs explose en Europe
 
 *Source: Fintech Futures*
- | *01/02/2026*
+ | *14/01/2026*
 
 Le nombre d'appels API en Open Banking a augmenté de 70% en Europe en 2025, porté par l'agrégation de comptes et l'initiation de paiements. Le Royaume-Uni reste leader mais la France progresse.
 
@@ -172,4 +172,4 @@ Cette newsletter est produite par **Ares & Co**, cabinet de conseil en stratégi
 
 Pour plus d'informations sur notre practice Banque, contactez-nous.
 
-*Généré le 03/02/2026 à 21:06*
+*Généré le 03/02/2026 à 21:08*
