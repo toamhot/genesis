@@ -18,6 +18,11 @@ rss_feeds:
     category: "regulateur"
     priority: 1
 
+  - name: "AMF - Actualités"
+    url: "https://www.amf-france.org/fr/flux-rss/display/21"
+    category: "regulateur"
+    priority: 1
+
   # Écosystème Fintech
   - name: "France FinTech"
     url: "https://francefintech.org/feed/"
