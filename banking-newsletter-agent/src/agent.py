@@ -215,8 +215,8 @@ class BankingNewsletterAgent:
             # ═══════════════════════════════════════════════════════════
             console.print(Panel("[bold]ÉTAPE 4/4 : GÉNÉRATION[/bold]", style="blue"))
 
-            # Générer l'éditorial basé sur TOUS les articles analysés (vision large)
-            editorial = self.writer.generate_editorial(selection, month, all_articles=analyzed_articles)
+            # Générer l'éditorial basé sur les articles SÉLECTIONNÉS (les plus importants)
+            editorial = self.writer.generate_editorial(selection, month)
 
             # Markdown
             if output_format in ("markdown", "both"):

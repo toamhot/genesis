@@ -127,6 +127,92 @@ Réponds UNIQUEMENT en JSON valide, avec TOUT le contenu EN FRANÇAIS."""
         self.client = anthropic.Anthropic(api_key=self.api_key)
         self.model = "claude-sonnet-4-20250514"
 
+    def _sample_articles_by_period(
+        self,
+        articles: List[Article],
+        max_articles: int,
+        num_periods: int = 4
+    ) -> List[Article]:
+        """
+        Échantillonne les articles de manière équilibrée sur la période.
+
+        Divise le mois en plusieurs périodes (par défaut 4 semaines) et prend
+        un nombre proportionnel d'articles de chaque période pour assurer
+        une couverture temporelle équilibrée.
+
+        Args:
+            articles: Liste de tous les articles collectés
+            max_articles: Nombre maximum d'articles à retourner
+            num_periods: Nombre de périodes pour diviser le mois (défaut: 4)
+
+        Returns:
+            Liste d'articles échantillonnés de manière équilibrée
+        """
+        from datetime import datetime, timedelta
+        from collections import defaultdict
+
+        # Séparer les articles avec et sans date
+        articles_with_date = [a for a in articles if a.published_date]
+        articles_without_date = [a for a in articles if not a.published_date]
+
+        if not articles_with_date:
+            # Pas de dates, prendre simplement les premiers
+            return articles[:max_articles]
+
+        # Trouver la plage de dates
+        dates = [a.published_date for a in articles_with_date]
+        # Normaliser les dates (enlever timezone si présent)
+        dates_normalized = []
+        for d in dates:
+            if d.tzinfo is not None:
+                d = d.replace(tzinfo=None)
+            dates_normalized.append(d)
+
+        min_date = min(dates_normalized)
+        max_date = max(dates_normalized)
+
+        # Calculer la durée de chaque période
+        total_days = (max_date - min_date).days + 1
+        period_days = max(1, total_days // num_periods)
+
+        # Grouper les articles par période
+        periods = defaultdict(list)
+        for article in articles_with_date:
+            pub_date = article.published_date
+            if pub_date.tzinfo is not None:
+                pub_date = pub_date.replace(tzinfo=None)
+            days_from_start = (pub_date - min_date).days
+            period_idx = min(days_from_start // period_days, num_periods - 1)
+            periods[period_idx].append(article)
+
+        # Calculer combien d'articles prendre de chaque période
+        articles_per_period = max_articles // num_periods
+        remainder = max_articles % num_periods
+
+        # Sélectionner les articles de chaque période
+        selected = []
+        for period_idx in range(num_periods):
+            period_articles = periods.get(period_idx, [])
+            # Trier par date décroissante dans chaque période
+            period_articles.sort(
+                key=lambda x: x.published_date.replace(tzinfo=None) if x.published_date.tzinfo else x.published_date,
+                reverse=True
+            )
+
+            # Nombre d'articles à prendre de cette période
+            take = articles_per_period + (1 if period_idx < remainder else 0)
+            selected.extend(period_articles[:take])
+
+        # Si on n'a pas assez, compléter avec les articles sans date
+        if len(selected) < max_articles and articles_without_date:
+            remaining = max_articles - len(selected)
+            selected.extend(articles_without_date[:remaining])
+
+        # Log de la répartition
+        console.print(f"  [dim]Répartition: {len(periods)} périodes, {[len(periods.get(i, [])) for i in range(num_periods)]} articles/période[/dim]")
+
+        return selected
+
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10)
@@ -256,14 +342,11 @@ Réponds en JSON avec cette structure exacte :
             batch_size: Nombre d'articles par lot
             max_articles: Nombre maximum d'articles à analyser (pour éviter rate limiting)
         """
-        # Limiter le nombre d'articles pour éviter rate limiting
+        # Limiter le nombre d'articles avec une répartition temporelle équilibrée
         if len(articles) > max_articles:
-            console.print(f"[yellow]⚠ {len(articles)} articles collectés, analyse limitée aux {max_articles} plus récents[/yellow]")
-            # Trier par date et prendre les plus récents
-            articles_with_date = [a for a in articles if a.published_date]
-            articles_without_date = [a for a in articles if not a.published_date]
-            articles_with_date.sort(key=lambda x: x.published_date, reverse=True)
-            articles = (articles_with_date + articles_without_date)[:max_articles]
+            console.print(f"[yellow]⚠ {len(articles)} articles collectés, sélection de {max_articles} avec répartition temporelle[/yellow]")
+            articles = self._sample_articles_by_period(articles, max_articles)
+            console.print(f"  [dim]→ Articles répartis sur la période du mois[/dim]")
 
         console.print(f"\n[bold blue]🔍 Analyse optimisée de {len(articles)} articles...[/bold blue]\n")
 
