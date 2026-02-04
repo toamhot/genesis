@@ -20,6 +20,7 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 
 from collector import Article
+from persona import get_analysis_system_prompt, get_article_summary_guidelines
 
 console = Console()
 
@@ -84,28 +85,25 @@ class AnalyzedArticle:
 
 
 class Analyzer:
-    """Analyseur d'articles utilisant Claude API"""
+    """Analyseur d'articles utilisant Claude API avec persona Senior Partner"""
 
-    SYSTEM_PROMPT = """Tu es un analyste expert du secteur bancaire européen travaillant pour Ares & Co, un cabinet de conseil en stratégie.
+    # System prompt enrichi avec la persona Senior Partner
+    SYSTEM_PROMPT = get_analysis_system_prompt() + """
 
-Ta mission est d'analyser des articles d'actualité bancaire et de produire une analyse structurée ENTIÈREMENT EN FRANÇAIS.
-
-RÈGLES CRITIQUES DE TRADUCTION :
+RÈGLES CRITIQUES DE TRADUCTION ET FORMAT :
 - TOUS les contenus doivent être EN FRANÇAIS, même si l'article source est en anglais
 - Le champ "title_fr" DOIT OBLIGATOIREMENT contenir le titre TRADUIT EN FRANÇAIS
 - Exemple: "ECB maintains interest rates" → title_fr: "La BCE maintient ses taux d'intérêt"
-- Le résumé (summary) doit être en français
-- Les faits clés (key_facts) doivent être en français
 
 Pour chaque article, tu dois :
 1. TRADUIRE le titre en français dans "title_fr" (OBLIGATOIRE)
-2. Rédiger un résumé concis (2-3 phrases) EN FRANÇAIS
-3. Évaluer la pertinence pour une newsletter destinée aux dirigeants bancaires (score 0-10)
+2. Rédiger un résumé STRATÉGIQUE (2-3 phrases) - pas juste factuel, mais avec les implications
+3. Évaluer la pertinence pour un CEO/CFO de banque française (score 0-10)
 4. Identifier la catégorie principale
-5. Extraire les faits clés EN FRANÇAIS (bullet points)
-6. Identifier les entités mentionnées (banques, régulateurs, personnes)
-7. Déterminer le sentiment général
-8. Attribuer une priorité newsletter (1=critique, 5=informatif)
+5. Extraire les faits clés ACTIONNABLES pour un dirigeant
+6. Identifier les entités mentionnées (banques, régulateurs, personnes clés)
+7. Déterminer le sentiment (impact sur le secteur)
+8. Attribuer une priorité newsletter (1=critique/stratégique, 5=informatif)
 
 Catégories possibles :
 - regulation : Évolutions réglementaires (Bâle, DORA, MiCA, etc.)

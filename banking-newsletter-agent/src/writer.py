@@ -18,6 +18,7 @@ from rich.console import Console
 
 from curator import CuratedSelection
 from analyzer import AnalyzedArticle
+from persona import get_editorial_system_prompt
 
 console = Console()
 
@@ -60,21 +61,8 @@ class NewsletterWriter:
         "fintech": "fa-microchip",
     }
 
-    EDITORIAL_SYSTEM_PROMPT = """Tu es le rédacteur en chef de la newsletter bancaire d'Ares & Co, un cabinet de conseil en stratégie.
-
-Tu rédiges une introduction éditoriale mensuelle pour des dirigeants du secteur bancaire français et européen.
-
-Style attendu :
-- Ton professionnel mais engageant
-- Analyse stratégique, pas simplement descriptif
-- Point de vue Ares & Co : expertise, prospectif
-- 2-3 paragraphes maximum
-- En français
-
-L'introduction doit :
-1. Identifier le fil rouge / thème dominant du mois
-2. Mettre en perspective les événements clés
-3. Donner une vision prospective"""
+    # Prompt éditorial enrichi avec la persona Senior Partner
+    EDITORIAL_SYSTEM_PROMPT = get_editorial_system_prompt()
 
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
@@ -142,18 +130,33 @@ L'introduction doit :
 
         prompt = f"""Rédige l'introduction éditoriale de la newsletter bancaire Ares & Co pour {month}.
 
-**Actualités du mois analysées :**
+CONTEXTE - ACTUALITÉS ANALYSÉES CE MOIS :
 {articles_summary}
 
-**Répartition thématique dans la newsletter :**
+RÉPARTITION THÉMATIQUE :
 {categories_summary}
 
-Rédige une introduction de 2-3 paragraphes EN FRANÇAIS qui :
-1. Identifie les tendances et thèmes majeurs du mois
-2. Met en perspective les événements clés pour les dirigeants bancaires
-3. Donne une vision prospective stratégique
+CONSIGNES DE RÉDACTION :
+Tu es Senior Partner chez Ares & Co. Rédige l'éditorial (200-300 mots, 2-3 paragraphes) avec :
 
-IMPORTANT: L'éditorial doit être entièrement en français, professionnel et analytique."""
+1. ACCROCHE STRATÉGIQUE (1er paragraphe)
+   - Commence par une observation percutante sur la dynamique du mois
+   - Identifie le fil rouge ou l'inflexion majeure
+   - Exemple : "Le mois de {month} marque une inflexion dans..." ou "Trois signaux convergents dessinent..."
+
+2. ANALYSE DES DYNAMIQUES (2ème paragraphe)
+   - Développe les 2-3 thèmes structurants
+   - Fais les connexions entre les actualités
+   - Explicite les implications pour les banques françaises
+
+3. PERSPECTIVE PROSPECTIVE (3ème paragraphe, optionnel)
+   - "So what?" pour un dirigeant bancaire
+   - Points d'attention ou d'action pour les mois à venir
+
+STYLE : Assertif, analytique, niveau C-suite. Pas de formules génériques ("Ce mois a été riche...").
+Ne PAS lister les actualités, mais les SYNTHÉTISER en tendances.
+
+Rédige directement l'éditorial, sans titre ni préambule."""
 
         editorial = self._call_claude(self.EDITORIAL_SYSTEM_PROMPT, prompt)
         console.print("[green]✓ Éditorial généré[/green]")
