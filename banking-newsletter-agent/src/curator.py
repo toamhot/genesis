@@ -243,38 +243,86 @@ class Curator:
     def deduplicate_similar(
         self,
         articles: List[AnalyzedArticle],
-        similarity_threshold: float = 0.8
+        title_similarity_threshold: float = 0.4,
+        entity_match_threshold: int = 2
     ) -> List[AnalyzedArticle]:
         """
-        Déduplique les articles similaires basé sur les entités et le titre.
-        Garde l'article avec le meilleur score.
+        Déduplique les articles similaires basé sur :
+        1. La similarité des titres (Jaccard)
+        2. Les entités communes (banques, régulateurs mentionnés)
+
+        Garde l'article avec le meilleur score pour chaque sujet.
+
+        Args:
+            articles: Liste triée par score (meilleurs en premier)
+            title_similarity_threshold: Seuil Jaccard pour les titres (0.4 = 40%)
+            entity_match_threshold: Nombre min d'entités communes pour considérer comme doublon
         """
         if not articles:
             return []
 
         unique = []
-        seen_titles = set()
+        seen_articles = []  # Liste de (title_words, title_fr_words, entities)
+        duplicates_removed = 0
+
+        # Mots à ignorer dans la comparaison de titres
+        stopwords = {'le', 'la', 'les', 'de', 'du', 'des', 'un', 'une', 'et', 'en', 'pour',
+                     'sur', 'dans', 'par', 'avec', 'the', 'a', 'an', 'of', 'to', 'for', 'in',
+                     'on', 'at', 'by', 'its', 'son', 'sa', 'ses'}
 
         for article in articles:
-            # Normaliser le titre pour comparaison
-            title_words = set(article.article.title.lower().split())
+            # Normaliser le titre original et français
+            title_words = set(w for w in article.article.title.lower().split()
+                            if w not in stopwords and len(w) > 2)
+            title_fr_words = set(w for w in article.title_fr.lower().split()
+                               if w not in stopwords and len(w) > 2) if article.title_fr else set()
 
-            # Vérifier la similarité avec les titres déjà vus
+            # Entités de l'article (normalisées)
+            entities = set(e.lower() for e in article.entities) if article.entities else set()
+
             is_duplicate = False
-            for seen in seen_titles:
-                seen_words = set(seen.split())
-                # Calculer le coefficient de Jaccard
-                intersection = len(title_words & seen_words)
-                union = len(title_words | seen_words)
-                similarity = intersection / union if union > 0 else 0
+            duplicate_of = None
 
-                if similarity >= similarity_threshold:
-                    is_duplicate = True
-                    break
+            for i, (seen_title, seen_title_fr, seen_entities) in enumerate(seen_articles):
+                # Test 1: Similarité des titres originaux
+                if title_words and seen_title:
+                    intersection = len(title_words & seen_title)
+                    union = len(title_words | seen_title)
+                    title_similarity = intersection / union if union > 0 else 0
+
+                    if title_similarity >= title_similarity_threshold:
+                        is_duplicate = True
+                        duplicate_of = unique[i].article.title[:50]
+                        break
+
+                # Test 2: Similarité des titres français
+                if title_fr_words and seen_title_fr:
+                    intersection = len(title_fr_words & seen_title_fr)
+                    union = len(title_fr_words | seen_title_fr)
+                    title_fr_similarity = intersection / union if union > 0 else 0
+
+                    if title_fr_similarity >= title_similarity_threshold:
+                        is_duplicate = True
+                        duplicate_of = unique[i].title_fr[:50] if unique[i].title_fr else unique[i].article.title[:50]
+                        break
+
+                # Test 3: Entités communes (au moins 2 entités identiques)
+                if entities and seen_entities:
+                    common_entities = entities & seen_entities
+                    if len(common_entities) >= entity_match_threshold:
+                        is_duplicate = True
+                        duplicate_of = f"entités communes: {', '.join(list(common_entities)[:3])}"
+                        break
 
             if not is_duplicate:
                 unique.append(article)
-                seen_titles.add(article.article.title.lower())
+                seen_articles.append((title_words, title_fr_words, entities))
+            else:
+                duplicates_removed += 1
+                console.print(f"  [dim]↳ Doublon ignoré: {article.article.title[:40]}... (similaire à: {duplicate_of})[/dim]")
+
+        if duplicates_removed > 0:
+            console.print(f"  [yellow]• {duplicates_removed} doublons supprimés[/yellow]")
 
         return unique
 
