@@ -4,45 +4,66 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Project Overview
 
-Genesis - [Add project description here]
+Genesis — LinkedIn Nomination Agent: an automated agent that scans your LinkedIn contacts' posts to detect nominations, promotions, and new role announcements from the past week.
 
 ## Build & Development
 
 ```bash
 # Install dependencies
-# [Add install command]
+pip install -r requirements.txt
 
-# Run development server
-# [Add dev command]
+# Copy and configure environment
+cp .env.example .env
+# Edit .env with your LinkedIn credentials and optional LLM API keys
 
-# Build for production
-# [Add build command]
+# Run the agent
+python main.py
+
+# Run with options
+python main.py --mode feed --days 7 --output console
+python main.py --mode contacts --output json
+python main.py --mode both --output html --no-llm
 ```
 
 ## Testing
 
 ```bash
 # Run tests
-# [Add test command]
+python -m pytest tests/ -v
 
 # Run tests with coverage
-# [Add coverage command]
+python -m pytest tests/ --cov=src --cov-report=term-missing
 ```
 
 ## Project Structure
 
 ```
 genesis/
-├── src/           # Source code
-├── tests/         # Test files
-└── ...
+├── main.py                      # Entry point (CLI)
+├── config/
+│   └── settings.py              # Configuration & environment vars
+├── src/
+│   ├── agent.py                 # Main orchestrator agent
+│   ├── linkedin_client.py       # LinkedIn API client
+│   ├── nomination_detector.py   # NLP nomination detection (keywords + LLM)
+│   └── reporter.py              # Output formatting (console/JSON/HTML)
+├── tests/
+│   └── test_nomination_detector.py
+├── requirements.txt
+├── .env.example
+└── .gitignore
 ```
 
 ## Code Style
 
-- [Add language/framework conventions]
-- [Add linting/formatting tools used]
+- Python 3.12+
+- Type hints throughout
+- Dataclasses for data models
+- Logging via stdlib `logging`
 
 ## Key Files
 
-- [Add important entry points and configuration files]
+- `main.py` — CLI entry point with argparse
+- `src/agent.py` — Orchestrator that ties LinkedIn client, detector, and reporter together
+- `src/nomination_detector.py` — Core detection logic (keyword matching + optional LLM)
+- `config/settings.py` — All configuration loaded from environment
