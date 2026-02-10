@@ -218,6 +218,9 @@ class BankingNewsletterAgent:
             # Générer l'éditorial basé sur les articles SÉLECTIONNÉS (les plus importants)
             editorial = self.writer.generate_editorial(selection, month)
 
+            # Générer le "Point de vue Ares & Co" - prise de position tranchée
+            ares_view = self.writer.generate_ares_view(selection, month)
+
             # Markdown
             if output_format in ("markdown", "both"):
                 md_content = self.writer.generate_markdown(selection, month, editorial)
@@ -227,7 +230,7 @@ class BankingNewsletterAgent:
             # HTML
             if output_format in ("html", "both"):
                 html_content = self.writer.generate_html(
-                    selection, month, editorial, logo_url
+                    selection, month, editorial, ares_view=ares_view, logo_url=logo_url
                 )
                 html_path = self.writer.save_html(html_content, self.output_dir)
                 results["output_files"].append(html_path)

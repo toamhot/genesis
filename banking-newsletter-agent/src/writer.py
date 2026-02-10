@@ -18,7 +18,7 @@ from rich.console import Console
 
 from curator import CuratedSelection
 from analyzer import AnalyzedArticle
-from persona import get_editorial_system_prompt
+from persona import get_editorial_system_prompt, get_ares_view_system_prompt
 
 console = Console()
 
@@ -163,6 +163,87 @@ Rédige directement l'éditorial, sans titre ni préambule."""
 
         return editorial
 
+    def generate_ares_view(
+        self,
+        selection: CuratedSelection,
+        month: str,
+        partner_name: str = "Thomas André"
+    ) -> dict:
+        """
+        Génère le "Point de vue Ares & Co" - une prise de position tranchée.
+
+        Args:
+            selection: La sélection curée d'articles
+            month: Le mois de la newsletter
+            partner_name: Nom du Partner pour la signature
+
+        Returns:
+            dict avec 'topic' (sujet), 'content' (texte), 'partner' (signature)
+        """
+        console.print("\n[bold blue]💡 Génération du Point de vue Ares & Co...[/bold blue]")
+
+        if not self.client:
+            console.print("[yellow]⚠ Pas de client Claude API[/yellow]")
+            return {
+                "topic": "Sujet du mois",
+                "content": "[Point de vue à rédiger manuellement]",
+                "partner": partner_name
+            }
+
+        # Préparer le contexte - tous les articles sélectionnés
+        articles_context = "\n".join([
+            f"- [{a.assigned_category}] {a.title_fr if a.title_fr else a.article.title}: {a.ai_summary}"
+            for a in selection.top_articles
+        ])
+
+        # Identifier les thèmes dominants
+        category_counts = {}
+        for cat, articles in selection.articles_by_category.items():
+            category_counts[self.CATEGORY_NAMES.get(cat, cat)] = len(articles)
+
+        themes = "\n".join([f"- {cat}: {count} articles" for cat, count in
+                          sorted(category_counts.items(), key=lambda x: x[1], reverse=True)])
+
+        prompt = f"""Analyse ces actualités bancaires de {month} et rédige le "POINT DE VUE ARES & CO".
+
+ACTUALITÉS DU MOIS :
+{articles_context}
+
+THÈMES DOMINANTS :
+{themes}
+
+MISSION :
+1. Identifie LE sujet stratégique majeur du mois (celui qui mérite une prise de position)
+2. Rédige une prise de position TRANCHÉE et DIFFÉRENCIANTE (100-150 mots)
+
+FORMAT DE RÉPONSE (respecte exactement ce format) :
+SUJET: [Le sujet en 5-10 mots]
+---
+[Ton point de vue tranché, avec conviction et prédiction concrète]
+
+RAPPEL : Sois clivant, prédictif, concret. Évite les banalités et le consensus.
+Le lecteur doit se dire "Tiens, c'est un angle intéressant que je n'avais pas vu"."""
+
+        response = self._call_claude(get_ares_view_system_prompt(), prompt)
+
+        # Parser la réponse
+        topic = "Le sujet du mois"
+        content = response
+
+        if "SUJET:" in response and "---" in response:
+            parts = response.split("---", 1)
+            topic_line = parts[0].replace("SUJET:", "").strip()
+            topic = topic_line if topic_line else topic
+            content = parts[1].strip() if len(parts) > 1 else response
+
+        console.print(f"[green]✓ Point de vue généré: {topic[:50]}...[/green]")
+
+        return {
+            "topic": topic,
+            "content": content,
+            "partner": partner_name
+        }
+
     def generate_markdown(
         self,
         selection: CuratedSelection,
@@ -269,9 +350,19 @@ Rédige directement l'éditorial, sans titre ni préambule."""
         selection: CuratedSelection,
         month: str,
         editorial: Optional[str] = None,
+        ares_view: Optional[dict] = None,
         logo_url: Optional[str] = None
     ) -> str:
-        """Génère la newsletter au format HTML professionnel"""
+        """
+        Génère la newsletter au format HTML professionnel.
+
+        Args:
+            selection: La sélection curée d'articles
+            month: Le mois de la newsletter
+            editorial: L'éditorial (généré si non fourni)
+            ares_view: Le point de vue Ares & Co (dict avec topic, content, partner)
+            logo_url: URL du logo (optionnel)
+        """
         console.print("\n[bold blue]🎨 Génération du HTML...[/bold blue]")
 
         if editorial is None:
@@ -282,6 +373,7 @@ Rédige directement l'éditorial, sans titre ni préambule."""
         html = template.render(
             month=month,
             editorial=editorial,
+            ares_view=ares_view,
             categories=selection.articles_by_category,
             category_names=self.CATEGORY_NAMES,
             category_icons=self.CATEGORY_ICONS,
@@ -394,6 +486,49 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .editorial p {
             margin-bottom: 15px;
             text-align: justify;
+        }
+
+        .ares-view {
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 4px solid var(--accent-color);
+            margin: 0;
+        }
+
+        .ares-view h2 {
+            color: var(--primary-color);
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .ares-view .topic {
+            color: var(--accent-color);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .ares-view .content {
+            font-style: italic;
+            margin-bottom: 15px;
+            text-align: justify;
+            line-height: 1.7;
+        }
+
+        .ares-view .signature {
+            text-align: right;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 14px;
+        }
+
+        .ares-view .signature span {
+            display: block;
+            font-weight: normal;
+            font-size: 12px;
+            color: #718096;
         }
 
         .category {
@@ -518,6 +653,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <p>{{ paragraph }}</p>
             {% endfor %}
         </div>
+
+        {% if ares_view %}
+        <div class="ares-view">
+            <h2><i class="fas fa-lightbulb" style="margin-right: 8px; color: var(--accent-color);"></i>Le Point de vue Ares & Co</h2>
+            <div class="topic">{{ ares_view.topic }}</div>
+            <div class="content">
+                {% for paragraph in ares_view.content.split('\\n\\n') %}
+                <p>{{ paragraph }}</p>
+                {% endfor %}
+            </div>
+            <div class="signature">
+                {{ ares_view.partner }}
+                <span>Partner, Ares & Co</span>
+            </div>
+        </div>
+        {% endif %}
 
         {% for category, articles in categories.items() %}
         {% if articles %}
