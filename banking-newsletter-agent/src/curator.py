@@ -5,9 +5,12 @@ Banking Newsletter Agent - Ares & Co
 Ce module gère :
 - Le scoring et ranking des articles
 - La sélection des articles pour la newsletter
+- Le filtrage par thème éditorial
 - Le groupement par thématique
 """
 
+import yaml
+from pathlib import Path
 from typing import List, Dict, Optional
 from dataclasses import dataclass
 from collections import defaultdict
@@ -28,6 +31,8 @@ class CuratedSelection:
     articles_by_category: Dict[str, List[AnalyzedArticle]]
     total_collected: int
     total_selected: int
+    theme: Optional[str] = None  # Thème du mois
+    theme_name: Optional[str] = None  # Nom du thème
 
 
 class Curator:
@@ -48,10 +53,11 @@ class Curator:
         self,
         min_relevance_score: float = 5.0,
         max_articles_per_category: int = 3,
-        max_total_articles: int = 10,
-        min_articles_per_category: int = 2,
+        max_total_articles: int = 6,  # Réduit à 6 pour nouvelle structure
+        min_articles_per_category: int = 1,
         target_month: Optional[datetime] = None,
-        days_back: int = 30
+        days_back: int = 30,
+        themes_config_path: Optional[str] = None
     ):
         self.min_relevance_score = min_relevance_score
         self.max_articles_per_category = max_articles_per_category
@@ -64,6 +70,109 @@ class Curator:
         self.target_month = target_month
         self.days_back = days_back
         self.cutoff_date = datetime.now() - timedelta(days=days_back)
+
+        # Charger la configuration des thèmes
+        self.themes = {}
+        if themes_config_path is None:
+            themes_config_path = Path(__file__).parent.parent / "config" / "themes.yaml"
+        self._load_themes(themes_config_path)
+
+    def _load_themes(self, config_path: str):
+        """Charge la configuration des thèmes éditoriaux"""
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = yaml.safe_load(f)
+                self.themes = config.get('themes', {})
+        except FileNotFoundError:
+            console.print(f"[yellow]⚠ Fichier thèmes non trouvé: {config_path}[/yellow]")
+            self.themes = {}
+
+    def get_available_themes(self) -> List[str]:
+        """Retourne la liste des thèmes disponibles"""
+        return list(self.themes.keys())
+
+    def get_theme_info(self, theme_id: str) -> Optional[Dict]:
+        """Retourne les informations d'un thème"""
+        return self.themes.get(theme_id)
+
+    def calculate_theme_relevance(
+        self,
+        article: AnalyzedArticle,
+        theme_id: str
+    ) -> float:
+        """
+        Calcule la pertinence d'un article pour un thème donné.
+
+        Args:
+            article: L'article analysé
+            theme_id: L'identifiant du thème
+
+        Returns:
+            Score de pertinence thématique (0-5)
+        """
+        theme = self.themes.get(theme_id)
+        if not theme:
+            return 0
+
+        keywords = theme.get('keywords', [])
+        if not keywords:
+            return 0
+
+        # Texte à analyser (titre + résumé + faits clés)
+        text_to_check = " ".join([
+            article.article.title.lower(),
+            (article.title_fr or "").lower(),
+            article.ai_summary.lower(),
+            " ".join(article.key_facts).lower() if article.key_facts else ""
+        ])
+
+        # Compter les mots-clés trouvés
+        matches = 0
+        for keyword in keywords:
+            if keyword.lower() in text_to_check:
+                matches += 1
+
+        # Score proportionnel (max 5 points)
+        score = min(5, matches * 0.5)
+        return score
+
+    def filter_by_theme(
+        self,
+        articles: List[AnalyzedArticle],
+        theme_id: str,
+        min_theme_score: float = 0.5
+    ) -> List[AnalyzedArticle]:
+        """
+        Filtre et booste les articles selon leur pertinence pour le thème.
+
+        Args:
+            articles: Liste des articles à filtrer
+            theme_id: Identifiant du thème
+            min_theme_score: Score minimum pour inclure un article
+
+        Returns:
+            Articles filtrés et triés par pertinence thématique
+        """
+        theme = self.themes.get(theme_id)
+        if not theme:
+            console.print(f"[yellow]⚠ Thème inconnu: {theme_id}[/yellow]")
+            return articles
+
+        console.print(f"\n[bold cyan]🎯 Filtrage par thème: {theme.get('name', theme_id)}[/bold cyan]")
+
+        scored_articles = []
+        for article in articles:
+            theme_score = self.calculate_theme_relevance(article, theme_id)
+            if theme_score >= min_theme_score:
+                scored_articles.append((theme_score, article))
+
+        # Trier par score thématique décroissant
+        scored_articles.sort(key=lambda x: x[0], reverse=True)
+
+        filtered = [article for _, article in scored_articles]
+        console.print(f"  [dim]• {len(filtered)}/{len(articles)} articles pertinents pour ce thème[/dim]")
+
+        return filtered
 
     def calculate_final_score(self, article: AnalyzedArticle) -> float:
         """
@@ -326,21 +435,34 @@ class Curator:
 
         return unique
 
-    def curate(self, articles: List[AnalyzedArticle], strict_date: bool = False) -> CuratedSelection:
+    def curate(
+        self,
+        articles: List[AnalyzedArticle],
+        strict_date: bool = False,
+        theme_id: Optional[str] = None
+    ) -> CuratedSelection:
         """
         Pipeline complet de curation :
         1. Validation des dates
-        2. Filtre et ranking
-        3. Déduplication
-        4. Assurer minimum par catégorie
-        5. Groupement par catégorie
-        6. Sélection finale
+        2. Filtrage par thème (si spécifié)
+        3. Filtre et ranking
+        4. Déduplication
+        5. Sélection finale (6 articles pour le Radar)
 
         Args:
             articles: Liste des articles analysés
             strict_date: Si True, rejette les articles sans date
+            theme_id: Identifiant du thème mensuel (optionnel)
         """
+        theme_name = None
+        if theme_id:
+            theme_info = self.get_theme_info(theme_id)
+            if theme_info:
+                theme_name = theme_info.get('name', theme_id)
+
         console.print(f"\n[bold blue]📋 Curation de {len(articles)} articles...[/bold blue]\n")
+        if theme_name:
+            console.print(f"  [bold cyan]🎯 Thème du mois: {theme_name}[/bold cyan]\n")
         console.print(f"  [dim]Période cible: depuis {self.cutoff_date.strftime('%d/%m/%Y')}[/dim]\n")
 
         # Étape 1: Valider les dates
@@ -349,35 +471,40 @@ class Curator:
             console.print(f"  [yellow]• {date_rejected} articles rejetés (hors période)[/yellow]")
         console.print(f"  [dim]• {len(date_filtered)} articles dans la période cible[/dim]")
 
-        # Étape 2: Filtrer et classer
+        # Étape 2: Filtrage par thème (si spécifié)
+        if theme_id:
+            themed = self.filter_by_theme(date_filtered, theme_id, min_theme_score=0.5)
+            # Si pas assez d'articles sur le thème, garder tous les articles
+            if len(themed) >= self.max_total_articles:
+                date_filtered = themed
+            else:
+                console.print(f"  [yellow]⚠ Seulement {len(themed)} articles sur le thème, complément avec autres articles[/yellow]")
+                # Garder les articles thématiques en premier, puis compléter
+                other_articles = [a for a in date_filtered if a not in themed]
+                date_filtered = themed + other_articles
+
+        # Étape 3: Filtrer et classer
         ranked = self.filter_and_rank(date_filtered)
         console.print(f"  [dim]• {len(ranked)} articles après filtrage (score >= {self.min_relevance_score})[/dim]")
 
-        # Étape 3: Dédupliquer
+        # Étape 4: Dédupliquer
         deduplicated = self.deduplicate_similar(ranked)
         console.print(f"  [dim]• {len(deduplicated)} articles après déduplication[/dim]")
 
-        # Étape 4: Sélectionner le top initial
+        # Étape 5: Sélectionner exactement 6 articles pour le Radar
         top_articles = deduplicated[:self.max_total_articles]
+        console.print(f"  [dim]• {len(top_articles)} articles sélectionnés pour le Radar[/dim]")
 
-        # Étape 5: Assurer le minimum par catégorie (2 articles minimum)
-        top_articles = self.ensure_minimum_per_category(top_articles, deduplicated)
-        console.print(f"  [dim]• {len(top_articles)} articles après équilibrage des catégories[/dim]")
-
-        # Étape 6: Grouper par catégorie
+        # Grouper par catégorie (pour compatibilité)
         by_category = self.group_by_category(top_articles)
-
-        # Afficher les catégories avec moins de 2 articles
-        for cat, cat_articles in by_category.items():
-            if len(cat_articles) < self.min_articles_per_category:
-                cat_name = self.CATEGORY_NAMES.get(cat, cat)
-                console.print(f"  [yellow]⚠ {cat_name}: seulement {len(cat_articles)} article(s) disponible(s)[/yellow]")
 
         selection = CuratedSelection(
             top_articles=top_articles,
             articles_by_category=by_category,
             total_collected=len(articles),
-            total_selected=len(top_articles)
+            total_selected=len(top_articles),
+            theme=theme_id,
+            theme_name=theme_name
         )
 
         self._display_summary(selection)

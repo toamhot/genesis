@@ -1,0 +1,168 @@
+# Configuration des Territoires Éditoriaux 2026
+# Banking Newsletter Agent - Ares & Co
+#
+# Chaque mois, la newsletter se concentre sur UN thème parmi ces 6 territoires.
+# Les articles sont filtrés et scorés en fonction de leur pertinence pour le thème du mois.
+
+themes:
+  growth_distribution:
+    name: "Modèles de croissance & distribution"
+    name_short: "Croissance & Distribution"
+    description: "Omnicanal, bancassurance, partenariats stratégiques"
+    keywords:
+      - omnicanal
+      - multicanal
+      - bancassurance
+      - partenariat
+      - distribution
+      - agence
+      - digital
+      - phygital
+      - acquisition client
+      - cross-selling
+      - PNB
+      - revenus
+      - croissance organique
+    questions_comex:
+      - "Quel équilibre agences/digital pour maximiser le PNB par client ?"
+      - "Quels partenariats créent vraiment de la valeur ?"
+    color: "#2563eb"  # Blue
+
+  customer_experience:
+    name: "Expérience client & propositions de valeur"
+    name_short: "Expérience Client"
+    description: "Particuliers, professionnels, entreprises - parcours et offres"
+    keywords:
+      - expérience client
+      - parcours client
+      - satisfaction
+      - NPS
+      - fidélisation
+      - onboarding
+      - particuliers
+      - professionnels
+      - entreprises
+      - PME
+      - corporate
+      - offre
+      - tarification
+      - bundle
+    questions_comex:
+      - "Comment différencier l'expérience client face aux néobanques ?"
+      - "Quelle proposition de valeur pour les segments à forte attrition ?"
+    color: "#059669"  # Green
+
+  operational_performance:
+    name: "Performance opérationnelle"
+    name_short: "Performance Opérationnelle"
+    description: "Process, coûts, productivité, industrialisation"
+    keywords:
+      - coûts
+      - productivité
+      - efficacité
+      - process
+      - automatisation
+      - industrialisation
+      - ratio
+      - coefficient exploitation
+      - cost income
+      - ETP
+      - mutualisation
+      - lean
+      - outsourcing
+      - cloud
+    questions_comex:
+      - "Où sont les 15-20% de coûts encore compressibles ?"
+      - "Quels process automatiser en priorité avec l'IA ?"
+    color: "#dc2626"  # Red
+
+  demographic_transition:
+    name: "Transition démographique"
+    name_short: "Transition Démographique"
+    description: "Bien vieillir, transmission, sécurisation du portefeuille"
+    keywords:
+      - seniors
+      - silver économie
+      - vieillissement
+      - retraite
+      - transmission
+      - succession
+      - héritage
+      - dépendance
+      - protection
+      - tutelle
+      - patrimoine
+      - génération
+      - baby-boomer
+    questions_comex:
+      - "Comment capter et sécuriser les 800 Mds€ de transmission à venir ?"
+      - "Quelle offre pour les 60-75 ans à fort potentiel ?"
+    color: "#7c3aed"  # Purple
+
+  retirement_savings:
+    name: "Épargne retraite"
+    name_short: "Épargne Retraite"
+    description: "PER, assurance vie, épargne longue"
+    keywords:
+      - épargne
+      - retraite
+      - PER
+      - assurance vie
+      - PERP
+      - Madelin
+      - épargne salariale
+      - intéressement
+      - participation
+      - gestion pilotée
+      - unités de compte
+      - fonds euros
+    questions_comex:
+      - "Comment accélérer les encours PER face à la concurrence ?"
+      - "Quel rôle de conseil pour justifier les frais de gestion ?"
+    color: "#ea580c"  # Orange
+
+  risk_finance:
+    name: "Risk & Finance"
+    name_short: "Risk & Finance"
+    description: "Rentabilité, ALM, risques émergents"
+    keywords:
+      - risque
+      - ALM
+      - liquidité
+      - solvabilité
+      - Bâle
+      - ratio
+      - rentabilité
+      - ROE
+      - ROTE
+      - capital
+      - provision
+      - NPL
+      - crédit
+      - taux
+      - marge intérêt
+      - stress test
+    questions_comex:
+      - "Comment maintenir le ROE dans un environnement de taux normalisé ?"
+      - "Quels risques émergents intégrer dans les stress tests ?"
+    color: "#475569"  # Gray
+
+# Planning éditorial suggéré (6 mois = 1 cycle)
+planning_suggere:
+  janvier: growth_distribution
+  fevrier: customer_experience
+  mars: operational_performance
+  avril: demographic_transition
+  mai: retirement_savings
+  juin: risk_finance
+  # Puis cycle recommence...
+
+# Règles éditoriales
+regles:
+  articles_par_newsletter: 6
+  mots_par_resume: "60-90"
+  style:
+    - "Questions format COMEX (structurent la décision)"
+    - "Comparaisons France vs Europe vs US en 3 lignes"
+    - "1 chiffre qui tranche (pas 12)"
+    - "1 idée = 1 rubrique = 1 bénéfice lecteur"

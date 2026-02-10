@@ -384,6 +384,64 @@ Le lecteur doit se dire "Tiens, c'est un angle intéressant que je n'avais pas v
         console.print("[green]✓ Newsletter HTML générée[/green]")
         return html
 
+    def generate_html_v2(
+        self,
+        selection,  # CuratedSelection
+        month: str,
+        editorial: Optional[str] = None,
+        ares_view: Optional[dict] = None,
+        terrain: Optional[dict] = None,
+        logo_url: Optional[str] = None
+    ) -> str:
+        """
+        Génère la newsletter V2 avec la nouvelle structure :
+        1. Édito
+        2. Radar (6 articles)
+        3. Point of View (optionnel)
+        4. Terrain Ares & Co (optionnel)
+        5. Call to Action
+
+        Args:
+            selection: La sélection curée d'articles
+            month: Le mois de la newsletter
+            editorial: L'éditorial (généré si non fourni)
+            ares_view: Le point de vue Ares & Co
+            terrain: Mini-cas anonymisé (dict avec problem, approach, results)
+            logo_url: URL du logo (optionnel)
+        """
+        from pathlib import Path
+
+        console.print("\n[bold blue]🎨 Génération du HTML (nouvelle structure)...[/bold blue]")
+
+        if editorial is None:
+            editorial = self.generate_editorial(selection, month)
+
+        # Charger le template V2
+        template_path = Path(__file__).parent / "templates" / "newsletter_v2.html"
+        with open(template_path, 'r', encoding='utf-8') as f:
+            template_content = f.read()
+
+        template = Template(template_content)
+
+        # Récupérer les infos du thème si disponible
+        theme_name = getattr(selection, 'theme_name', None)
+        theme_color = '#57AEE0'  # Couleur par défaut
+
+        html = template.render(
+            month=month,
+            theme_name=theme_name,
+            theme_color=theme_color,
+            editorial=editorial,
+            articles=selection.top_articles,
+            ares_view=ares_view,
+            terrain=terrain,
+            generation_date=datetime.now().strftime('%d/%m/%Y'),
+            logo_url=logo_url or ""
+        )
+
+        console.print(f"[green]✓ Newsletter HTML V2 générée ({len(selection.top_articles)} articles)[/green]")
+        return html
+
     def save_html(
         self,
         content: str,
