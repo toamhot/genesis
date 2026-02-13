@@ -95,6 +95,52 @@ class Curator:
         """Retourne les informations d'un thème"""
         return self.themes.get(theme_id)
 
+    # Sources françaises connues
+    FRENCH_SOURCES = {
+        'les echos', 'l\'agefi', 'la tribune', 'bfm', 'challenges',
+        'le figaro', 'le monde', 'option finance', 'revue banque',
+        'mind fintech', 'c\'est pas mon idée', 'france fintech',
+        'banque de france', 'acpr', 'amf', 'bnp', 'société générale',
+        'crédit agricole', 'bpce', 'la banque postale', 'lcl',
+        'boursorama', 'fortuneo', 'orange bank', 'argus de l\'assurance'
+    }
+
+    # Entités françaises
+    FRENCH_ENTITIES = {
+        'france', 'français', 'française', 'paris', 'hexagone',
+        'bnp paribas', 'société générale', 'crédit agricole', 'bpce',
+        'la banque postale', 'lcl', 'crédit mutuel', 'caisse d\'épargne',
+        'banque populaire', 'cic', 'hsbc france', 'boursorama', 'fortuneo',
+        'orange bank', 'nickel', 'revolut france', 'n26 france',
+        'amf', 'acpr', 'banque de france', 'bercy', 'trésor'
+    }
+
+    def is_french_article(self, article: AnalyzedArticle) -> bool:
+        """
+        Détermine si un article concerne principalement la France.
+
+        Returns:
+            True si l'article est français, False sinon
+        """
+        # Vérifier la source
+        source_lower = article.article.source.lower()
+        if any(fr_source in source_lower for fr_source in self.FRENCH_SOURCES):
+            return True
+
+        # Vérifier les entités
+        if article.entities:
+            entities_lower = [e.lower() for e in article.entities]
+            if any(fr_entity in ' '.join(entities_lower) for fr_entity in self.FRENCH_ENTITIES):
+                return True
+
+        # Vérifier le contenu (titre + résumé)
+        content_lower = f"{article.article.title} {article.title_fr or ''} {article.ai_summary}".lower()
+        french_indicators = ['france', 'français', 'française', 'hexagone', 'paris', 'acpr', 'amf']
+        if any(indicator in content_lower for indicator in french_indicators):
+            return True
+
+        return False
+
     def calculate_theme_relevance(
         self,
         article: AnalyzedArticle,
@@ -140,18 +186,21 @@ class Curator:
         self,
         articles: List[AnalyzedArticle],
         theme_id: str,
-        min_theme_score: float = 0.5
+        min_theme_score: float = 0.5,
+        target_count: int = 6
     ) -> List[AnalyzedArticle]:
         """
         Filtre et booste les articles selon leur pertinence pour le thème.
+        PRIORITÉ : Articles français d'abord, puis internationaux si besoin.
 
         Args:
             articles: Liste des articles à filtrer
             theme_id: Identifiant du thème
             min_theme_score: Score minimum pour inclure un article
+            target_count: Nombre cible d'articles (défaut: 6 pour le Radar)
 
         Returns:
-            Articles filtrés et triés par pertinence thématique
+            Articles filtrés et triés (France d'abord, puis international)
         """
         theme = self.themes.get(theme_id)
         if not theme:
@@ -160,19 +209,51 @@ class Curator:
 
         console.print(f"\n[bold cyan]🎯 Filtrage par thème: {theme.get('name', theme_id)}[/bold cyan]")
 
-        scored_articles = []
+        # Séparer articles français et internationaux
+        french_articles = []
+        international_articles = []
+
         for article in articles:
             theme_score = self.calculate_theme_relevance(article, theme_id)
+            is_french = self.is_french_article(article)
+
             if theme_score >= min_theme_score:
-                scored_articles.append((theme_score, article))
+                # Bonus pour articles français (+2 points)
+                final_score = theme_score + (2.0 if is_french else 0)
 
-        # Trier par score thématique décroissant
-        scored_articles.sort(key=lambda x: x[0], reverse=True)
+                if is_french:
+                    french_articles.append((final_score, theme_score, article))
+                else:
+                    international_articles.append((final_score, theme_score, article))
 
-        filtered = [article for _, article in scored_articles]
-        console.print(f"  [dim]• {len(filtered)}/{len(articles)} articles pertinents pour ce thème[/dim]")
+        # Trier chaque groupe par score décroissant
+        french_articles.sort(key=lambda x: x[0], reverse=True)
+        international_articles.sort(key=lambda x: x[0], reverse=True)
 
-        return filtered
+        # Stats
+        console.print(f"  [dim]• {len(french_articles)} articles France sur le thème[/dim]")
+        console.print(f"  [dim]• {len(international_articles)} articles internationaux sur le thème[/dim]")
+
+        # Combiner : France d'abord, puis international pour compléter
+        result = []
+
+        # Prendre d'abord les articles français (jusqu'à target_count)
+        for score, theme_score, article in french_articles:
+            if len(result) < target_count:
+                result.append(article)
+                console.print(f"    [green]✓ 🇫🇷 {article.title_fr or article.article.title[:50]}... (score thème: {theme_score:.1f})[/green]")
+
+        # Compléter avec des articles internationaux si besoin
+        if len(result) < target_count:
+            remaining = target_count - len(result)
+            console.print(f"  [dim]• Complément avec {min(remaining, len(international_articles))} articles internationaux[/dim]")
+            for score, theme_score, article in international_articles[:remaining]:
+                result.append(article)
+                console.print(f"    [blue]✓ 🌍 {article.title_fr or article.article.title[:50]}... (score thème: {theme_score:.1f})[/blue]")
+
+        console.print(f"  [bold]→ {len(result)} articles sélectionnés pour le Radar[/bold]")
+
+        return result
 
     def calculate_final_score(self, article: AnalyzedArticle) -> float:
         """

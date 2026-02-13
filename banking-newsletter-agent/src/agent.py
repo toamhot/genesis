@@ -322,6 +322,11 @@ class BankingNewsletterAgent:
             console.print("[dim]  → Génération du Point de vue Ares & Co...[/dim]")
             ares_view = self.writer.generate_ares_view(selection, month)
 
+            # Générer le "Terrain Ares & Co" - mini-cas anonymisé
+            if terrain is None:
+                console.print("[dim]  → Génération du Terrain Ares & Co...[/dim]")
+                terrain = self.writer.generate_terrain(selection, month)
+
             # Markdown (format legacy, gardé pour compatibilité)
             if output_format in ("markdown", "both"):
                 console.print("[dim]  → Génération du Markdown...[/dim]")

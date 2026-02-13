@@ -307,6 +307,99 @@ Le lecteur doit se dire "Tiens, c'est un angle intéressant que je n'avais pas v
             "partner": partner_name
         }
 
+    def generate_terrain(
+        self,
+        selection: CuratedSelection,
+        month: str
+    ) -> dict:
+        """
+        Génère la section "Terrain Ares & Co" - mini-cas anonymisé.
+
+        Structure : Problème → Approche → Résultats/Leçons
+
+        Args:
+            selection: La sélection curée d'articles
+            month: Le mois de la newsletter
+
+        Returns:
+            dict avec 'title', 'problem', 'approach', 'results'
+        """
+        console.print("\n[bold blue]💼 Génération du Terrain Ares & Co...[/bold blue]")
+
+        if not self.client:
+            console.print("[yellow]⚠ Pas de client Claude API[/yellow]")
+            return {
+                "title": "Retour d'expérience terrain",
+                "problem": "[À compléter]",
+                "approach": "[À compléter]",
+                "results": "[À compléter]"
+            }
+
+        # Récupérer le thème du mois
+        theme_name = getattr(selection, 'theme_name', None) or "transformation bancaire"
+
+        # Contexte des articles sélectionnés
+        articles_context = "\n".join([
+            f"- {a.title_fr if a.title_fr else a.article.title}"
+            for a in selection.top_articles[:6]
+        ])
+
+        prompt = f"""Génère un mini-cas "TERRAIN ARES & CO" pour la newsletter bancaire de {month}.
+
+THÈME DU MOIS : {theme_name}
+
+ARTICLES DU RADAR (pour contexte) :
+{articles_context}
+
+MISSION :
+Imagine un cas de mission Ares & Co ANONYMISÉ et RÉALISTE qui illustre le thème du mois.
+Ce cas doit démontrer l'expertise terrain d'Ares & Co et apporter de la crédibilité.
+
+STRUCTURE STRICTE À RESPECTER :
+
+TITRE: [Titre court du cas - ex: "Optimisation du réseau d'agences d'une banque régionale"]
+---
+PROBLÈME: [2-3 phrases décrivant la problématique client - contexte, enjeux, chiffres clés]
+---
+APPROCHE: [2-3 phrases décrivant la méthodologie Ares & Co - phases, outils, équipe]
+---
+RÉSULTATS: [2-3 phrases avec résultats quantifiés et leçons clés - KPIs, ROI, enseignements]
+
+RÈGLES :
+- Client ANONYMISÉ (dire "une banque régionale", "un acteur majeur de la bancassurance", etc.)
+- Chiffres CRÉDIBLES et PRÉCIS (%, M€, nombre de jours, etc.)
+- Ton FACTUEL et PROFESSIONNEL
+- Lien ÉVIDENT avec le thème du mois
+- Maximum 150 mots au total"""
+
+        response = self._call_claude(self.EDITORIAL_SYSTEM_PROMPT, prompt)
+
+        # Parser la réponse
+        terrain = {
+            "title": "Retour d'expérience terrain",
+            "problem": "",
+            "approach": "",
+            "results": ""
+        }
+
+        if "TITRE:" in response:
+            parts = response.split("---")
+
+            for part in parts:
+                part = part.strip()
+                if part.startswith("TITRE:"):
+                    terrain["title"] = part.replace("TITRE:", "").strip()
+                elif part.startswith("PROBLÈME:") or part.startswith("PROBLEME:"):
+                    terrain["problem"] = part.replace("PROBLÈME:", "").replace("PROBLEME:", "").strip()
+                elif part.startswith("APPROCHE:"):
+                    terrain["approach"] = part.replace("APPROCHE:", "").strip()
+                elif part.startswith("RÉSULTATS:") or part.startswith("RESULTATS:"):
+                    terrain["results"] = part.replace("RÉSULTATS:", "").replace("RESULTATS:", "").strip()
+
+        console.print(f"[green]✓ Terrain généré: {terrain['title'][:50]}...[/green]")
+
+        return terrain
+
     def generate_markdown(
         self,
         selection: CuratedSelection,
