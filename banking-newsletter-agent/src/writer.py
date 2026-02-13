@@ -128,35 +128,61 @@ class NewsletterWriter:
             for cat, articles in selection.articles_by_category.items()
         ])
 
-        prompt = f"""Rédige l'introduction éditoriale de la newsletter bancaire Ares & Co pour {month}.
+        prompt = f"""Rédige l'éditorial de la newsletter bancaire Ares & Co pour {month}.
 
-CONTEXTE - ACTUALITÉS ANALYSÉES CE MOIS :
+CONTEXTE - ACTUALITÉS CLÉS DU MOIS :
 {articles_summary}
 
 RÉPARTITION THÉMATIQUE :
 {categories_summary}
 
-CONSIGNES DE RÉDACTION :
-Tu es Senior Partner chez Ares & Co. Rédige l'éditorial (200-300 mots, 2-3 paragraphes) avec :
+═══════════════════════════════════════════════════════════════
+CONSIGNES DE RÉDACTION STYLE McKINSEY / BCG
+═══════════════════════════════════════════════════════════════
 
-1. ACCROCHE STRATÉGIQUE (1er paragraphe)
-   - Commence par une observation percutante sur la dynamique du mois
-   - Identifie le fil rouge ou l'inflexion majeure
-   - Exemple : "Le mois de {month} marque une inflexion dans..." ou "Trois signaux convergents dessinent..."
+Tu es Senior Partner chez Ares & Co, cabinet de conseil de Direction Générale spécialisé dans les services financiers. Tu écris pour des Directeurs Généraux, Directeurs de la Stratégie et membres de COMEX de banques françaises et européennes.
 
-2. ANALYSE DES DYNAMIQUES (2ème paragraphe)
-   - Développe les 2-3 thèmes structurants
-   - Fais les connexions entre les actualités
-   - Explicite les implications pour les banques françaises
+STRUCTURE DE L'ÉDITORIAL (400-500 mots, 4-5 paragraphes) :
 
-3. PERSPECTIVE PROSPECTIVE (3ème paragraphe, optionnel)
-   - "So what?" pour un dirigeant bancaire
-   - Points d'attention ou d'action pour les mois à venir
+**1. THÈSE CENTRALE (1 paragraphe - l'insight clé)**
+- Ouvre avec une affirmation forte et différenciante
+- Identifie LE shift majeur ou LA tension structurante du mois
+- Utilise des formulations assertives : "Ce mois confirme...", "Une rupture se dessine...", "Le marché envoie un signal clair..."
+- Pas de conditionnel : affirme ta lecture des événements
 
-STYLE : Assertif, analytique, niveau C-suite. Pas de formules génériques ("Ce mois a été riche...").
-Ne PAS lister les actualités, mais les SYNTHÉTISER en tendances.
+**2. PREUVES ET SIGNAUX (2 paragraphes - la démonstration)**
+- Développe 2-3 dynamiques qui soutiennent ta thèse
+- Fais des CONNEXIONS entre les actualités (pattern recognition)
+- Quantifie quand c'est possible (montants, %, nombre d'acteurs)
+- Montre les implications de second ordre (A implique B qui génère C)
+- Évite le listing : chaque actualité doit servir l'argumentaire
 
-Rédige directement l'éditorial, sans titre ni préambule."""
+**3. SO WHAT - IMPLICATIONS STRATÉGIQUES (1 paragraphe)**
+- Traduis en enjeux concrets pour un DG de banque
+- Quelles questions stratégiques ces évolutions posent-elles ?
+- Quels arbitrages ou réallocations de ressources cela implique ?
+
+**4. CONVICTION ARES & CO (1 phrase finale en gras)**
+- Termine par une prise de position claire et mémorable
+- Format : "Notre conviction : [affirmation tranchée]."
+- C'est la phrase que le lecteur doit retenir
+
+STYLE RÉDACTIONNEL :
+- Assertif et direct (pas de "il semblerait que", "on peut penser")
+- Analytique mais accessible (éviter le jargon excessif)
+- Phrases courtes et percutantes
+- Transitions fluides entre paragraphes
+- Aucune formule générique ("Le mois a été riche", "Beaucoup de choses se sont passées")
+- JAMAIS de liste à puces dans l'éditorial - tout en prose fluide
+
+EXEMPLES DE FORMULATIONS McKINSEY :
+- "Trois signaux convergents cette semaine dessinent..."
+- "Au-delà de l'annonce, c'est un changement de paradigme qui..."
+- "Ce qui peut sembler un ajustement tactique révèle en réalité..."
+- "La vraie question n'est pas si, mais quand et comment..."
+- "Les dirigeants qui auront su anticiper..."
+
+Rédige directement l'éditorial, sans titre ni préambule. Le dernier paragraphe doit contenir la conviction Ares & Co en gras avec le format : **Notre conviction : [phrase].**"""
 
         editorial = self._call_claude(self.EDITORIAL_SYSTEM_PROMPT, prompt)
         console.print("[green]✓ Éditorial généré[/green]")
@@ -415,6 +441,10 @@ Le lecteur doit se dire "Tiens, c'est un angle intéressant que je n'avais pas v
 
         if editorial is None:
             editorial = self.generate_editorial(selection, month)
+
+        # Convertir le markdown basique en HTML (gras)
+        import re
+        editorial = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', editorial)
 
         # Charger le template V2
         template_path = Path(__file__).parent / "templates" / "newsletter_v2.html"

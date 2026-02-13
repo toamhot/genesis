@@ -198,11 +198,16 @@ def test_full_pipeline():
     print("\n[3/4] Génération des contenus...")
     writer = NewsletterWriter(api_key=None)  # Sans API pour le test
 
-    # Éditorial simplifié (pas d'API)
-    editorial = """Ce mois de janvier 2026 marque un tournant dans les stratégies de distribution bancaire en France.
-Entre l'offensive omnicanale de BNP Paribas, l'obtention de la licence bancaire par Revolut, et les
-repositionnements stratégiques de HSBC et Orange Bank, le marché se restructure autour de deux axes :
-l'hybridation digital-physique pour les acteurs historiques, et la spécialisation pour les challengers."""
+    # Éditorial style McKinsey (exemple sans API)
+    editorial = """Le mois de janvier 2026 acte la fin d'une illusion : celle de la banque 100% digitale comme modèle universel. Trois mouvements convergents — le pivot B2B2C d'Orange Bank, l'offensive omnicanale de BNP Paribas, et l'accélération des partenariats bancassurance — dessinent une nouvelle réalité où le "phygital" n'est plus une option mais une nécessité stratégique.
+
+L'annonce de BNP Paribas de transformer 500 agences avec un investissement de 200M€ n'est pas un simple programme immobilier. C'est l'aveu que la relation bancaire complexe — crédit immobilier, gestion de patrimoine, accompagnement des professionnels — requiert une présence physique réinventée. Dans le même temps, Orange Bank tire les leçons de sept années d'expérimentation directe : le coût d'acquisition client en B2C digital dépasse désormais 300€, rendant le modèle structurellement déficitaire sur le segment mass market. Le pivot vers le B2B2C, avec trois partenariats retailers annoncés, traduit une recherche de distribution à coût marginal proche de zéro.
+
+Cette recomposition n'est pas neutre pour les acteurs établis. L'alliance Crédit Agricole-Worldline sur les paiements merchants, ciblant 500 000 TPE/PME, illustre une stratégie de bundling défensif face à la montée des néobanques sur le segment professionnel. Quant à la cession par HSBC de ses 244 agences à My Money Group pour 1,1Md€, elle confirme que le retail banking français n'offre plus de perspectives de rentabilité suffisantes pour un acteur international non-leader.
+
+Pour les dirigeants bancaires, ces signaux posent une question stratégique immédiate : comment optimiser le ratio coût/valeur de chaque canal tout en préservant la capacité à capter les moments de vie à forte valeur ? Les banques qui sauront articuler digital transactionnel et physique relationnel creuseront l'écart avec celles qui resteront dans un "ni-ni" mal assumé.
+
+**Notre conviction : d'ici 2028, le marché français ne comptera plus que deux modèles viables — les réseaux "phygitaux" intégrés des bancassureurs et les pure players spécialisés sur des niches à forte valeur. Le milieu de gamme digital généraliste aura disparu.**"""
 
     # Point de vue Ares simplifié
     ares_view = {

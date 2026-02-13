@@ -286,7 +286,11 @@
         <div class="section edito">
             <h2 class="section-title"><span class="section-number">1</span>Édito</h2>
             {% for paragraph in editorial.split('\n\n') %}
-            <p>{{ paragraph }}</p>
+            {% if 'conviction' in paragraph|lower %}
+            <p class="conviction">{{ paragraph|safe }}</p>
+            {% else %}
+            <p>{{ paragraph|safe }}</p>
+            {% endif %}
             {% endfor %}
         </div>
 
