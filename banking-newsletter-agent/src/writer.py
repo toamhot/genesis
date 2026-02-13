@@ -128,7 +128,13 @@ class NewsletterWriter:
             for cat, articles in selection.articles_by_category.items()
         ])
 
+        # Récupérer le thème si disponible
+        theme_name = getattr(selection, 'theme_name', None) or "actualités bancaires"
+        theme_id = getattr(selection, 'theme', None)
+
         prompt = f"""Rédige l'éditorial de la newsletter bancaire Ares & Co pour {month}.
+
+THÈME DU MOIS : {theme_name}
 
 CONTEXTE - ACTUALITÉS CLÉS DU MOIS :
 {articles_summary}
@@ -137,12 +143,43 @@ RÉPARTITION THÉMATIQUE :
 {categories_summary}
 
 ═══════════════════════════════════════════════════════════════
+ENRICHISSEMENT AVEC TES CONNAISSANCES SECTORIELLES
+═══════════════════════════════════════════════════════════════
+
+IMPORTANT : Ne te limite PAS aux actualités ci-dessus. En tant qu'expert du secteur bancaire, tu dois ENRICHIR l'analyse avec :
+
+1. **CONTEXTE MACRO** : Relie les actualités aux grandes tendances du secteur :
+   - Évolution des taux d'intérêt et impact sur les modèles économiques
+   - Pression réglementaire (Bâle IV, DSP3, DORA, MiCA...)
+   - Transformation digitale et IA générative dans la banque
+   - Consolidation du marché européen
+   - Nouveaux entrants (néobanques, BigTech, embedded finance)
+
+2. **BENCHMARKS INTERNATIONAUX** : Compare avec ce qui se passe ailleurs :
+   - Stratégies des banques US, UK, nordiques, asiatiques
+   - Best practices et innovations observées à l'étranger
+   - Leçons tirées d'autres marchés
+
+3. **CADRES STRATÉGIQUES** : Mobilise des frameworks pertinents :
+   - Économie de plateforme vs modèle intégré
+   - Open banking et BaaS (Banking-as-a-Service)
+   - Courbe d'adoption technologique
+   - Théorie des jeux concurrentiels
+
+4. **DONNÉES DE RÉFÉRENCE** : Cite des ordres de grandeur crédibles :
+   - Tailles de marché, parts de marché
+   - Ratios de rentabilité sectoriels (ROE, cost-to-income)
+   - Tendances d'investissement (IT spend, M&A)
+
+L'objectif est de produire un éditorial qui démontre une EXPERTISE SECTORIELLE PROFONDE, pas juste un résumé des actualités du mois.
+
+═══════════════════════════════════════════════════════════════
 CONSIGNES DE RÉDACTION STYLE McKINSEY / BCG
 ═══════════════════════════════════════════════════════════════
 
 Tu es Senior Partner chez Ares & Co, cabinet de conseil de Direction Générale spécialisé dans les services financiers. Tu écris pour des Directeurs Généraux, Directeurs de la Stratégie et membres de COMEX de banques françaises et européennes.
 
-STRUCTURE DE L'ÉDITORIAL (400-500 mots, 4-5 paragraphes) :
+STRUCTURE DE L'ÉDITORIAL (450-550 mots, 4-5 paragraphes) :
 
 **1. THÈSE CENTRALE (1 paragraphe - l'insight clé)**
 - Ouvre avec une affirmation forte et différenciante
