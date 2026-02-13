@@ -242,6 +242,21 @@
             background-color: white;
             color: var(--primary-color);
         }
+        .cta-button.share {
+            background-color: #25D366;
+            color: white;
+            margin-top: 10px;
+        }
+        .share-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .share-text {
+            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
 
         /* FOOTER */
         .footer {
@@ -372,6 +387,12 @@
                 </a>
                 <a href="https://www.linkedin.com/company/ares-&-company/" class="cta-button secondary" target="_blank">
                     <i class="fab fa-linkedin"></i> Suivre sur LinkedIn
+                </a>
+            </div>
+            <div class="share-section">
+                <p class="share-text">Cette newsletter vous a plu ? Partagez-la avec vos contacts :</p>
+                <a href="mailto:?subject={{ 'Newsletter Banque Ares %26 Co - ' ~ month ~ ((' - ' ~ theme_name) if theme_name else '') }}&body={{ 'Bonjour,%0D%0A%0D%0AJe vous partage la dernière newsletter bancaire d%27Ares %26 Co.%0D%0A%0D%0AThème du mois : ' ~ (theme_name if theme_name else 'Actualités bancaires') ~ '%0D%0A%0D%0ABonne lecture !%0D%0A%0D%0A---%0D%0APour recevoir cette newsletter chaque mois, contactez contact@aresandco.com' }}" class="cta-button share">
+                    <i class="fas fa-share-alt"></i> Partager par email
                 </a>
             </div>
         </div>
