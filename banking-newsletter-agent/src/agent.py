@@ -28,7 +28,23 @@ from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 # Charger .env depuis le dossier parent de src/ (racine du projet)
 env_path = Path(__file__).parent.parent / '.env'
-loaded = load_dotenv(dotenv_path=env_path)
+
+# Gérer les problèmes d'encodage Windows (UTF-16 BOM)
+try:
+    loaded = load_dotenv(dotenv_path=env_path)
+except UnicodeDecodeError:
+    # Essayer de lire le fichier avec différents encodages
+    try:
+        with open(env_path, 'r', encoding='utf-16') as f:
+            content = f.read()
+        # Réécrire en UTF-8
+        with open(env_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        loaded = load_dotenv(dotenv_path=env_path)
+    except Exception as e:
+        print(f"[ERREUR] Impossible de lire .env: {e}")
+        print("Créez un fichier .env en UTF-8 avec: ANTHROPIC_API_KEY=votre-clé")
+        loaded = False
 
 # Debug: afficher si le fichier .env a été trouvé
 if not loaded:
