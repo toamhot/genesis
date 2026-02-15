@@ -24,6 +24,13 @@ CHECK_PERIOD_DAYS = int(os.getenv("CHECK_PERIOD_DAYS", "7"))
 MAX_POSTS_PER_CONTACT = int(os.getenv("MAX_POSTS_PER_CONTACT", "10"))
 OUTPUT_FORMAT = os.getenv("OUTPUT_FORMAT", "console")  # console, json, html
 
+# Notion integration
+NOTION_API_KEY = os.getenv("NOTION_API_KEY", "")
+NOTION_DATABASE_ID = os.getenv("NOTION_DATABASE_ID", "")
+
+# Document storage
+DOCUMENTS_DIR = BASE_DIR / "documents"
+
 # Nomination detection keywords (French + English)
 NOMINATION_KEYWORDS_FR = [
     "nommé", "nommée", "nomination", "promu", "promue", "promotion",
