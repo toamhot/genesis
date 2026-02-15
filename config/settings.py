@@ -27,6 +27,10 @@ OUTPUT_FORMAT = os.getenv("OUTPUT_FORMAT", "console")  # console, json, html
 # Notion integration
 NOTION_API_KEY = os.getenv("NOTION_API_KEY", "")
 NOTION_DATABASE_ID = os.getenv("NOTION_DATABASE_ID", "")
+NOTION_INBOX_DATABASE_ID = os.getenv("NOTION_INBOX_DATABASE_ID", "")
+
+# Inbox polling
+INBOX_POLL_INTERVAL_MINUTES = int(os.getenv("INBOX_POLL_INTERVAL_MINUTES", "10"))
 
 # Document storage
 DOCUMENTS_DIR = BASE_DIR / "documents"

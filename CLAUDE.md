@@ -28,6 +28,12 @@ python main.py --mode both --output html --no-llm
 python main.py --url https://linkedin.com/posts/...
 python main.py --url https://linkedin.com/posts/... --notion
 python main.py --file liens.txt --notion --output html
+
+# Notion Inbox workflow
+python main.py --setup-inbox <NOTION_PAGE_ID>  # Create Inbox + Nominations DBs
+python main.py --inbox                          # Process pending Inbox entries (one pass)
+python main.py --daemon                         # Poll Inbox continuously (every 10 min)
+python main.py --daemon --interval 5            # Custom polling interval
 ```
 
 ## Testing
