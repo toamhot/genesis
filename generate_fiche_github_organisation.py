@@ -218,7 +218,7 @@ run.font.color.rgb = NAVY_PRIMARY
 
 p = doc.add_paragraph()
 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-run = p.add_run("Centraliser le code et les outils internes Ares & Co")
+run = p.add_run("Guidelines pour l'expérimentation et le passage à l'échelle")
 run.font.name = 'Arial'
 run.font.size = Pt(12)
 run.font.color.rgb = NAVY_SECONDARY
@@ -227,13 +227,14 @@ doc.add_paragraph()
 doc.add_paragraph()
 
 # Metadata
-table = doc.add_table(rows=4, cols=2)
+table = doc.add_table(rows=5, cols=2)
 table.style = 'Table Grid'
 table.alignment = WD_TABLE_ALIGNMENT.CENTER
 meta = [
-    ("Type de document", "Recommandation transverse"),
+    ("Type de document", "Recommandation transverse — Guidelines de développement"),
     ("Destinataires", "Direction, IT, Consultants seniors"),
-    ("Priorité", "Haute — prérequis pour les projets collaboratifs"),
+    ("Contexte", "Structurer les pratiques de développement d'agents IA au sein du cabinet"),
+    ("Principe clé", "Infrastructure agnostique du LLM — compatible Claude, GPT, Mistral, Llama, etc."),
     ("Effort de mise en place", "2-3 heures (création) + 30 min/consultant (onboarding)"),
 ]
 for i, (k, v) in enumerate(meta):
@@ -252,27 +253,39 @@ run.font.bold = True
 run.font.color.rgb = NAVY_PRIMARY
 run.font.size = Pt(11)
 
-add_body(doc, "Cette note recommande la création d'une organisation GitHub pour Ares & Co afin de centraliser le code des outils internes (newsletter, automatisations, templates). Cette infrastructure permet la collaboration entre consultants, assure la pérennité des développements, et pose les bases d'une culture de développement maîtrisée au sein du cabinet.")
+add_body(doc, "Ares & Co initie une démarche de développement d'agents IA pour renforcer ses capacités internes (newsletter automatisée, outils d'analyse, automatisations). Il n'existe pas aujourd'hui de pratique formalisée de développement au sein du cabinet. Cette note propose les guidelines nécessaires pour structurer cette activité naissante : d'abord dans une logique d'expérimentation (quelques consultants, un premier projet pilote), puis dans une perspective de passage à l'échelle (multiplication des agents, collaboration entre équipes).")
+
+add_body(doc, "La recommandation centrale est la mise en place d'une organisation GitHub comme socle technique commun. Cette infrastructure est volontairement agnostique du choix de LLM : elle fonctionne de la même manière que le code s'appuie sur Claude (Anthropic), GPT (OpenAI), Mistral, Llama (Meta), ou tout autre modèle. Le choix du LLM est une décision indépendante, qui peut évoluer dans le temps sans impacter l'infrastructure de versioning et de collaboration.")
 
 doc.add_page_break()
 
 # ========================================
 # SECTION 1: CONSTAT
 # ========================================
-doc.add_heading("1. Constat : les limites du travail en local", level=1)
+doc.add_heading("1. Contexte : une activité de développement naissante", level=1)
 
-add_body(doc, "Aujourd'hui, les projets de développement (newsletter, outils d'automatisation, scripts) sont réalisés sur les postes individuels des consultants, sans infrastructure de partage. Cette approche présente plusieurs risques :")
+add_body(doc, "Ares & Co est un cabinet de conseil de Direction Générale. Le développement logiciel ne fait pas partie de son cœur de métier. Cependant, l'émergence des LLMs (Claude, GPT, Mistral, etc.) ouvre des opportunités concrètes pour créer des outils internes augmentés par l'IA : newsletters automatisées, agents d'analyse sectorielle, automatisations de reporting.")
 
-add_table(doc, ["Risque", "Impact", "Fréquence"],
-    [["Perte de code", "Un PC tombe en panne → projet perdu", "Rare mais critique"],
-     ["Duplication d'efforts", "Deux consultants refont le même outil", "Fréquent"],
-     ["Difficultés de passation", "Un consultant quitte → le projet meurt", "À chaque départ"],
-     ["Pas de revue qualité", "Code non validé, bugs en production", "Systématique"],
-     ["Clés API exposées", "Secrets dans les .zip qui circulent", "Fréquent"],
-     ["Versions multiples", "\"C'est laquelle la bonne version ?\"", "Quotidien"]],
-    col_widths=[4.5, 7, 4.5])
+add_body(doc, "Aujourd'hui, il n'existe pas de pratique formalisée de développement au sein du cabinet. Les premières expérimentations (projet newsletter) sont menées de façon individuelle, sur les postes des consultants. Cette situation est normale à ce stade, mais elle ne peut pas durer si l'ambition est de passer à l'échelle.")
 
-add_body(doc, "Ces problèmes s'aggravent à mesure que le nombre de projets et de contributeurs augmente.")
+doc.add_heading("1.1 Ce qui fonctionne en phase d'expérimentation", level=2)
+
+add_bullet(doc, "Un consultant explore une idée seul, sur son PC")
+add_bullet(doc, "Prototypage rapide avec Claude Code ou un autre assistant IA")
+add_bullet(doc, "Résultat : un premier MVP qui valide le concept")
+
+doc.add_heading("1.2 Ce qui bloque pour passer à l'échelle", level=2)
+
+add_table(doc, ["Problème", "Impact en phase d'expérimentation", "Impact à l'échelle"],
+    [["Code sur un seul PC", "Acceptable", "Risque de perte critique"],
+     ["Pas de partage", "Non bloquant (1 personne)", "Impossible de collaborer"],
+     ["Pas d'historique", "Gérable manuellement", "Impossible de tracer les évolutions"],
+     ["Pas de revue qualité", "Tolérable pour un prototype", "Risque d'erreurs en production"],
+     ["Secrets dans le code", "Risque limité", "Risque de fuite avec la multiplication des copies"],
+     ["Pas de standards", "Non pertinent (1 projet)", "Chaque consultant fait différemment"]],
+    col_widths=[3.5, 6.25, 6.25])
+
+add_body(doc, "La mise en place d'une infrastructure GitHub permet de résoudre ces problèmes dès maintenant, de façon progressive et sans freiner les expérimentations en cours.")
 
 doc.add_page_break()
 
@@ -295,14 +308,34 @@ doc.add_heading("2.2 Pourquoi GitHub plutôt qu'un autre outil ?", level=2)
 
 add_table(doc, ["Critère", "GitHub", "Alternatives (GitLab, Bitbucket, Azure DevOps)"],
     [["Adoption mondiale", "Standard de facto, 100M+ utilisateurs", "Moins répandus"],
-     ["Intégration Claude Code", "Native et optimisée", "Possible mais moins fluide"],
+     ["Intégration assistants IA", "Claude Code, GitHub Copilot, Cursor, Continue", "Compatibles mais intégration moins directe"],
      ["Courbe d'apprentissage", "Documentation abondante, tutoriels", "Similaire"],
      ["Coût", "Gratuit (repos privés illimités)", "Gratuit aussi"],
      ["Interface", "Simple et intuitive", "Plus complexe (GitLab/Azure)"],
      ["Communauté", "Immense, réponses rapides", "Plus restreinte"]],
     col_widths=[3.5, 6.25, 6.25])
 
-add_tip(doc, "GitHub est le choix naturel pour des consultants qui débutent en développement. L'écosystème est mature et l'intégration avec Claude Code est excellente.")
+add_tip(doc, "GitHub est le choix naturel pour des consultants qui débutent en développement. L'écosystème est le plus mature et compatible avec tous les assistants IA de code du marché.")
+
+doc.add_heading("2.3 Un socle agnostique du choix de LLM", level=2)
+
+add_body(doc, "Un point fondamental : l'infrastructure GitHub est totalement indépendante du LLM utilisé. Le code versionné sur GitHub peut s'appuyer sur n'importe quel modèle d'IA :")
+
+add_table(doc, ["Couche", "Rôle", "Exemples d'options"],
+    [["Infrastructure de code", "Versionner, collaborer, sécuriser", "GitHub (recommandé) — choix unique, stable"],
+     ["Assistant de développement", "Aider le consultant à coder", "Claude Code, GitHub Copilot, Cursor, Continue + Ollama"],
+     ["LLM dans le produit", "IA intégrée dans l'agent créé", "Claude API, GPT API, Mistral API, Ollama (local)"]],
+    col_widths=[3.5, 5, 7.5])
+
+add_body(doc, "Ces trois couches sont indépendantes. On peut par exemple :")
+
+add_bullet(doc, "utiliser Claude Code pour le développement, mais GPT dans le produit final")
+add_bullet(doc, "commencer avec Claude API puis migrer vers un modèle local (Ollama)")
+add_bullet(doc, "laisser chaque consultant choisir son assistant de développement préféré")
+
+add_body(doc, "GitHub reste le socle commun quelle que soit la combinaison choisie. Le choix du LLM est une décision réversible qui peut évoluer au fil du temps (nouveaux modèles, évolution des prix, exigences de confidentialité) sans jamais remettre en cause l'infrastructure de collaboration.")
+
+add_warning(doc, "En revanche, l'absence d'infrastructure Git rend difficile tout changement futur : si le code est dispersé sur les PC des consultants, migrer d'un LLM à un autre est un effort considérable projet par projet.")
 
 doc.add_page_break()
 
