@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Newsletter Banque - Mars 2026 | Ares &amp; Co</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -82,7 +83,7 @@
             letter-spacing: 0.3px;
         }
 
-        /* ÉDITORIAL */
+        /* &#201;DITORIAL */
         .edito p {
             margin-bottom: 16px;
             text-align: justify;
@@ -156,7 +157,7 @@
 
         /* CTA */
         .cta-section {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, #051E3B, #051E5B);
             text-align: center;
             padding: 44px 40px;
         }
@@ -167,57 +168,58 @@
             font-weight: 400;
             margin-bottom: 24px;
         }
-        .cta-buttons { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+        .cta-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
         .cta-button {
             display: inline-block;
-            padding: 11px 28px;
+            padding: 12px 25px;
+            border-radius: 25px;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 13px;
-            letter-spacing: 0.5px;
-            transition: opacity 0.2s;
-            border: 1px solid transparent;
+            letter-spacing: 0.3px;
+            transition: transform 0.2s;
         }
-        .cta-button:hover { opacity: 0.85; }
-        .cta-button.primary { background-color: white; color: var(--primary-color); }
-        .cta-button.secondary { background-color: transparent; color: white; border-color: rgba(255,255,255,0.5); }
+        .cta-button:hover { transform: translateY(-2px); }
+        .cta-button.primary { background-color: #57AEE0; color: white; }
+        .cta-button.secondary { background-color: white; color: #051E3B; }
         .share-section {
             margin-top: 28px;
             padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.15);
+            border-top: 1px solid rgba(255,255,255,0.2);
         }
-        .share-text { color: rgba(255,255,255,0.7); font-size: 13px; margin-bottom: 14px; font-weight: 300; }
-        .cta-button.share { background-color: transparent; color: white; border-color: rgba(255,255,255,0.4); }
+        .share-text { color: rgba(255,255,255,0.85); font-size: 13px; margin-bottom: 14px; font-weight: 300; }
+        .cta-button.share { background-color: #25D366; color: white; }
 
         /* FOOTER */
         .footer {
-            background-color: #f3f4f6;
-            color: var(--text-color);
+            background-color: #051E3B;
+            color: white;
             padding: 36px 40px;
             text-align: center;
         }
-        .footer img { max-height: 32px; margin-bottom: 12px; }
-        .footer p { font-size: 12px; color: var(--text-light); margin-bottom: 6px; }
-        .footer .contact-info { margin: 20px 0; font-size: 12px; color: var(--text-light); }
-        .footer .contact-info p { margin: 4px 0; }
+        .footer img { max-height: 40px; margin-bottom: 12px; filter: brightness(0) invert(1); }
+        .footer p { font-size: 13px; opacity: 0.9; margin-bottom: 8px; }
+        .footer .contact-info { margin: 20px 0; font-size: 13px; }
+        .footer .contact-info p { margin: 5px 0; opacity: 0.85; }
         .footer .social-links { margin: 16px 0; }
         .footer .social-links a {
-            color: var(--text-light);
+            color: white;
             text-decoration: none;
             margin: 0 12px;
-            font-size: 12px;
+            font-size: 13px;
+            opacity: 0.85;
         }
-        .footer .social-links a:hover { color: var(--primary-color); }
+        .footer .social-links a:hover { opacity: 1; }
         .footer .legal {
             margin-top: 20px;
             padding-top: 16px;
-            border-top: 1px solid #d1d5db;
+            border-top: 1px solid rgba(255,255,255,0.2);
             font-size: 11px;
-            color: #9ca3af;
+            opacity: 0.7;
         }
-        .footer .legal a { color: #9ca3af; text-decoration: none; }
-        .footer .legal a:hover { color: var(--primary-color); }
-        .footer .generation-date { margin-top: 12px; font-size: 10px; color: #c0c5cc; }
+        .footer .legal a { color: white; text-decoration: none; }
+        .footer .legal a:hover { text-decoration: underline; }
+        .footer .generation-date { margin-top: 12px; font-size: 10px; opacity: 0.5; }
 
         @media (max-width: 600px) {
             .header { padding: 32px 24px; }
@@ -240,7 +242,7 @@
             <div class="month">Mars 2026</div>
         </div>
 
-        <!-- ÉDITORIAL -->
+        <!-- &#201;DITORIAL -->
         <div class="section edito">
             <h2 class="section-title">Notre &#233;ditorial</h2>
 
@@ -268,7 +270,7 @@
             </div>
         </div>
 
-        <!-- STRATÉGIES & MARCHÉS -->
+        <!-- STRAT&#201;GIES & MARCH&#201;S -->
         <div class="section">
             <h2 class="section-title">Strat&#233;gies &amp; march&#233;s</h2>
 
@@ -297,7 +299,7 @@
             </div>
         </div>
 
-        <!-- NOUVEAUX MODÈLES -->
+        <!-- NOUVEAUX MOD&#200;LES -->
         <div class="section">
             <h2 class="section-title">Nouveaux mod&#232;les</h2>
 
@@ -318,7 +320,7 @@
             </div>
         </div>
 
-        <!-- RÉGULATION & SUPERVISION -->
+        <!-- R&#201;GULATION & SUPERVISION -->
         <div class="section">
             <h2 class="section-title">R&#233;gulation &amp; supervision</h2>
 
@@ -344,16 +346,16 @@
             <h2>Continuons la conversation</h2>
             <div class="cta-buttons">
                 <a href="mailto:contact@aresandco.com?subject=Newsletter Banque - Contact" class="cta-button primary">
-                    Nous contacter
+                    <i class="fas fa-envelope"></i> Nous contacter
                 </a>
                 <a href="https://www.linkedin.com/company/ares-&-company/" class="cta-button secondary" target="_blank">
-                    Suivre sur LinkedIn
+                    <i class="fab fa-linkedin"></i> Suivre sur LinkedIn
                 </a>
             </div>
             <div class="share-section">
-                <p class="share-text">Cette newsletter vous a plu ? Partagez-la avec vos contacts.</p>
+                <p class="share-text">Cette newsletter vous a plu ? Partagez-la avec vos contacts :</p>
                 <a href="mailto:?subject=Newsletter Banque Ares %26 Co - Mars 2026&body=Bonjour,%0D%0A%0D%0AJe vous partage la derni%C3%A8re newsletter bancaire d%27Ares %26 Co.%0D%0A%0D%0ABonne lecture !%0D%0A%0D%0A---%0D%0APour recevoir cette newsletter chaque mois, contactez contact@aresandco.com" class="cta-button share">
-                    Transmettre par email
+                    <i class="fas fa-share-alt"></i> Partager par email
                 </a>
             </div>
         </div>
@@ -366,14 +368,14 @@
             <p>Cabinet de conseil de Direction G&#233;n&#233;rale</p>
 
             <div class="contact-info">
-                <p>15 Av. de la Grande Arm&#233;e, 75116 Paris</p>
-                <p>+33 1 40 20 44 49</p>
-                <p><a href="mailto:contact@aresandco.com" style="color: #6b7280;">contact@aresandco.com</a></p>
+                <p><i class="fas fa-map-marker-alt"></i> 15 Av. de la Grande Arm&#233;e, 75116 Paris</p>
+                <p><i class="fas fa-phone"></i> +33 1 40 20 44 49</p>
+                <p><i class="fas fa-envelope"></i> <a href="mailto:contact@aresandco.com" style="color: white;">contact@aresandco.com</a></p>
             </div>
 
             <div class="social-links">
-                <a href="https://www.aresandco.com/fr">aresandco.com</a>
-                <a href="https://www.linkedin.com/company/ares-&-company/">LinkedIn</a>
+                <a href="https://www.aresandco.com/fr"><i class="fas fa-globe"></i> Site web</a>
+                <a href="https://www.linkedin.com/company/ares-&-company/"><i class="fab fa-linkedin"></i> LinkedIn</a>
             </div>
 
             <div class="legal">
