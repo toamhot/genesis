@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Newsletter Banque - Mars 2026 | Ares & Co</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Newsletter Banque - Mars 2026 | Ares &amp; Co</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #1a2a3a;
@@ -13,7 +12,6 @@
             --text-light: #6b7280;
             --border-color: #d1d5db;
             --light-bg: #f9fafb;
-            --accent-color: #1a2a3a;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,7 +32,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
         }
 
-        /* HEADER — Minimal, McKinsey-style */
+        /* HEADER */
         .header {
             background-color: var(--primary-color);
             color: white;
@@ -50,12 +48,17 @@
             margin-bottom: 28px;
             font-weight: 300;
         }
+        .header .separator {
+            width: 40px;
+            height: 1px;
+            background-color: rgba(255,255,255,0.4);
+            margin: 20px 0;
+        }
         .header h1 {
             font-family: Georgia, 'Times New Roman', serif;
             font-size: 30px;
             font-weight: 400;
             letter-spacing: -0.3px;
-            margin-bottom: 0;
         }
         .header .month {
             font-size: 13px;
@@ -65,14 +68,8 @@
             text-transform: uppercase;
             opacity: 0.8;
         }
-        .header .separator {
-            width: 40px;
-            height: 1px;
-            background-color: rgba(255,255,255,0.4);
-            margin: 20px 0;
-        }
 
-        /* SECTION COMMUNE */
+        /* SECTIONS */
         .section { padding: 36px 40px; border-bottom: 1px solid #e5e7eb; }
         .section-title {
             color: var(--primary-color);
@@ -85,10 +82,7 @@
             letter-spacing: 0.3px;
         }
 
-        /* BLOC 0 — ÉDITORIAL */
-        .edito {
-            background-color: white;
-        }
+        /* ÉDITORIAL */
         .edito p {
             margin-bottom: 16px;
             text-align: justify;
@@ -118,12 +112,11 @@
             font-weight: 300;
         }
 
-        /* BLOC ARTICLE COMMUN */
+        /* ARTICLES */
         .bloc-article {
             margin-bottom: 28px;
             padding: 0 0 24px 0;
             border-bottom: 1px solid #eee;
-            background-color: transparent;
         }
         .bloc-article:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
         .bloc-article h3 {
@@ -161,26 +154,7 @@
         }
         .bloc-article .source-line a:hover { border-bottom-color: var(--primary-color); color: var(--primary-color); }
 
-        /* Conviction "Notre lecture" */
-        .notre-lecture {
-            font-style: italic;
-            color: var(--primary-color);
-            margin-top: 10px;
-            padding: 10px 14px;
-            background-color: var(--light-bg);
-            font-size: 13px;
-            border-left: 2px solid var(--primary-color);
-            font-weight: 400;
-        }
-
-        /* Section accent — thin top bar only */
-        .bloc-strategies .section-title,
-        .bloc-modeles .section-title,
-        .bloc-regulation .section-title {
-            border-bottom-color: var(--primary-color);
-        }
-
-        /* CTA — Sober, no gradient */
+        /* CTA */
         .cta-section {
             background-color: var(--primary-color);
             text-align: center;
@@ -205,29 +179,17 @@
             border: 1px solid transparent;
         }
         .cta-button:hover { opacity: 0.85; }
-        .cta-button.primary {
-            background-color: white;
-            color: var(--primary-color);
-        }
-        .cta-button.secondary {
-            background-color: transparent;
-            color: white;
-            border-color: rgba(255,255,255,0.5);
-        }
+        .cta-button.primary { background-color: white; color: var(--primary-color); }
+        .cta-button.secondary { background-color: transparent; color: white; border-color: rgba(255,255,255,0.5); }
         .share-section {
             margin-top: 28px;
             padding-top: 20px;
             border-top: 1px solid rgba(255,255,255,0.15);
         }
         .share-text { color: rgba(255,255,255,0.7); font-size: 13px; margin-bottom: 14px; font-weight: 300; }
-        .cta-button.share {
-            background-color: transparent;
-            color: white;
-            border-color: rgba(255,255,255,0.4);
-            margin-top: 0;
-        }
+        .cta-button.share { background-color: transparent; color: white; border-color: rgba(255,255,255,0.4); }
 
-        /* FOOTER — Clean, minimal */
+        /* FOOTER */
         .footer {
             background-color: #f3f4f6;
             color: var(--text-color);
@@ -238,7 +200,6 @@
         .footer p { font-size: 12px; color: var(--text-light); margin-bottom: 6px; }
         .footer .contact-info { margin: 20px 0; font-size: 12px; color: var(--text-light); }
         .footer .contact-info p { margin: 4px 0; }
-        .footer .contact-info i { width: 14px; color: var(--text-light); }
         .footer .social-links { margin: 16px 0; }
         .footer .social-links a {
             color: var(--text-light);
@@ -273,107 +234,107 @@
         <!-- HEADER -->
         <div class="header">
             <img src="https://www.aresandco.com/images/common-contents/logo-image/62c2a7a87e751_logo.png" alt="Ares & Co">
-            <div class="baseline">Cabinet de conseil de Direction Generale</div>
+            <div class="baseline">Cabinet de conseil de Direction G&#233;n&#233;rale</div>
             <div class="separator"></div>
             <h1>Newsletter Banque</h1>
             <div class="month">Mars 2026</div>
         </div>
 
-        <!-- BLOC 0 — NOTRE ÉDITORIAL -->
+        <!-- ÉDITORIAL -->
         <div class="section edito">
-            <h2 class="section-title">Notre editorial</h2>
+            <h2 class="section-title">Notre &#233;ditorial</h2>
 
-            <p>Vos clients epargnent de plus en plus hors de chez vous — et ce n'est pas qu'une question de taux.</p>
+            <p>Vos clients &#233;pargnent de plus en plus hors de chez vous &#8212; et ce n&#8217;est pas qu&#8217;une question de taux.</p>
 
-            <p>En 2025, 34% de la collecte nette en assurance-vie a ete captee par des acteurs non-bancaires — contre 18% cinq ans plus tot (Banque de France, janvier 2026). Les banques francaises perdent du terrain sur leur metier historique de collecte.</p>
+            <p>En 2025, 34% de la collecte nette en assurance-vie a &#233;t&#233; capt&#233;e par des acteurs non-bancaires &#8212; contre 18% cinq ans plus t&#244;t (Banque de France, janvier 2026). Les banques fran&#231;aises perdent du terrain sur leur m&#233;tier historique de collecte.</p>
 
-            <p>Trois dynamiques convergent. Premierement, la montee en puissance des assureurs et gestionnaires d'actifs dans la distribution de produits d'epargne retraite rogne les parts de marche bancaires sur leur terrain historique. Deuxiemement, la digitalisation des parcours souscription — portee par des acteurs comme Yomoni ou Nalo — abaisse le cout d'entree pour le client et reduit l'avantage de la relation en agence. Troisiemement, la directive CSRD et les nouvelles exigences ESG creent un besoin de conseil patrimonial complexe que les reseaux bancaires generalistes peinent a adresser faute de formation.</p>
+            <p>Trois dynamiques convergent. Premi&#232;rement, la mont&#233;e en puissance des assureurs et gestionnaires d&#8217;actifs dans la distribution de produits d&#8217;&#233;pargne retraite rogne les parts de march&#233; bancaires sur leur terrain historique. Deuxi&#232;mement, la digitalisation des parcours souscription &#8212; port&#233;e par des acteurs comme Yomoni ou Nalo &#8212; abaisse le co&#251;t d&#8217;entr&#233;e pour le client et r&#233;duit l&#8217;avantage de la relation en agence. Troisi&#232;mement, la directive CSRD et les nouvelles exigences ESG cr&#233;ent un besoin de conseil patrimonial complexe que les r&#233;seaux bancaires g&#233;n&#233;ralistes peinent &#224; adresser faute de formation.</p>
 
-            <div class="conviction"><strong>Notre conviction :</strong> d'ici 2028, les banques francaises qui n'auront pas construit une offre d'epargne retraite autonome — hors reseaux tiers — auront perdu entre 15 et 20% de leur PNB patrimonial sans possibilite de retour.</div>
+            <div class="conviction"><strong>Notre conviction :</strong> d&#8217;ici 2028, les banques fran&#231;aises qui n&#8217;auront pas construit une offre d&#8217;&#233;pargne retraite autonome &#8212; hors r&#233;seaux tiers &#8212; auront perdu entre 15 et 20% de leur PNB patrimonial sans possibilit&#233; de retour.</div>
 
-            <div class="signature">— Olivier Dupin, Partner, Ares & Co</div>
+            <div class="signature">&#8212; Olivier Dupin, Partner, Ares &amp; Co</div>
         </div>
 
-        <!-- BLOC 1 — L'ESSENTIEL -->
-        <div class="section bloc-essentiel">
-            <h2 class="section-title">L'essentiel</h2>
+        <!-- L'ESSENTIEL -->
+        <div class="section">
+            <h2 class="section-title">L&#8217;essentiel</h2>
 
             <div class="bloc-article">
-                <h3><span class="item-number">01</span> La BCE maintient ses taux directeurs inchanges a 2,00%</h3>
-                <div class="body">Reunie le 6 mars, la BCE a confirme le statu quo monetaire malgre une inflation sous-jacente toujours au-dessus de l'objectif. Le scenario d'une baisse avant l'ete s'eloigne. Pour les banques francaises, cela prolonge la fenetre de compression des marges sur les depots a vue — mais aussi la pression sur la production de credit immobilier, qui reste anemique a 3,4% sur 20 ans.</div>
+                <h3><span class="item-number">01</span> La BCE maintient ses taux directeurs inchang&#233;s &#224; 2,00%</h3>
+                <div class="body">R&#233;unie le 6 mars, la BCE a confirm&#233; le statu quo mon&#233;taire malgr&#233; une inflation sous-jacente toujours au-dessus de l&#8217;objectif. Le sc&#233;nario d&#8217;une baisse avant l&#8217;&#233;t&#233; s&#8217;&#233;loigne. Pour les banques fran&#231;aises, cela prolonge la fen&#234;tre de compression des marges sur les d&#233;p&#244;ts &#224; vue &#8212; mais aussi la pression sur la production de cr&#233;dit immobilier, qui reste an&#233;mique &#224; 3,4% sur 20 ans.</div>
                 <div class="source-line">
-                    <a href="https://example.com/article/0" target="_blank">BCE - Communiques</a> | 15 mars 2026
-                </div>
-            </div>
-        </div>
-
-        <!-- BLOC 2 — STRATÉGIES & MARCHÉS -->
-        <div class="section bloc-strategies">
-            <h2 class="section-title">Strategies & marches</h2>
-
-            <div class="bloc-article">
-                <h3><span class="item-number">02</span> HSBC France cede sa banque de detail a My Money Group pour 1,1 Md&euro;</h3>
-                <div class="body">HSBC finalise la cession de ses 244 agences et 800 000 clients a My Money Group pour 1,1 Md&euro;, soit 1,4x la valeur comptable. Le groupe britannique conserve uniquement la banque privee et la BFI en France. Cette operation illustre la difficulte pour un acteur international non-leader a atteindre une rentabilite suffisante sur le retail francais — un signal pour les autres banques etrangeres en position similaire.</div>
-                <div class="source-line">
-                    <a href="https://example.com/article/4" target="_blank">Les Echos</a> | 13 mars 2026
-                </div>
-            </div>
-
-            <div class="bloc-article">
-                <h3><span class="item-number">03</span> BNP Paribas annonce un plan de transformation digitale de 500M&euro;</h3>
-                <div class="body">BNP Paribas engage 500 millions d'euros sur trois ans pour deployer l'IA generative dans la relation client et moderniser son core banking. L'objectif affiche — 30% de gains de productivite — traduit une ambition de reduire un cost-to-income encore superieur a 65%. Pour les concurrents francais, ce plan cree une pression competitive directe sur les budgets IT et l'attractivite des talents tech.</div>
-                <div class="source-line">
-                    <a href="https://example.com/article/2" target="_blank">Les Echos</a> | 25 fevrier 2026
-                </div>
-            </div>
-
-            <div class="bloc-article">
-                <h3><span class="item-number">04</span> Societe Generale finalise la cession de ses activites en Russie</h3>
-                <div class="body">Societe Generale clot un chapitre de 20 ans en Russie avec la cession de Rosbank, liberant 20 points de base de CET1. L'operation permet au groupe de redeployer environ 3 Md&euro; de capital vers ses priorites strategiques — la banque de detail en France et la BFI en Europe. Pour les autres banques francaises encore exposees aux marches emergents, cette sortie confirme le recentrage europeen du secteur.</div>
-                <div class="source-line">
-                    <a href="https://example.com/article/3" target="_blank">Les Echos</a> | 12 mars 2026
+                    <a href="https://example.com/article/0" target="_blank">BCE - Communiqu&#233;s</a> &#124; 15 mars 2026
                 </div>
             </div>
         </div>
 
-        <!-- BLOC 3 — NOUVEAUX MODÈLES -->
-        <div class="section bloc-modeles">
-            <h2 class="section-title">Nouveaux modeles</h2>
+        <!-- STRATÉGIES & MARCHÉS -->
+        <div class="section">
+            <h2 class="section-title">Strat&#233;gies &amp; march&#233;s</h2>
 
             <div class="bloc-article">
-                <h3><span class="item-number">05</span> Open Banking : l'usage des APIs explose en Europe (+70%)</h3>
-                <div class="body">Le volume d'appels API Open Banking a bondi de 70% en Europe en 2025, porte par l'agregation de comptes et l'initiation de paiements. La France se positionne comme 3eme marche europeen derriere le Royaume-Uni et l'Allemagne. L'adoption du paiement par virement instantane progresse rapidement et pourrait capter 15% des transactions e-commerce d'ici 2028, reduisant la dependance aux schemas cartes.</div>
+                <h3><span class="item-number">02</span> HSBC France c&#232;de sa banque de d&#233;tail &#224; My Money Group pour 1,1 Md&#8364;</h3>
+                <div class="body">HSBC finalise la cession de ses 244 agences et 800 000 clients &#224; My Money Group pour 1,1 Md&#8364;, soit 1,4x la valeur comptable. Le groupe britannique conserve uniquement la banque priv&#233;e et la BFI en France. Cette op&#233;ration illustre la difficult&#233; pour un acteur international non-leader &#224; atteindre une rentabilit&#233; suffisante sur le retail fran&#231;ais &#8212; un signal pour les autres banques &#233;trang&#232;res en position similaire.</div>
                 <div class="source-line">
-                    <a href="https://example.com/article/6" target="_blank">Fintech Futures</a> | 16 mars 2026
+                    <a href="https://example.com/article/4" target="_blank">Les Echos</a> &#124; 13 mars 2026
                 </div>
             </div>
 
             <div class="bloc-article">
-                <h3><span class="item-number">06</span> Credit Agricole lance une offre de Banking-as-a-Service</h3>
-                <div class="body">Le Credit Agricole a ouvert en beta fermee sa plateforme Banking-as-a-Service permettant a des enseignes retail d'integrer des services financiers directement dans leur parcours client. L'offre cible d'abord la grande distribution et le e-commerce. Cette initiative positionne CA comme infrastructure financiere pour des acteurs non-bancaires — un renversement de posture qui transforme un concurrent potentiel en client.</div>
+                <h3><span class="item-number">03</span> BNP Paribas annonce un plan de transformation digitale de 500M&#8364;</h3>
+                <div class="body">BNP Paribas engage 500 millions d&#8217;euros sur trois ans pour d&#233;ployer l&#8217;IA g&#233;n&#233;rative dans la relation client et moderniser son core banking. L&#8217;objectif affich&#233; &#8212; 30% de gains de productivit&#233; &#8212; traduit une ambition de r&#233;duire un cost-to-income encore sup&#233;rieur &#224; 65%. Pour les concurrents fran&#231;ais, ce plan cr&#233;e une pression comp&#233;titive directe sur les budgets IT et l&#8217;attractivit&#233; des talents tech.</div>
                 <div class="source-line">
-                    <a href="https://example.com/article/5" target="_blank">Mind Fintech</a> | 9 mars 2026
+                    <a href="https://example.com/article/2" target="_blank">Les Echos</a> &#124; 25 f&#233;vrier 2026
+                </div>
+            </div>
+
+            <div class="bloc-article">
+                <h3><span class="item-number">04</span> Soci&#233;t&#233; G&#233;n&#233;rale finalise la cession de ses activit&#233;s en Russie</h3>
+                <div class="body">Soci&#233;t&#233; G&#233;n&#233;rale cl&#244;t un chapitre de 20 ans en Russie avec la cession de Rosbank, lib&#233;rant 20 points de base de CET1. L&#8217;op&#233;ration permet au groupe de red&#233;ployer environ 3 Md&#8364; de capital vers ses priorit&#233;s strat&#233;giques &#8212; la banque de d&#233;tail en France et la BFI en Europe. Pour les autres banques fran&#231;aises encore expos&#233;es aux march&#233;s &#233;mergents, cette sortie confirme le recentrage europ&#233;en du secteur.</div>
+                <div class="source-line">
+                    <a href="https://example.com/article/3" target="_blank">Les Echos</a> &#124; 12 mars 2026
                 </div>
             </div>
         </div>
 
-        <!-- BLOC 4 — RÉGULATION & SUPERVISION -->
-        <div class="section bloc-regulation">
-            <h2 class="section-title">Regulation & supervision</h2>
+        <!-- NOUVEAUX MODÈLES -->
+        <div class="section">
+            <h2 class="section-title">Nouveaux mod&#232;les</h2>
 
             <div class="bloc-article">
-                <h3><span class="item-number">07</span> AMLA operationnelle : transfert des competences AML depuis l'EBA</h3>
-                <div class="body">L'AMLA (Anti-Money Laundering Authority) est pleinement operationnelle depuis le 1er janvier 2026 apres le transfert de toutes les competences LCB-FT de l'EBA. Basee a Francfort, elle exercera une supervision directe sur les 40 etablissements europeens a plus haut risque. Pour les banques francaises concernees, cela implique un double reporting — ACPR et AMLA — et une revision complete des dispositifs de conformite d'ici mi-2027.</div>
+                <h3><span class="item-number">05</span> Open Banking : l&#8217;usage des APIs explose en Europe (+70%)</h3>
+                <div class="body">Le volume d&#8217;appels API Open Banking a bondi de 70% en Europe en 2025, port&#233; par l&#8217;agr&#233;gation de comptes et l&#8217;initiation de paiements. La France se positionne comme 3&#232;me march&#233; europ&#233;en derri&#232;re le Royaume-Uni et l&#8217;Allemagne. L&#8217;adoption du paiement par virement instantan&#233; progresse rapidement et pourrait capter 15% des transactions e-commerce d&#8217;ici 2028, r&#233;duisant la d&#233;pendance aux sch&#233;mas cartes.</div>
                 <div class="source-line">
-                    <a href="https://example.com/article/7" target="_blank">EBA - Communique officiel</a> | 12 mars 2026
+                    <a href="https://example.com/article/6" target="_blank">Fintech Futures</a> &#124; 16 mars 2026
                 </div>
             </div>
 
             <div class="bloc-article">
-                <h3><span class="item-number">08</span> Report d'un an pour le FRTB : application au 1er janvier 2027</h3>
-                <div class="body">La Commission europeenne accorde un an supplementaire pour l'application du Fundamental Review of the Trading Book (FRTB), repoussant l'echeance au 1er janvier 2027. Ce report aligne le calendrier europeen sur celui du Comite de Bale. Pour les banques francaises actives en BFI, ce delai est l'occasion d'affiner les modeles internes — mais aussi le risque de reporter une charge en capital estimee entre 5 et 15% sur les desks de marche.</div>
+                <h3><span class="item-number">06</span> Cr&#233;dit Agricole lance une offre de Banking-as-a-Service</h3>
+                <div class="body">Le Cr&#233;dit Agricole a ouvert en b&#234;ta ferm&#233;e sa plateforme Banking-as-a-Service permettant &#224; des enseignes retail d&#8217;int&#233;grer des services financiers directement dans leur parcours client. L&#8217;offre cible d&#8217;abord la grande distribution et le e-commerce. Cette initiative positionne CA comme infrastructure financi&#232;re pour des acteurs non-bancaires &#8212; un renversement de posture qui transforme un concurrent potentiel en client.</div>
                 <div class="source-line">
-                    <a href="https://example.com/article/8" target="_blank">Commission Europeenne</a> | 5 mars 2026
+                    <a href="https://example.com/article/5" target="_blank">Mind Fintech</a> &#124; 9 mars 2026
+                </div>
+            </div>
+        </div>
+
+        <!-- RÉGULATION & SUPERVISION -->
+        <div class="section">
+            <h2 class="section-title">R&#233;gulation &amp; supervision</h2>
+
+            <div class="bloc-article">
+                <h3><span class="item-number">07</span> AMLA op&#233;rationnelle : transfert des comp&#233;tences AML depuis l&#8217;EBA</h3>
+                <div class="body">L&#8217;AMLA (Anti-Money Laundering Authority) est pleinement op&#233;rationnelle depuis le 1er janvier 2026 apr&#232;s le transfert de toutes les comp&#233;tences LCB-FT de l&#8217;EBA. Bas&#233;e &#224; Francfort, elle exercera une supervision directe sur les 40 &#233;tablissements europ&#233;ens &#224; plus haut risque. Pour les banques fran&#231;aises concern&#233;es, cela implique un double reporting &#8212; ACPR et AMLA &#8212; et une r&#233;vision compl&#232;te des dispositifs de conformit&#233; d&#8217;ici mi-2027.</div>
+                <div class="source-line">
+                    <a href="https://example.com/article/7" target="_blank">EBA - Communiqu&#233; officiel</a> &#124; 12 mars 2026
+                </div>
+            </div>
+
+            <div class="bloc-article">
+                <h3><span class="item-number">08</span> Report d&#8217;un an pour le FRTB : application au 1er janvier 2027</h3>
+                <div class="body">La Commission europ&#233;enne accorde un an suppl&#233;mentaire pour l&#8217;application du Fundamental Review of the Trading Book (FRTB), repoussant l&#8217;&#233;ch&#233;ance au 1er janvier 2027. Ce report aligne le calendrier europ&#233;en sur celui du Comit&#233; de B&#226;le. Pour les banques fran&#231;aises actives en BFI, ce d&#233;lai est l&#8217;occasion d&#8217;affiner les mod&#232;les internes &#8212; mais aussi le risque de reporter une charge en capital estim&#233;e entre 5 et 15% sur les desks de march&#233;.</div>
+                <div class="source-line">
+                    <a href="https://example.com/article/8" target="_blank">Commission Europ&#233;enne</a> &#124; 5 mars 2026
                 </div>
             </div>
         </div>
@@ -391,7 +352,7 @@
             </div>
             <div class="share-section">
                 <p class="share-text">Cette newsletter vous a plu ? Partagez-la avec vos contacts.</p>
-                <a href="mailto:?subject=Newsletter Banque Ares %26 Co - Mars 2026&body=Bonjour,%0D%0A%0D%0AJe vous partage la derniere newsletter bancaire d%27Ares %26 Co.%0D%0A%0D%0ABonne lecture !%0D%0A%0D%0A---%0D%0APour recevoir cette newsletter chaque mois, contactez contact@aresandco.com" class="cta-button share">
+                <a href="mailto:?subject=Newsletter Banque Ares %26 Co - Mars 2026&body=Bonjour,%0D%0A%0D%0AJe vous partage la derni%C3%A8re newsletter bancaire d%27Ares %26 Co.%0D%0A%0D%0ABonne lecture !%0D%0A%0D%0A---%0D%0APour recevoir cette newsletter chaque mois, contactez contact@aresandco.com" class="cta-button share">
                     Transmettre par email
                 </a>
             </div>
@@ -402,10 +363,10 @@
             <a href="https://www.aresandco.com/fr" target="_blank">
                 <img src="https://www.aresandco.com/images/common-contents/logo-image/62c2a7a87e751_logo.png" alt="Ares & Co">
             </a>
-            <p>Cabinet de conseil de Direction Generale</p>
+            <p>Cabinet de conseil de Direction G&#233;n&#233;rale</p>
 
             <div class="contact-info">
-                <p>15 Av. de la Grande Armee, 75116 Paris</p>
+                <p>15 Av. de la Grande Arm&#233;e, 75116 Paris</p>
                 <p>+33 1 40 20 44 49</p>
                 <p><a href="mailto:contact@aresandco.com" style="color: #6b7280;">contact@aresandco.com</a></p>
             </div>
@@ -416,15 +377,15 @@
             </div>
 
             <div class="legal">
-                <p>Cette newsletter est envoyee aux clients et partenaires d'Ares & Co.</p>
+                <p>Cette newsletter est envoy&#233;e aux clients et partenaires d&#8217;Ares &amp; Co.</p>
                 <p>
-                    <a href="#">Mentions legales</a> |
-                    <a href="#">Politique de confidentialite</a> |
-                    <a href="mailto:contact@aresandco.com?subject=Desabonnement Newsletter">Se desabonner</a>
+                    <a href="#">Mentions l&#233;gales</a> |
+                    <a href="#">Politique de confidentialit&#233;</a> |
+                    <a href="mailto:contact@aresandco.com?subject=D%C3%A9sabonnement Newsletter">Se d&#233;sabonner</a>
                 </p>
             </div>
 
-            <div class="generation-date">Genere le 24/03/2026</div>
+            <div class="generation-date">G&#233;n&#233;r&#233; le 24/03/2026</div>
         </div>
     </div>
 </body>
