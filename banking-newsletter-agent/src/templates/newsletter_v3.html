@@ -261,7 +261,7 @@
                 <div class="source-line">
                     📰 <a href="{{ article.article.url }}" target="_blank">{{ article.article.source }}</a>
                     {% if article.article.published_date %}
-                    | {{ article.article.published_date.strftime('%d %B %Y') }}
+                    | {{ article.article.published_date|date_fr }}
                     {% endif %}
                 </div>
             </div>
@@ -280,7 +280,7 @@
                 <div class="source-line">
                     📰 <a href="{{ article.article.url }}" target="_blank">{{ article.article.source }}</a>
                     {% if article.article.published_date %}
-                    | {{ article.article.published_date.strftime('%d %B %Y') }}
+                    | {{ article.article.published_date|date_fr }}
                     {% endif %}
                 </div>
             </div>
@@ -302,7 +302,7 @@
                 <div class="source-line">
                     📰 <a href="{{ article.article.url }}" target="_blank">{{ article.article.source }}</a>
                     {% if article.article.published_date %}
-                    | {{ article.article.published_date.strftime('%d %B %Y') }}
+                    | {{ article.article.published_date|date_fr }}
                     {% endif %}
                 </div>
             </div>
@@ -321,7 +321,7 @@
                 <div class="source-line">
                     📰 <a href="{{ article.article.url }}" target="_blank">{{ article.article.source }}</a>
                     {% if article.article.published_date %}
-                    | {{ article.article.published_date.strftime('%d %B %Y') }}
+                    | {{ article.article.published_date|date_fr }}
                     {% endif %}
                 </div>
             </div>

@@ -16,7 +16,7 @@ import re
 from datetime import datetime
 from typing import Optional, Dict, List
 import anthropic
-from jinja2 import Template
+from jinja2 import Template, Environment, BaseLoader
 from tenacity import retry, stop_after_attempt, wait_exponential
 from rich.console import Console
 
@@ -29,6 +29,18 @@ from persona import (
 )
 
 console = Console()
+
+
+def format_date_fr(dt) -> str:
+    """Formate une date en français (ex: '6 mars 2026')."""
+    if dt is None:
+        return ""
+    mois_fr = {
+        1: "janvier", 2: "février", 3: "mars", 4: "avril",
+        5: "mai", 6: "juin", 7: "juillet", 8: "août",
+        9: "septembre", 10: "octobre", 11: "novembre", 12: "décembre"
+    }
+    return f"{dt.day} {mois_fr.get(dt.month, '')} {dt.year}"
 
 
 class NewsletterWriter:
@@ -380,7 +392,9 @@ RÈGLES :
         with open(template_path, 'r', encoding='utf-8') as f:
             template_content = f.read()
 
-        template = Template(template_content)
+        env = Environment(loader=BaseLoader())
+        env.filters['date_fr'] = lambda dt: format_date_fr(dt)
+        template = env.from_string(template_content)
 
         # Préparer les blocs
         blocs = getattr(selection, 'blocs', {})
