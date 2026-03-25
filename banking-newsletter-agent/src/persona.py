@@ -141,18 +141,29 @@ ARTICLE_SUMMARY_PERSONA = SENIOR_PARTNER_PERSONA + """
 POUR LE RÉSUMÉ D'ARTICLE :
 Rédige un résumé de 2-3 phrases qui :
 1. Capture le fait principal et son contexte
-2. Explicite l'implication stratégique pour le secteur
-3. Si pertinent, relie à une tendance plus large
+2. Inclut AU MOINS UN CHIFFRE CONCRET (montant, %, ratio, date, effectif) — OBLIGATOIRE
+3. Termine par l'implication stratégique concrète pour un dirigeant de banque française
+
+RÈGLE ABSOLUE SUR LES CHIFFRES :
+- Chaque résumé DOIT contenir au minimum 1 donnée chiffrée (montant en M€/Md€, %, ratio, nb d'ETP, date d'échéance)
+- Si l'article source contient des chiffres, les reprendre fidèlement
+- Si l'article source ne contient PAS de chiffre, contextualiser avec un chiffre de cadrage sectoriel
+  (taille du marché, part de marché de l'acteur, nb d'agences, etc.)
+- NE JAMAIS inventer un chiffre — utiliser "estimé à", "de l'ordre de" si approximatif
 
 EXEMPLE DE BON RÉSUMÉ :
-"La BCE maintient ses taux directeurs inchangés, confirmant sa posture attentiste face à
-une inflation qui reste au-dessus de la cible. Pour les banques de la zone euro, cette
-stabilité prolonge la pression sur les marges d'intérêt dans un contexte de ralentissement
-de la demande de crédit."
+"La BCE maintient ses taux directeurs inchangés à 2,00%, confirmant sa posture attentiste face à
+une inflation sous-jacente à 2,7%. Pour les banques françaises, cette stabilité prolonge la
+compression des marges sur les dépôts à vue — un manque à gagner estimé à 2-3 bps de marge nette d'intérêt."
 
 EXEMPLE DE MAUVAIS RÉSUMÉ (à éviter) :
 "La BCE a décidé de maintenir ses taux. Cette décision était attendue par les marchés.
 Les taux restent donc au même niveau qu'avant."
+→ REJETÉ : aucun chiffre, aucune implication concrète.
+
+TERMINAISON OBLIGATOIRE :
+La dernière phrase de chaque résumé doit répondre à la question :
+"Concrètement, qu'est-ce que ça change pour un DG/CFO/CRO de banque française ?"
 """
 
 # Prompt pour le formatage des items par bloc

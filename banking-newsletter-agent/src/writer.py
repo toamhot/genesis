@@ -166,6 +166,64 @@ Rédige directement l'éditorial."""
         console.print("[green]✓ Éditorial V3 généré[/green]")
         return editorial
 
+    def generate_chiffre_du_mois(
+        self,
+        selection: CuratedSelection,
+        month: str,
+        editorial: str
+    ) -> Optional[Dict[str, str]]:
+        """
+        Génère le "Chiffre du mois" — un KPI impactant en bandeau après l'éditorial.
+        Retourne un dict avec 'value', 'label', 'context'.
+        """
+        console.print("\n[bold blue]📊 Génération du Chiffre du mois...[/bold blue]")
+
+        if not self.client:
+            return None
+
+        articles_context = "\n".join([
+            f"- {a.title_fr if a.title_fr else a.article.title}: {a.ai_summary}"
+            for a in selection.top_articles[:8]
+        ])
+
+        prompt = f"""À partir de l'éditorial et des articles de la newsletter bancaire de {month},
+identifie LE chiffre le plus percutant du mois pour un dirigeant de banque française.
+
+ÉDITORIAL :
+{editorial[:500]}
+
+ARTICLES :
+{articles_context}
+
+Réponds EXACTEMENT dans ce format (3 lignes, pas de JSON) :
+VALEUR: [Le chiffre brut, ex: "2 Mds$", "+70%", "3,4%", "500M€"]
+LABEL: [Ce que mesure ce chiffre, en 5-8 mots, ex: "Investissement IA annuel de JPMorgan"]
+CONTEXTE: [Une phrase de contexte/comparaison, max 15 mots, ex: "soit 10% de son budget IT — et autant d'économies revendiquées"]
+
+RÈGLES :
+- Le chiffre doit provenir d'un article RÉEL de la sélection
+- Choisir le chiffre qui "fait mal" ou qui surprend
+- Pas de chiffre banal (CA d'une grande banque, nombre d'agences...)
+- La VALEUR doit être courte et lisible en gros caractères"""
+
+        response = self._call_claude(self.EDITORIAL_SYSTEM_PROMPT, prompt, max_tokens=256)
+
+        chiffre = {"value": "", "label": "", "context": ""}
+        for line in response.strip().split("\n"):
+            line = line.strip()
+            if line.startswith("VALEUR:"):
+                chiffre["value"] = line.replace("VALEUR:", "").strip()
+            elif line.startswith("LABEL:"):
+                chiffre["label"] = line.replace("LABEL:", "").strip()
+            elif line.startswith("CONTEXTE:"):
+                chiffre["context"] = line.replace("CONTEXTE:", "").strip()
+
+        if chiffre["value"]:
+            console.print(f"[green]✓ Chiffre du mois: {chiffre['value']} — {chiffre['label']}[/green]")
+            return chiffre
+
+        return None
+
     def generate_terrain(
         self,
         selection: CuratedSelection,
@@ -256,7 +314,8 @@ RÈGLES :
         month: str,
         editorial: Optional[str] = None,
         partner_name: Optional[str] = None,
-        terrain: Optional[dict] = None
+        terrain: Optional[dict] = None,
+        chiffre_du_mois: Optional[Dict[str, str]] = None
     ) -> str:
         """Génère la newsletter V3 au format Markdown."""
         console.print("\n[bold blue]📝 Génération du Markdown V3...[/bold blue]")
@@ -288,12 +347,33 @@ RÈGLES :
         # Bloc 0 — Éditorial
         lines.append("## NOTRE ÉDITORIAL")
         lines.append("")
-        lines.append(editorial_md)
-        lines.append("")
-        lines.append(f"— {partner}, Partner, Ares & Co")
-        lines.append("")
+        # Retirer la signature si déjà présente dans l'éditorial généré par Claude
+        editorial_clean = editorial_md.rstrip()
+        signature_line = f"— {partner}, Partner, Ares & Co"
+        if editorial_clean.endswith(signature_line) or editorial_clean.endswith(f"— {partner}, Partner, Ares &amp; Co"):
+            # Signature déjà incluse par Claude, ne pas la rajouter
+            lines.append(editorial_md)
+            lines.append("")
+        else:
+            lines.append(editorial_md)
+            lines.append("")
+            lines.append(signature_line)
+            lines.append("")
         lines.append(sep)
         lines.append("")
+
+        # Chiffre du mois (bandeau entre éditorial et blocs)
+        if chiffre_du_mois and chiffre_du_mois.get("value"):
+            lines.append("## LE CHIFFRE DU MOIS")
+            lines.append("")
+            lines.append(f"### {chiffre_du_mois['value']}")
+            lines.append("")
+            lines.append(f"**{chiffre_du_mois.get('label', '')}**")
+            if chiffre_du_mois.get('context'):
+                lines.append(f"_{chiffre_du_mois['context']}_")
+            lines.append("")
+            lines.append(sep)
+            lines.append("")
 
         # Blocs 1-4
         bloc_titles = {
@@ -366,7 +446,8 @@ RÈGLES :
         editorial: Optional[str] = None,
         terrain: Optional[dict] = None,
         partner_name: Optional[str] = None,
-        logo_url: Optional[str] = None
+        logo_url: Optional[str] = None,
+        chiffre_du_mois: Optional[Dict[str, str]] = None
     ) -> str:
         """
         Génère la newsletter V3 avec la structure 5 blocs :
@@ -410,6 +491,7 @@ RÈGLES :
             blocs=blocs,
             item_numbers=item_numbers,
             terrain=terrain,
+            chiffre_du_mois=chiffre_du_mois,
             generation_date=datetime.now().strftime('%d/%m/%Y'),
             logo_url=logo_url or ""
         )

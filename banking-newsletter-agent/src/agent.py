@@ -324,6 +324,12 @@ class BankingNewsletterAgent:
                 partner_name=partner_name
             )
 
+            # Générer le Chiffre du mois (bandeau post-éditorial)
+            console.print("[dim]  → Génération du Chiffre du mois...[/dim]")
+            chiffre_du_mois = self.writer.generate_chiffre_du_mois(
+                selection, month, editorial
+            )
+
             # Générer le Terrain (optionnel)
             if not skip_terrain and terrain is None:
                 console.print("[dim]  → Génération du Terrain Ares & Co...[/dim]")
@@ -335,7 +341,8 @@ class BankingNewsletterAgent:
                 md_content = self.writer.generate_markdown_v3(
                     selection, month, editorial,
                     partner_name=partner_name,
-                    terrain=terrain
+                    terrain=terrain,
+                    chiffre_du_mois=chiffre_du_mois
                 )
                 md_path = self.writer.save_markdown(md_content, self.output_dir)
                 results["output_files"].append(md_path)
@@ -349,7 +356,8 @@ class BankingNewsletterAgent:
                     editorial=editorial,
                     terrain=terrain,
                     partner_name=partner_name,
-                    logo_url=logo_url
+                    logo_url=logo_url,
+                    chiffre_du_mois=chiffre_du_mois
                 )
                 html_path = self.writer.save_html(html_content, self.output_dir)
                 results["output_files"].append(html_path)

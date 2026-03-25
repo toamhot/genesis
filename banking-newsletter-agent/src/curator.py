@@ -188,6 +188,52 @@ class Curator:
         matches = sum(1 for keyword in keywords if keyword.lower() in text_to_check)
         return min(5, matches * 0.5)
 
+    # Phrases qui signalent un résumé de mauvaise qualité (IA n'a pas assez d'info)
+    WEAK_SUMMARY_INDICATORS = [
+        "absence de détails",
+        "limite l'analyse",
+        "informations limitées",
+        "pas suffisamment d'informations",
+        "détails non disponibles",
+        "impossible d'analyser",
+        "contenu non accessible",
+        "à compléter",
+        "sans plus de détails",
+        "manque de précision",
+    ]
+
+    def filter_weak_summaries(
+        self,
+        articles: List[AnalyzedArticle]
+    ) -> List[AnalyzedArticle]:
+        """
+        Rejette les articles dont le résumé IA est trop faible pour être publié.
+        Un résumé faible contient des aveux d'impuissance de l'IA.
+        """
+        strong = []
+        weak_count = 0
+
+        for article in articles:
+            summary_lower = article.ai_summary.lower()
+            is_weak = any(
+                indicator in summary_lower
+                for indicator in self.WEAK_SUMMARY_INDICATORS
+            )
+
+            # Aussi rejeter les résumés trop courts (< 50 chars)
+            if is_weak or len(article.ai_summary.strip()) < 50:
+                weak_count += 1
+                console.print(
+                    f"  [dim]  ✗ Rejeté (résumé faible): {(article.title_fr or article.article.title)[:50]}...[/dim]"
+                )
+            else:
+                strong.append(article)
+
+        if weak_count > 0:
+            console.print(f"  [yellow]• {weak_count} articles rejetés (résumés trop faibles)[/yellow]")
+
+        return strong
+
     def calculate_final_score(self, article: AnalyzedArticle) -> float:
         """Calcule un score final combinant pertinence IA, source et récence."""
         base_score = article.relevance_score
@@ -321,13 +367,21 @@ class Curator:
         scored.sort(key=lambda x: x[0], reverse=True)
         return [a for _, a in scored]
 
+    def _extract_content_words(self, text: str, stopwords: set) -> set:
+        """Extrait les mots significatifs d'un texte."""
+        return set(w for w in text.lower().split() if w not in stopwords and len(w) > 2)
+
     def deduplicate_similar(
         self,
         articles: List[AnalyzedArticle],
         title_similarity_threshold: float = 0.4,
+        summary_similarity_threshold: float = 0.35,
         entity_match_threshold: int = 2
     ) -> List[AnalyzedArticle]:
-        """Déduplique les articles similaires (Jaccard sur titres + entités)."""
+        """
+        Déduplique les articles similaires.
+        V3 : ajoute la comparaison sémantique sur les résumés IA (pas juste les titres).
+        """
         if not articles:
             return []
 
@@ -337,18 +391,19 @@ class Curator:
 
         stopwords = {'le', 'la', 'les', 'de', 'du', 'des', 'un', 'une', 'et', 'en', 'pour',
                      'sur', 'dans', 'par', 'avec', 'the', 'a', 'an', 'of', 'to', 'for', 'in',
-                     'on', 'at', 'by', 'its', 'son', 'sa', 'ses'}
+                     'on', 'at', 'by', 'its', 'son', 'sa', 'ses', 'cette', 'ces', 'qui', 'que',
+                     'est', 'sont', 'ont', 'aux', 'plus', 'pas', 'une', 'also', 'has', 'was'}
 
         for article in articles:
-            title_words = set(w for w in article.article.title.lower().split()
-                            if w not in stopwords and len(w) > 2)
-            title_fr_words = set(w for w in article.title_fr.lower().split()
-                               if w not in stopwords and len(w) > 2) if article.title_fr else set()
+            title_words = self._extract_content_words(article.article.title, stopwords)
+            title_fr_words = self._extract_content_words(article.title_fr, stopwords) if article.title_fr else set()
+            summary_words = self._extract_content_words(article.ai_summary, stopwords) if article.ai_summary else set()
             entities = set(e.lower() for e in article.entities) if article.entities else set()
 
             is_duplicate = False
 
-            for i, (seen_title, seen_title_fr, seen_entities) in enumerate(seen_articles):
+            for seen_title, seen_title_fr, seen_summary, seen_entities in seen_articles:
+                # Check title similarity (original)
                 if title_words and seen_title:
                     intersection = len(title_words & seen_title)
                     union = len(title_words | seen_title)
@@ -356,6 +411,7 @@ class Curator:
                         is_duplicate = True
                         break
 
+                # Check translated title similarity
                 if title_fr_words and seen_title_fr:
                     intersection = len(title_fr_words & seen_title_fr)
                     union = len(title_fr_words | seen_title_fr)
@@ -363,20 +419,55 @@ class Curator:
                         is_duplicate = True
                         break
 
+                # NEW: Check summary semantic similarity (catches same-topic articles with different titles)
+                if summary_words and seen_summary:
+                    intersection = len(summary_words & seen_summary)
+                    union = len(summary_words | seen_summary)
+                    if union > 0 and intersection / union >= summary_similarity_threshold:
+                        is_duplicate = True
+                        break
+
+                # Check entity overlap
                 if entities and seen_entities and len(entities & seen_entities) >= entity_match_threshold:
                     is_duplicate = True
                     break
 
             if not is_duplicate:
                 unique.append(article)
-                seen_articles.append((title_words, title_fr_words, entities))
+                seen_articles.append((title_words, title_fr_words, summary_words, entities))
             else:
                 duplicates_removed += 1
 
         if duplicates_removed > 0:
-            console.print(f"  [yellow]• {duplicates_removed} doublons supprimés[/yellow]")
+            console.print(f"  [yellow]• {duplicates_removed} doublons supprimés (titres + résumés + entités)[/yellow]")
 
         return unique
+
+    def cap_per_source(
+        self,
+        articles: List[AnalyzedArticle],
+        max_per_source: int = 2
+    ) -> List[AnalyzedArticle]:
+        """
+        Plafonne le nombre d'articles par source pour garantir la diversité.
+        Garde les articles les mieux scorés pour chaque source.
+        """
+        source_counts = defaultdict(int)
+        capped = []
+        removed = 0
+
+        for article in articles:
+            source = article.article.source.lower().strip()
+            if source_counts[source] < max_per_source:
+                capped.append(article)
+                source_counts[source] += 1
+            else:
+                removed += 1
+
+        if removed > 0:
+            console.print(f"  [yellow]• {removed} articles retirés (plafond {max_per_source}/source)[/yellow]")
+
+        return capped
 
     def distribute_to_blocs(
         self,
@@ -386,10 +477,12 @@ class Curator:
         """
         Distribue les articles dans les 4 blocs éditoriaux.
 
-        Bloc 1 "L'essentiel" : articles les plus pertinents pour le thème du mois
-        Bloc 2 "Stratégies & marchés" : M&A, banques françaises, tendances marché
-        Bloc 3 "Nouveaux modèles" : innovation, fintech
-        Bloc 4 "Régulation & supervision" : regulation, politique monétaire, régulateurs
+        V3 amélioré :
+        - Bloc 1 "L'essentiel" : articles les plus pertinents pour le THÈME du mois
+          (doivent documenter la thèse de l'éditorial, pas être un fourre-tout)
+        - Bloc 2 "Stratégies & marchés" : M&A, banques françaises, tendances marché
+        - Bloc 3 "Nouveaux modèles" : innovation, fintech
+        - Bloc 4 "Régulation & supervision" : regulation, politique monétaire, régulateurs
         """
         blocs = {bloc: [] for bloc in self.BLOC_ORDER}
 
@@ -404,37 +497,60 @@ class Curator:
             _, max_items = self.BLOC_LIMITS[bloc_id]
             blocs[bloc_id] = candidates_by_bloc[bloc_id][:max_items]
 
-        # Bloc 1 "L'essentiel" : top articles par pertinence thématique (pas déjà assignés)
+        # ──────────────────────────────────────────────────
+        # Bloc 1 "L'essentiel" — DOIT être lié au thème
+        # ──────────────────────────────────────────────────
         assigned_ids = set()
         for bloc_id in ["strategies_marches", "nouveaux_modeles", "regulation"]:
             for a in blocs[bloc_id]:
                 assigned_ids.add(a.article.id)
 
-        # Sélectionner pour L'essentiel : articles les mieux notés et liés au thème
+        # Stratégie : si un thème est défini, L'essentiel pioche PARMI TOUS les articles
+        # (y compris ceux déjà dans d'autres blocs) les plus pertinents thématiquement.
+        # L'article est alors retiré de son bloc d'origine.
         essentiel_candidates = []
+        min_theme_score_essentiel = 1.0  # Seuil minimum de pertinence thématique
+
         for article in articles:
-            if article.article.id in assigned_ids:
-                continue
             score = self.calculate_final_score(article)
+            theme_score = 0
+
             if theme_id:
-                theme_bonus = self.calculate_theme_relevance(article, theme_id)
-                score += theme_bonus * 2  # Double bonus thème pour L'essentiel
-            essentiel_candidates.append((score, article))
+                theme_score = self.calculate_theme_relevance(article, theme_id)
+                # L'essentiel EXIGE une pertinence thématique forte
+                if theme_score < min_theme_score_essentiel:
+                    continue
+                score += theme_score * 3  # Triple bonus thème pour L'essentiel
+
+            essentiel_candidates.append((score, theme_score, article))
 
         essentiel_candidates.sort(key=lambda x: x[0], reverse=True)
         _, max_essentiel = self.BLOC_LIMITS["essentiel"]
-        blocs["essentiel"] = [a for _, a in essentiel_candidates[:max_essentiel]]
 
-        # Si L'essentiel est vide, prendre les meilleurs articles tous blocs confondus
-        if not blocs["essentiel"] and articles:
-            # Prendre le meilleur article de n'importe quel bloc
-            best = articles[0]
-            # Le retirer de son bloc actuel et le mettre dans L'essentiel
+        for score, theme_score, article in essentiel_candidates[:max_essentiel]:
+            blocs["essentiel"].append(article)
+            # Retirer du bloc d'origine si nécessaire
             for bloc_id in ["strategies_marches", "nouveaux_modeles", "regulation"]:
-                if best in blocs[bloc_id]:
-                    blocs[bloc_id].remove(best)
+                if article in blocs[bloc_id]:
+                    blocs[bloc_id].remove(article)
                     break
-            blocs["essentiel"] = [best]
+
+        # Si pas assez de candidats thématiques, prendre les top articles globaux
+        # mais uniquement ceux avec un score élevé (pas de remplissage faible)
+        if not blocs["essentiel"] and articles:
+            non_assigned = [a for a in articles if a.article.id not in assigned_ids]
+            non_assigned.sort(key=lambda a: self.calculate_final_score(a), reverse=True)
+            # Seulement si le meilleur candidat a un score > 10
+            if non_assigned and self.calculate_final_score(non_assigned[0]) > 10:
+                blocs["essentiel"] = [non_assigned[0]]
+            else:
+                # Prendre le meilleur tous blocs confondus
+                best = articles[0]
+                for bloc_id in ["strategies_marches", "nouveaux_modeles", "regulation"]:
+                    if best in blocs[bloc_id]:
+                        blocs[bloc_id].remove(best)
+                        break
+                blocs["essentiel"] = [best]
 
         return blocs
 
@@ -463,8 +579,11 @@ class Curator:
             console.print(f"  [bold cyan]🎯 Thème du mois: {theme_name}[/bold cyan]\n")
         console.print(f"  [dim]Période cible: depuis {self.cutoff_date.strftime('%d/%m/%Y')}[/dim]\n")
 
+        # Étape 0: Filtrer les résumés faibles
+        quality_filtered = self.filter_weak_summaries(articles)
+
         # Étape 1: Valider les dates
-        date_filtered, date_rejected = self.filter_by_date(articles, strict=strict_date)
+        date_filtered, date_rejected = self.filter_by_date(quality_filtered, strict=strict_date)
         if date_rejected > 0:
             console.print(f"  [yellow]• {date_rejected} articles rejetés (hors période)[/yellow]")
         console.print(f"  [dim]• {len(date_filtered)} articles dans la période cible[/dim]")
@@ -483,12 +602,16 @@ class Curator:
         ranked = self.filter_and_rank(date_filtered)
         console.print(f"  [dim]• {len(ranked)} articles après filtrage (score >= {self.min_relevance_score})[/dim]")
 
-        # Étape 4: Dédupliquer
+        # Étape 4: Dédupliquer (titres + résumés + entités)
         deduplicated = self.deduplicate_similar(ranked)
         console.print(f"  [dim]• {len(deduplicated)} articles après déduplication[/dim]")
 
+        # Étape 4b: Plafonner par source (max 2 articles/source)
+        diversified = self.cap_per_source(deduplicated, max_per_source=2)
+        console.print(f"  [dim]• {len(diversified)} articles après diversification sources[/dim]")
+
         # Étape 5: Distribuer dans les 4 blocs
-        blocs = self.distribute_to_blocs(deduplicated, theme_id=theme_id)
+        blocs = self.distribute_to_blocs(diversified, theme_id=theme_id)
 
         # Construire la liste plate (ordonnée par bloc)
         top_articles = []
