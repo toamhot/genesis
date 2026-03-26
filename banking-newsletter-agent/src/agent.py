@@ -68,6 +68,7 @@ from collector import Collector, Article
 from analyzer import Analyzer, AnalyzedArticle
 from curator import Curator, CuratedSelection
 from writer import NewsletterWriter
+from audit_trail import AuditTrail
 
 console = Console()
 
@@ -236,6 +237,17 @@ class BankingNewsletterAgent:
             "output_files": []
         }
 
+        # Initialiser l'audit trail
+        audit = AuditTrail()
+        audit.log_run_params(
+            month=month,
+            theme_id=theme_id,
+            theme_name=theme_info.get('name', ''),
+            partner_name=partner_name or "Olivier Dupin",
+            days_back=days_back,
+            model=self.analyzer.model if self.analyzer else "N/A"
+        )
+
         try:
             # ═══════════════════════════════════════════════════════════
             # ÉTAPE 1 : COLLECTE
@@ -245,9 +257,24 @@ class BankingNewsletterAgent:
             articles = self.collector.collect_all(days_back=days_back)
             results["articles_collected"] = len(articles)
 
+            # Audit : logger les sources
+            for feed in self.collector.config.get('rss_feeds', []):
+                status = "OK"
+                count = sum(1 for a in articles if a.source == feed['name'])
+                audit.log_source(feed['name'], feed['url'], status, count)
+            for web in self.collector.config.get('web_sources', []):
+                count = sum(1 for a in articles if a.source == web['name'])
+                status = "OK" if count > 0 else "empty"
+                audit.log_source(web['name'], web['url'], status, count)
+
+            # Audit : logger tous les articles collectés
+            for a in articles:
+                audit.log_article_collected(a)
+
             if not articles:
                 console.print("[yellow]⚠ Aucun article collecté. Vérifiez les sources.[/yellow]")
                 results["status"] = "no_articles"
+                audit.save_excel(os.path.join(self.output_dir, "..", "audit"))
                 return results
 
             # ═══════════════════════════════════════════════════════════
@@ -288,6 +315,11 @@ class BankingNewsletterAgent:
                     batch_size=5
                 )
 
+            # Audit : logger les analyses
+            for aa in analyzed_articles:
+                audit.log_article_analyzed(aa)
+                audit.log_api_call(tokens_estimate=600)
+
             results["articles_analyzed"] = len(analyzed_articles)
 
             # ═══════════════════════════════════════════════════════════
@@ -306,9 +338,29 @@ class BankingNewsletterAgent:
                 for bloc_id, arts in selection.blocs.items():
                     results["blocs"][bloc_id] = len(arts)
 
+            # Audit : logger les articles retenus et rejetés
+            retained_ids = set()
+            item_num = 1
+            for bloc_id in self.curator.BLOC_ORDER:
+                bloc_articles = selection.blocs.get(bloc_id, [])
+                for aa in bloc_articles:
+                    final_score = self.curator.calculate_final_score(aa)
+                    audit.log_article_retained(aa.article.id, bloc_id, final_score, item_num)
+                    retained_ids.add(aa.article.id)
+                    item_num += 1
+
+            # Logger les articles rejetés
+            for aa in analyzed_articles:
+                if aa.article.id not in retained_ids:
+                    reason = "Score insuffisant"
+                    if aa.relevance_score < self.curator.min_relevance_score:
+                        reason = f"Score trop bas ({aa.relevance_score:.1f} < {self.curator.min_relevance_score})"
+                    audit.log_article_rejected(aa.article.id, reason)
+
             if selection.total_selected == 0:
                 console.print("[yellow]⚠ Aucun article sélectionné après curation.[/yellow]")
                 results["status"] = "no_selection"
+                audit.save_excel(os.path.join(self.output_dir, "..", "audit"))
                 return results
 
             # ═══════════════════════════════════════════════════════════
@@ -374,6 +426,21 @@ class BankingNewsletterAgent:
                 results["output_files"].append(html_path)
 
             # ═══════════════════════════════════════════════════════════
+            # AUDIT TRAIL — Logger la génération
+            # ═══════════════════════════════════════════════════════════
+            audit.log_generation(
+                editorial=editorial,
+                chiffre=chiffre_du_mois,
+                hashtags=hashtags,
+                output_files=results["output_files"]
+            )
+
+            # Sauvegarder l'audit trail Excel
+            audit_dir = os.path.join(self.output_dir, "..", "audit")
+            audit_path = audit.save_excel(audit_dir)
+            results["output_files"].append(audit_path)
+
+            # ═══════════════════════════════════════════════════════════
             # RÉSUMÉ FINAL
             # ═══════════════════════════════════════════════════════════
             self._display_summary(results)
@@ -382,6 +449,12 @@ class BankingNewsletterAgent:
             console.print(f"\n[bold red]❌ Erreur : {str(e)}[/bold red]")
             results["status"] = "error"
             results["error"] = str(e)
+            # Sauvegarder l'audit trail même en cas d'erreur
+            try:
+                audit_dir = os.path.join(self.output_dir, "..", "audit")
+                audit.save_excel(audit_dir)
+            except Exception:
+                pass
             raise
 
         return results
