@@ -249,6 +249,9 @@ Réponds UNIQUEMENT en JSON valide, avec TOUT le contenu EN FRANÇAIS."""
                 messages=[{"role": "user", "content": prompt}]
             )
             return message.content[0].text
+        except anthropic.BadRequestError as e:
+            console.print(f"[red]✗ BadRequestError Claude API: {str(e)[:120]}[/red]")
+            raise  # Ne pas retrier, erreur non-transitoire
         except TRANSIENT_EXCEPTIONS as e:
             console.print(f"[yellow]⚠ Erreur réseau Claude API (retry auto): {type(e).__name__}: {str(e)[:80]}[/yellow]")
             raise  # Laisser tenacity gérer le retry
@@ -260,7 +263,7 @@ Réponds UNIQUEMENT en JSON valide, avec TOUT le contenu EN FRANÇAIS."""
 **Titre original** : {article.title}
 **Source** : {article.source}
 **Date** : {article.published_date.strftime('%Y-%m-%d') if article.published_date else 'Non spécifiée'}
-**Contenu** : {article.content[:1500] if article.content else article.summary}
+**Contenu** : {article.content[:1000] if article.content else article.summary}
 
 IMPORTANT: Si le titre est en anglais, tu DOIS le traduire en français dans "title_fr".
 IMPORTANT: Le résumé DOIT contenir AU MOINS 1 chiffre concret (montant, %, ratio, date).
@@ -300,21 +303,30 @@ Réponds en JSON avec cette structure exacte :
         except json.JSONDecodeError as e:
             console.print(f"[yellow]⚠ Erreur parsing JSON pour {article.title[:40]}...[/yellow]")
             # Retourner une analyse par défaut
-            return AnalyzedArticle(
-                article=article,
-                ai_summary=article.summary[:200],
-                relevance_score=5.0,
-                assigned_category=article.category,
-                key_facts=[],
-                entities=[],
-                sentiment="neutral",
-                newsletter_priority=3,
-                title_fr=article.title
-            )
+            return self._fallback_analysis(article)
+
+        except anthropic.BadRequestError as e:
+            console.print(f"[red]✗ BadRequest pour {article.title[:40]}: {str(e)[:80]}[/red]")
+            console.print(f"[dim]  → Analyse fallback appliquée (scoring basique)[/dim]")
+            return self._fallback_analysis(article)
 
         except Exception as e:
             console.print(f"[red]✗ Erreur analyse {article.title[:40]}: {str(e)[:50]}[/red]")
             raise
+
+    def _fallback_analysis(self, article: Article) -> AnalyzedArticle:
+        """Crée une analyse par défaut quand l'API échoue (scoring basique sans IA)"""
+        return AnalyzedArticle(
+            article=article,
+            ai_summary=article.summary[:200] if article.summary else article.content[:200] if article.content else "",
+            relevance_score=5.0,
+            assigned_category=article.category,
+            key_facts=[],
+            entities=[],
+            sentiment="neutral",
+            newsletter_priority=3,
+            title_fr=article.title
+        )
 
     def analyze_batch(
         self,
@@ -416,6 +428,20 @@ Réponds en JSON avec cette structure exacte :
                                 analyzed.append(result)
                             except Exception as ind_e:
                                 console.print(f"[red]  → {article.title[:30]}: {str(ind_e)[:50]}[/red]")
+                except anthropic.BadRequestError as e:
+                    console.print(f"[yellow]⚠ BadRequest lot {batch_num+1}: {str(e)[:100]}[/yellow]")
+                    console.print(f"[dim]  → Fallback: analyse individuelle avec contenu tronqué...[/dim]")
+                    for article in batch:
+                        try:
+                            time.sleep(1)
+                            result = self.analyze_article(article)
+                            analyzed.append(result)
+                        except anthropic.BadRequestError:
+                            console.print(f"[dim]  → Fallback basique pour: {article.title[:40]}[/dim]")
+                            analyzed.append(self._fallback_analysis(article))
+                        except Exception as ind_e:
+                            console.print(f"[red]  → {article.title[:30]}: {str(ind_e)[:50]}[/red]")
+                            analyzed.append(self._fallback_analysis(article))
                 except anthropic.RateLimitError as e:
                     console.print(f"[yellow]⚠ Rate limit atteint, pause de {rate_limit_backoff}s...[/yellow]")
                     time.sleep(rate_limit_backoff)
@@ -437,6 +463,7 @@ Réponds en JSON avec cette structure exacte :
                             analyzed.append(result)
                         except Exception as ind_e:
                             console.print(f"[red]  → {article.title[:30]}: {str(ind_e)[:50]}[/red]")
+                            analyzed.append(self._fallback_analysis(article))
                 except Exception as e:
                     console.print(f"[yellow]⚠ Erreur lot {batch_num+1}: {str(e)[:80]}[/yellow]")
                     # Fallback : analyser individuellement
@@ -447,6 +474,7 @@ Réponds en JSON avec cette structure exacte :
                             analyzed.append(result)
                         except Exception as ind_e:
                             console.print(f"[red]  → Échec: {str(ind_e)[:50]}[/red]")
+                            analyzed.append(self._fallback_analysis(article))
 
                 progress.update(task, advance=1)
 
