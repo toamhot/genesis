@@ -237,24 +237,18 @@ Réponds UNIQUEMENT en JSON valide, avec TOUT le contenu EN FRANÇAIS."""
         stop=stop_after_attempt(5),
         wait=wait_exponential(multiplier=2, min=2, max=60),
         retry=retry_if_exception_type(TRANSIENT_EXCEPTIONS),
-        before_sleep=before_sleep_log(logger, logging.WARNING)
+        before_sleep=before_sleep_log(logger, logging.WARNING),
+        reraise=True
     )
     def _call_claude(self, prompt: str, max_tokens: int = 2048) -> str:
         """Appelle Claude API avec retry automatique sur erreurs réseau transitoires"""
-        try:
-            message = self.client.messages.create(
-                model=self.model,
-                max_tokens=max_tokens,
-                system=self.SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            return message.content[0].text
-        except anthropic.BadRequestError as e:
-            console.print(f"[red]✗ BadRequestError Claude API: {str(e)[:120]}[/red]")
-            raise  # Ne pas retrier, erreur non-transitoire
-        except TRANSIENT_EXCEPTIONS as e:
-            console.print(f"[yellow]⚠ Erreur réseau Claude API (retry auto): {type(e).__name__}: {str(e)[:80]}[/yellow]")
-            raise  # Laisser tenacity gérer le retry
+        message = self.client.messages.create(
+            model=self.model,
+            max_tokens=max_tokens,
+            system=self.SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return message.content[0].text
 
     def analyze_article(self, article: Article) -> AnalyzedArticle:
         """Analyse un article individuel avec Claude"""
@@ -306,7 +300,8 @@ Réponds en JSON avec cette structure exacte :
             return self._fallback_analysis(article)
 
         except anthropic.BadRequestError as e:
-            console.print(f"[red]✗ BadRequest pour {article.title[:40]}: {str(e)[:80]}[/red]")
+            console.print(f"[red]✗ BadRequest pour {article.title[:40]}[/red]")
+            console.print(f"[red]  → Detail: {str(e)[:200]}[/red]")
             console.print(f"[dim]  → Analyse fallback appliquée (scoring basique)[/dim]")
             return self._fallback_analysis(article)
 
@@ -429,7 +424,7 @@ Réponds en JSON avec cette structure exacte :
                             except Exception as ind_e:
                                 console.print(f"[red]  → {article.title[:30]}: {str(ind_e)[:50]}[/red]")
                 except anthropic.BadRequestError as e:
-                    console.print(f"[yellow]⚠ BadRequest lot {batch_num+1}: {str(e)[:100]}[/yellow]")
+                    console.print(f"[yellow]⚠ BadRequest lot {batch_num+1}: {str(e)[:200]}[/yellow]")
                     console.print(f"[dim]  → Fallback: analyse individuelle avec contenu tronqué...[/dim]")
                     for article in batch:
                         try:
