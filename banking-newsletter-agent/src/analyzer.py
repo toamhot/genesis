@@ -237,11 +237,13 @@ Réponds UNIQUEMENT en JSON valide, avec TOUT le contenu EN FRANÇAIS."""
 **Contenu** : {article.content[:1500] if article.content else article.summary}
 
 IMPORTANT: Si le titre est en anglais, tu DOIS le traduire en français dans "title_fr".
+IMPORTANT: Le résumé DOIT contenir AU MOINS 1 chiffre concret (montant, %, ratio, date).
+IMPORTANT: La dernière phrase du résumé DOIT répondre au "so what?" pour un DG de banque française.
 
 Réponds en JSON avec cette structure exacte :
 {{
     "title_fr": "TITRE TRADUIT EN FRANÇAIS (obligatoire même si le titre original est déjà en français)",
-    "summary": "Résumé en français (2-3 phrases analytiques)",
+    "summary": "Résumé en français (2-3 phrases analytiques, AVEC au moins 1 chiffre)",
     "relevance_score": 7.5,
     "category": "regulation",
     "key_facts": ["fait clé 1 en français", "fait clé 2 en français"],
@@ -428,13 +430,18 @@ RÈGLES CRITIQUES :
 
 {articles_text}
 
+RÈGLE CHIFFRES : Chaque résumé DOIT contenir AU MOINS 1 chiffre concret (montant, %, ratio, date).
+Si l'article n'en contient pas, contextualiser avec un chiffre sectoriel de cadrage.
+
+TERMINAISON : La dernière phrase de chaque résumé doit répondre au "so what?" pour un DG de banque française.
+
 Réponds en JSON avec un tableau d'analyses, une par article :
 {{
     "analyses": [
         {{
             "article_id": "id de l'article",
             "title_fr": "TITRE TRADUIT EN FRANÇAIS (obligatoire)",
-            "summary": "Résumé analytique en français (2-3 phrases)",
+            "summary": "Résumé analytique en français (2-3 phrases, AVEC au moins 1 chiffre)",
             "relevance_score": 7.5,
             "category": "regulation",
             "key_facts": ["fait clé 1 en français", "fait clé 2 en français"],

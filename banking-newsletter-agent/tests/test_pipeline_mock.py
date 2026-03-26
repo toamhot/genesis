@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Test du pipeline Newsletter V2 avec données mockées
-Permet de valider le workflow sans accès réseau
+Test du pipeline Newsletter V3 avec données mockées
+Permet de valider le workflow V3 (4 blocs éditoriaux) sans accès réseau
 """
 
 import sys
@@ -18,112 +18,107 @@ from curator import Curator, CuratedSelection
 from writer import NewsletterWriter
 
 # ═══════════════════════════════════════════════════════════════
-# DONNÉES MOCKÉES - Articles fictifs sur le thème "Croissance & Distribution"
+# DONNÉES MOCKÉES — Articles répartis pour les 4 blocs
 # ═══════════════════════════════════════════════════════════════
 
 MOCK_ARTICLES = [
+    # Stratégies & marchés (french_banks, ma, market)
     {
         "title": "BNP Paribas lance une offensive omnicanale avec 500 agences repensées",
         "title_fr": "BNP Paribas lance une offensive omnicanale avec 500 agences repensées",
-        "summary": "Le groupe bancaire français annonce un plan de transformation de son réseau d'agences, misant sur l'hybridation digital-physique.",
-        "ai_summary": "BNP Paribas déploie un ambitieux programme de modernisation de 500 agences, combinant espaces de conseil premium et outils digitaux. L'objectif : réduire les transactions simples en agence de 40% tout en augmentant le temps de conseil de 60%. Un investissement de 200M€ sur 3 ans.",
+        "ai_summary": "BNP Paribas engage 200M€ pour transformer 500 agences en combinant espaces de conseil premium et outils digitaux. L'objectif — réduire les transactions simples de 40% tout en augmentant le temps de conseil de 60% — traduit un repositionnement du réseau vers la valeur ajoutée relationnelle.",
         "source": "Les Echos",
-        "category": "retail_banking",
+        "category": "french_banks",
         "relevance_score": 9.2,
         "entities": ["BNP Paribas", "France"],
-        "key_facts": ["500 agences transformées", "200M€ investis", "Réduction 40% transactions simples"],
-        "url": "https://lesechos.fr/bnp-omnicanal"
+        "key_facts": ["500 agences transformées", "200M€ investis"],
+        "url": "https://example.com/bnp-omnicanal"
     },
     {
-        "title": "Crédit Agricole et Worldline s'allient dans les paiements merchants",
-        "title_fr": "Crédit Agricole et Worldline s'allient dans les paiements merchants",
-        "summary": "Partenariat stratégique pour conquérir le marché des TPE/PME avec une offre intégrée banque + paiement.",
-        "ai_summary": "Crédit Agricole et Worldline créent une joint-venture dédiée aux solutions de paiement pour commerçants. L'alliance cible 500 000 nouveaux clients TPE/PME d'ici 2028, avec une offre bundlée compte pro + terminal + encaissement. Potentiel de revenus additionnels estimé à 150M€/an.",
-        "source": "L'Agefi",
-        "category": "payments",
-        "relevance_score": 8.8,
-        "entities": ["Crédit Agricole", "Worldline", "France"],
-        "key_facts": ["Joint-venture créée", "500K clients ciblés", "150M€ revenus potentiels"],
-        "url": "https://agefi.fr/ca-worldline"
+        "title": "HSBC France cède sa banque de détail à My Money Group pour 1,1 Md€",
+        "title_fr": "HSBC France cède sa banque de détail à My Money Group pour 1,1 Md€",
+        "ai_summary": "HSBC finalise la cession de ses 244 agences et 800 000 clients à My Money Group pour 1,1 Md€. Le groupe conserve uniquement banque privée et BFI en France. Cette opération illustre la difficulté pour un acteur international non-leader à atteindre une rentabilité suffisante sur le retail français.",
+        "source": "Les Echos",
+        "category": "ma",
+        "relevance_score": 8.7,
+        "entities": ["HSBC", "My Money Group", "France"],
+        "key_facts": ["1,1 Md€", "244 agences", "800K clients"],
+        "url": "https://example.com/hsbc-cession"
     },
     {
-        "title": "ING Direct ferme ses agences physiques en France - 100% digital",
-        "title_fr": "ING Direct ferme ses agences physiques en France - 100% digital",
-        "summary": "La banque néerlandaise achève sa transformation vers un modèle 100% en ligne.",
-        "ai_summary": "ING Direct finalise la fermeture de ses 3 derniers points de présence physique en France, confirmant son positionnement 100% digital. La banque revendique 1,2 million de clients et mise sur l'IA conversationnelle pour le service client. Coût de servicing réduit de 65% vs modèle traditionnel.",
-        "source": "Finextra",
-        "category": "digital_banking",
-        "relevance_score": 8.5,
-        "entities": ["ING", "France"],
-        "key_facts": ["100% digital", "1.2M clients", "-65% coût servicing"],
-        "url": "https://finextra.com/ing-digital"
+        "title": "Société Générale finalise la cession de Rosbank",
+        "title_fr": "Société Générale finalise la cession de ses activités en Russie",
+        "ai_summary": "Société Générale clôt 20 ans de présence en Russie avec la cession de Rosbank, libérant 20 bps de CET1. Le recentrage européen du groupe est confirmé, avec un redéploiement de 3 Md€ de capital vers la banque de détail France et la BFI Europe.",
+        "source": "Les Echos",
+        "category": "ma",
+        "relevance_score": 7.5,
+        "entities": ["Société Générale", "Rosbank"],
+        "key_facts": ["CET1 +20 bps", "Fin de 20 ans de présence"],
+        "url": "https://example.com/sg-rosbank"
+    },
+    # Nouveaux modèles (innovation, fintech)
+    {
+        "title": "Crédit Agricole lance une offre Banking-as-a-Service",
+        "title_fr": "Crédit Agricole lance une offre de Banking-as-a-Service",
+        "ai_summary": "Le Crédit Agricole ouvre en bêta fermée sa plateforme BaaS permettant à des enseignes retail d'intégrer des services financiers dans leur parcours client. L'offre cible la grande distribution et le e-commerce, positionnant CA comme infrastructure financière pour des acteurs non-bancaires.",
+        "source": "Mind Fintech",
+        "category": "innovation",
+        "relevance_score": 7.2,
+        "entities": ["Crédit Agricole"],
+        "key_facts": ["Plateforme API complète", "50 clients visés"],
+        "url": "https://example.com/ca-baas"
     },
     {
-        "title": "Société Générale déploie la bancassurance auto avec Allianz",
-        "title_fr": "Société Générale déploie la bancassurance auto avec Allianz",
-        "summary": "Nouveau partenariat pour distribuer l'assurance auto via le réseau bancaire.",
-        "ai_summary": "Société Générale et Allianz signent un accord de distribution exclusive d'assurance auto. Les conseillers bancaires pourront proposer des contrats directement en agence, avec un objectif de 200 000 contrats la première année. Le taux de pénétration cible est de 15% de la base clients véhiculés.",
-        "source": "L'Argus de l'Assurance",
-        "category": "bancassurance",
-        "relevance_score": 8.3,
-        "entities": ["Société Générale", "Allianz", "France"],
-        "key_facts": ["Partenariat exclusif", "200K contrats visés", "15% pénétration cible"],
-        "url": "https://argusdelassurance.com/sg-allianz"
-    },
-    {
-        "title": "Revolut obtient sa licence bancaire française et vise 5M de clients",
+        "title": "Revolut obtient sa licence bancaire française",
         "title_fr": "Revolut obtient sa licence bancaire française et vise 5M de clients",
-        "summary": "La néobanque britannique accélère son expansion en France post-Brexit.",
-        "ai_summary": "Revolut obtient l'agrément de l'ACPR et peut désormais opérer comme banque de plein exercice en France. Objectif : passer de 2,5M à 5M de clients français d'ici 2027. Lancement prévu de crédits conso et d'une offre pro renforcée. Investissement de 100M€ dans l'Hexagone.",
+        "ai_summary": "Revolut obtient l'agrément ACPR et peut opérer comme banque de plein exercice en France. Objectif : passer de 2,5M à 5M de clients français d'ici 2027 avec lancement de crédits conso et offre pro renforcée. Un investissement de 100M€ dans l'Hexagone est annoncé.",
         "source": "Mind Fintech",
         "category": "fintech",
         "relevance_score": 9.0,
         "entities": ["Revolut", "ACPR", "France"],
-        "key_facts": ["Licence bancaire obtenue", "5M clients visés", "100M€ investis"],
-        "url": "https://mindfintech.fr/revolut-licence"
+        "key_facts": ["Licence bancaire obtenue", "5M clients visés"],
+        "url": "https://example.com/revolut-licence"
+    },
+    # Régulation & supervision (regulation, monetary_policy, regulateur)
+    {
+        "title": "DORA : 85% des banques européennes conformes",
+        "title_fr": "DORA : 85% des banques européennes conformes ou en voie de l'être",
+        "ai_summary": "L'EBA publie un état des lieux de la conformité DORA : 85% des banques déclarent être conformes ou en voie de l'être. Les 15% restants sont principalement des établissements de taille intermédiaire. L'ACPR prévoit des contrôles ciblés dès le T2 2026.",
+        "source": "EBA - Communiqué officiel",
+        "category": "regulation",
+        "relevance_score": 8.0,
+        "entities": ["EBA", "DORA", "ACPR"],
+        "key_facts": ["85% conformes", "Contrôles ACPR T2 2026"],
+        "url": "https://example.com/dora-conformite"
     },
     {
-        "title": "La Banque Postale mise sur les territoires ruraux avec 2000 points de contact",
-        "title_fr": "La Banque Postale mise sur les territoires ruraux avec 2000 points de contact",
-        "summary": "Stratégie de maillage territorial pour capter la clientèle des zones moins denses.",
-        "ai_summary": "La Banque Postale annonce le maintien de 2000 points de contact en zones rurales, à contre-courant de la tendance de fermeture d'agences. Partenariat renforcé avec les mairies pour des permanences bancaires. Objectif : +300 000 clients en zones rurales sur 3 ans.",
-        "source": "La Tribune",
-        "category": "retail_banking",
-        "relevance_score": 8.1,
-        "entities": ["La Banque Postale", "France"],
-        "key_facts": ["2000 points maintenus", "+300K clients ruraux visés", "Partenariat mairies"],
-        "url": "https://latribune.fr/lbp-rural"
+        "title": "Report du FRTB au 1er janvier 2027",
+        "title_fr": "Report d'un an pour le FRTB : application au 1er janvier 2027",
+        "ai_summary": "La Commission européenne reporte d'un an le FRTB (Fundamental Review of the Trading Book), repoussant l'échéance au 1er janvier 2027. Ce report aligne le calendrier européen sur le Comité de Bâle. Pour les banques actives en BFI, ce délai permet d'affiner les modèles internes mais retarde une charge en capital de 5 à 15%.",
+        "source": "Commission Européenne",
+        "category": "regulation",
+        "relevance_score": 8.2,
+        "entities": ["Commission Européenne", "EBA", "Comité de Bâle"],
+        "key_facts": ["Report au 1er janvier 2027", "+5-15% charge capital"],
+        "url": "https://example.com/frtb-report"
     },
     {
-        "title": "HSBC France cède sa banque de détail à My Money Group",
-        "title_fr": "HSBC France cède sa banque de détail à My Money Group",
-        "summary": "Retrait stratégique du marché retail français pour la banque britannique.",
-        "ai_summary": "HSBC finalise la cession de ses activités de banque de détail en France (244 agences, 800 000 clients) à My Money Group pour 1,1Md€. Le groupe britannique conserve uniquement la banque privée et la BFI. Illustration de la consolidation du marché français.",
-        "source": "Les Echos",
-        "category": "ma_banking",
-        "relevance_score": 8.7,
-        "entities": ["HSBC", "My Money Group", "France"],
-        "key_facts": ["Cession 1.1Md€", "244 agences", "800K clients transférés"],
-        "url": "https://lesechos.fr/hsbc-cession"
-    },
-    {
-        "title": "Orange Bank abandonne le B2C mais se renforce en B2B2C",
-        "title_fr": "Orange Bank abandonne le B2C mais se renforce en B2B2C",
-        "summary": "Pivot stratégique vers la distribution via partenaires après l'échec du modèle direct.",
-        "ai_summary": "Orange Bank annonce l'arrêt de son offre bancaire grand public directe pour se repositionner en fournisseur de services bancaires en marque blanche. Partenariats signés avec 3 retailers majeurs. Le modèle B2B2C vise la rentabilité d'ici 2026.",
-        "source": "C'est pas mon idée",
-        "category": "digital_banking",
-        "relevance_score": 8.4,
-        "entities": ["Orange Bank", "France"],
-        "key_facts": ["Arrêt B2C", "Pivot B2B2C", "3 partenaires retailers"],
-        "url": "https://cestpasmonidee.fr/orange-bank"
+        "title": "AMLA opérationnelle depuis le 1er janvier 2026",
+        "title_fr": "AMLA opérationnelle : transfert des compétences AML depuis l'EBA",
+        "ai_summary": "L'AMLA est pleinement opérationnelle après le transfert des compétences LCB-FT de l'EBA. Basée à Francfort, elle supervisera directement les 40 établissements européens à plus haut risque. Pour les banques françaises, cela implique un double reporting — ACPR et AMLA — et une révision des dispositifs de conformité d'ici mi-2027.",
+        "source": "EBA - Communiqué officiel",
+        "category": "regulation",
+        "relevance_score": 8.8,
+        "entities": ["AMLA", "EBA", "ACPR"],
+        "key_facts": ["Transfert au 1er janvier 2026", "40 établissements supervisés"],
+        "url": "https://example.com/amla-operationnel"
     }
 ]
 
 
-def create_mock_articles():
-    """Crée des objets Article mockés"""
-    articles = []
+def create_mock_analyzed_articles():
+    """Crée des objets AnalyzedArticle mockés"""
+    analyzed = []
     base_date = datetime.now() - timedelta(days=15)
 
     for i, data in enumerate(MOCK_ARTICLES):
@@ -135,42 +130,31 @@ def create_mock_articles():
             url=data["url"],
             source=data["source"],
             published_date=pub_date,
-            summary=data["summary"],
+            summary=data["ai_summary"][:200],
             content=data["ai_summary"],
             category=data["category"],
             priority=1 if data["relevance_score"] > 8.5 else 2
         )
-        articles.append(article)
 
-    return articles
-
-
-def create_mock_analyzed_articles():
-    """Crée des objets AnalyzedArticle mockés"""
-    articles = create_mock_articles()
-    analyzed = []
-
-    for i, (article, data) in enumerate(zip(articles, MOCK_ARTICLES)):
-        analyzed_article = AnalyzedArticle(
+        analyzed.append(AnalyzedArticle(
             article=article,
             ai_summary=data["ai_summary"],
             relevance_score=data["relevance_score"],
             assigned_category=data["category"],
             key_facts=data["key_facts"],
             entities=data["entities"],
-            sentiment="positive" if "lance" in data["title"].lower() or "obtient" in data["title"].lower() else "neutral",
+            sentiment="neutral",
             newsletter_priority=1 if data["relevance_score"] > 8.5 else 2,
             title_fr=data["title_fr"]
-        )
-        analyzed.append(analyzed_article)
+        ))
 
     return analyzed
 
 
 def test_full_pipeline():
-    """Test complet du pipeline avec données mockées"""
+    """Test complet du pipeline V3 avec données mockées"""
     print("=" * 60)
-    print("TEST PIPELINE NEWSLETTER V2 - DONNÉES MOCKÉES")
+    print("TEST PIPELINE NEWSLETTER V3 - DONNÉES MOCKÉES")
     print("=" * 60)
 
     # 1. Créer les articles mockés
@@ -178,85 +162,86 @@ def test_full_pipeline():
     analyzed_articles = create_mock_analyzed_articles()
     print(f"  ✓ {len(analyzed_articles)} articles créés")
 
-    # 2. Curation avec thème
-    print("\n[2/4] Curation avec thème 'growth_distribution'...")
+    # 2. Curation V3 — distribution en 4 blocs
+    print("\n[2/4] Curation V3 — distribution en 4 blocs...")
     curator = Curator(
         min_relevance_score=3.0,
-        max_articles_per_category=3,
-        max_total_articles=6,
+        max_total_articles=12,
         themes_config_path="config/themes.yaml"
     )
 
     selection = curator.curate(analyzed_articles, theme_id="growth_distribution")
     print(f"  ✓ {selection.total_selected} articles sélectionnés")
 
-    for cat, arts in selection.articles_by_category.items():
-        if arts:
-            print(f"    - {cat}: {len(arts)} articles")
+    # Vérifier la distribution par bloc
+    for bloc_id in Curator.BLOC_ORDER:
+        arts = selection.blocs.get(bloc_id, [])
+        bloc_name = Curator.BLOC_NAMES.get(bloc_id, bloc_id)
+        print(f"    - {bloc_name}: {len(arts)} articles")
+        for a in arts:
+            print(f"      • {a.title_fr or a.article.title}")
 
-    # 3. Génération éditoriale (sans API - mode simplifié)
-    print("\n[3/4] Génération des contenus...")
-    writer = NewsletterWriter(api_key=None)  # Sans API pour le test
+    # 3. Génération des contenus (sans API)
+    print("\n[3/4] Génération des contenus V3...")
+    writer = NewsletterWriter(api_key=None)
 
-    # Éditorial style McKinsey (exemple sans API)
-    editorial = """Le mois de janvier 2026 acte la fin d'une illusion : celle de la banque 100% digitale comme modèle universel. Trois mouvements convergents — le pivot B2B2C d'Orange Bank, l'offensive omnicanale de BNP Paribas, et l'accélération des partenariats bancassurance — dessinent une nouvelle réalité où le "phygital" n'est plus une option mais une nécessité stratégique.
+    # Éditorial simulé — format V3 en 4 parties
+    editorial = """Vos clients épargnent de plus en plus hors de chez vous — et ce n'est pas qu'une question de taux.
 
-L'annonce de BNP Paribas de transformer 500 agences avec un investissement de 200M€ n'est pas un simple programme immobilier. C'est l'aveu que la relation bancaire complexe — crédit immobilier, gestion de patrimoine, accompagnement des professionnels — requiert une présence physique réinventée. Dans le même temps, Orange Bank tire les leçons de sept années d'expérimentation directe : le coût d'acquisition client en B2C digital dépasse désormais 300€, rendant le modèle structurellement déficitaire sur le segment mass market. Le pivot vers le B2B2C, avec trois partenariats retailers annoncés, traduit une recherche de distribution à coût marginal proche de zéro.
+En 2025, 34% de la collecte nette en assurance-vie a été captée par des acteurs non-bancaires — contre 18% cinq ans plus tôt (Banque de France, janvier 2026).
 
-Cette recomposition n'est pas neutre pour les acteurs établis. L'alliance Crédit Agricole-Worldline sur les paiements merchants, ciblant 500 000 TPE/PME, illustre une stratégie de bundling défensif face à la montée des néobanques sur le segment professionnel. Quant à la cession par HSBC de ses 244 agences à My Money Group pour 1,1Md€, elle confirme que le retail banking français n'offre plus de perspectives de rentabilité suffisantes pour un acteur international non-leader.
+Trois dynamiques convergent. La montée en puissance des assureurs dans la distribution d'épargne retraite rogne les parts de marché bancaires. La digitalisation des parcours souscription abaisse le coût d'entrée pour le client. La directive CSRD crée un besoin de conseil patrimonial complexe que les réseaux généralistes peinent à adresser.
 
-Pour les dirigeants bancaires, ces signaux posent une question stratégique immédiate : comment optimiser le ratio coût/valeur de chaque canal tout en préservant la capacité à capter les moments de vie à forte valeur ? Les banques qui sauront articuler digital transactionnel et physique relationnel creuseront l'écart avec celles qui resteront dans un "ni-ni" mal assumé.
+<strong>Notre conviction :</strong> d'ici 2028, les banques françaises qui n'auront pas construit une offre d'épargne retraite autonome auront perdu entre 15 et 20% de leur PNB patrimonial sans possibilité de retour."""
 
-**Notre conviction : d'ici 2028, le marché français ne comptera plus que deux modèles viables — les réseaux "phygitaux" intégrés des bancassureurs et les pure players spécialisés sur des niches à forte valeur. Le milieu de gamme digital généraliste aura disparu.**"""
-
-    # Point de vue Ares simplifié
-    ares_view = {
-        "title": "La fin du mythe de la banque 100% digitale ?",
-        "content": """Les derniers mouvements du marché révèlent une réalité que nous anticipions : le modèle
-100% digital atteint ses limites pour une clientèle mass market. ING ferme ses agences, Orange Bank
-pivote vers le B2B2C, tandis que BNP et La Banque Postale réinvestissent le physique.
-
-Notre conviction : la banque de demain sera **phygitale par nécessité**, pas par choix. Les pure players
-qui survivront seront ceux qui auront trouvé des relais de distribution physique via des partenariats.""",
-        "author": "Équipe Banking - Ares & Co"
-    }
-
-    # Terrain (mini-cas)
     terrain = {
         "title": "Optimisation du réseau d'agences d'une banque régionale",
-        "problem": "Une banque régionale avec 150 agences faisait face à une baisse de 30% de la fréquentation et une hausse des coûts fixes.",
-        "approach": "Diagnostic de chaque point de vente, segmentation en 3 formats (flagship, conseil, automate+), redéploiement des effectifs.",
-        "results": "Réduction de 25% des coûts de réseau, hausse de 15% du PNB par conseiller, NPS en progression de 12 points."
+        "problem": "Une banque régionale avec 150 agences faisait face à une baisse de 30% de la fréquentation.",
+        "approach": "Diagnostic point de vente, segmentation en 3 formats, redéploiement des effectifs.",
+        "results": "Réduction de 25% des coûts de réseau, hausse de 15% du PNB par conseiller."
     }
 
-    print("  ✓ Éditorial généré")
-    print("  ✓ Point de vue Ares généré")
-    print("  ✓ Terrain Ares généré")
+    print("  ✓ Éditorial V3 (4 parties)")
+    print("  ✓ Terrain Ares & Co")
 
-    # 4. Génération HTML V2
-    print("\n[4/4] Génération du HTML V2...")
-    html_content = writer.generate_html_v2(
+    # 4. Génération HTML V3
+    print("\n[4/4] Génération du HTML V3...")
+    html_content = writer.generate_html_v3(
         selection=selection,
-        month="Janvier 2026",
+        month="Mars 2026",
         editorial=editorial,
-        ares_view=ares_view,
         terrain=terrain,
+        partner_name="Olivier Dupin",
         logo_url=None
     )
 
-    # Sauvegarder
-    output_path = writer.save_html(html_content, "output/newsletters")
-    print(f"  ✓ HTML généré: {output_path}")
+    output_path = writer.save_html(html_content, "output/newsletters", "test-newsletter-v3.html")
+    print(f"  ✓ HTML V3 généré: {output_path}")
+
+    # Markdown V3
+    md_content = writer.generate_markdown_v3(
+        selection=selection,
+        month="Mars 2026",
+        editorial=editorial,
+        partner_name="Olivier Dupin",
+        terrain=terrain
+    )
+    md_path = writer.save_markdown(md_content, "output/newsletters", "test-newsletter-v3.md")
+    print(f"  ✓ Markdown V3 généré: {md_path}")
 
     # Résumé
     print("\n" + "=" * 60)
-    print("RÉSULTAT DU TEST")
+    print("RÉSULTAT DU TEST V3")
     print("=" * 60)
-    print(f"  Articles mockés:     {len(analyzed_articles)}")
+    print(f"  Articles mockés:       {len(analyzed_articles)}")
     print(f"  Articles sélectionnés: {selection.total_selected}")
-    print(f"  Thème:               {selection.theme_name or 'N/A'}")
-    print(f"  Fichier généré:      {output_path}")
-    print("\n✅ Test réussi ! Ouvrez le fichier HTML pour vérifier le rendu.")
+    print(f"  Blocs:")
+    for bloc_id in Curator.BLOC_ORDER:
+        arts = selection.blocs.get(bloc_id, [])
+        bloc_name = Curator.BLOC_NAMES.get(bloc_id, bloc_id)
+        print(f"    {bloc_name}: {len(arts)}")
+    print(f"  Fichiers générés:      {output_path}, {md_path}")
+    print("\n✅ Test V3 réussi ! Ouvrez le fichier HTML pour vérifier le rendu.")
 
     return output_path
 

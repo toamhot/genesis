@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Mode démo avec données simulées
+Mode démo V3 avec données simulées
 Banking Newsletter Agent - Ares & Co
 
-Ce script démontre le fonctionnement de l'agent avec des articles fictifs
-(sans appels réseau ni API Claude)
+Ce script démontre le fonctionnement de l'agent V3 avec des articles fictifs
+(sans appels réseau ni API Claude). Génère la newsletter avec 4 blocs éditoriaux.
 """
 
 import sys
@@ -26,18 +26,16 @@ from writer import NewsletterWriter
 console = Console()
 
 
-# Données simulées basées sur l'actualité bancaire réelle
+# Données simulées — réparties par bloc éditorial
 MOCK_ARTICLES = [
+    # --- Bloc 1 : L'essentiel (liés au thème éditorial) ---
     {
         "title": "La BCE maintient ses taux directeurs inchangés à 2,00%",
         "source": "BCE - Communiqués",
         "category": "monetary_policy",
-        "summary": "Le Conseil des gouverneurs de la BCE a décidé de maintenir les trois taux directeurs inchangés. Le taux de la facilité de dépôt reste à 2,00%, le taux des opérations principales de refinancement à 2,15% et le taux de la facilité de prêt marginal à 2,40%.",
-        "key_facts": [
-            "Taux de dépôt maintenu à 2,00%",
-            "Inflation sous-jacente toujours au-dessus de l'objectif",
-            "Prochaine réunion le 6 mars 2026"
-        ],
+        "summary": "Le Conseil des gouverneurs de la BCE a décidé de maintenir les trois taux directeurs inchangés.",
+        "ai_summary": "Réunie le 6 mars, la BCE a confirmé le statu quo monétaire malgré une inflation sous-jacente toujours au-dessus de l'objectif. Le scénario d'une baisse avant l'été s'éloigne. Pour les banques françaises, cela prolonge la fenêtre de compression des marges sur les dépôts à vue — mais aussi la pression sur la production de crédit immobilier, qui reste anémique à 3,4% sur 20 ans.",
+        "key_facts": ["Taux de dépôt maintenu à 2,00%", "Inflation sous-jacente au-dessus de l'objectif"],
         "entities": ["BCE", "Christine Lagarde"],
         "priority": 1,
         "relevance": 9.5
@@ -46,127 +44,104 @@ MOCK_ARTICLES = [
         "title": "L'EBA publie les nouvelles guidelines sur les risques ESG",
         "source": "EBA - Press Releases",
         "category": "regulation",
-        "summary": "L'Autorité bancaire européenne a publié ses lignes directrices finales sur la gestion des risques environnementaux, sociaux et de gouvernance (ESG). Ces guidelines entrent en application immédiate et concernent toutes les banques européennes.",
-        "key_facts": [
-            "Intégration ESG obligatoire dans le processus ICAAP",
-            "Nouveaux stress tests climatiques requis",
-            "Délai de mise en conformité : 12 mois"
-        ],
+        "summary": "L'Autorité bancaire européenne a publié ses lignes directrices finales sur la gestion des risques ESG.",
+        "ai_summary": "L'EBA impose l'intégration des risques ESG dans le processus ICAAP de toutes les banques européennes, avec un délai de 12 mois pour se conformer. Les établissements devront réaliser des stress tests climatiques annuels et documenter leurs expositions aux risques de transition. Pour les banques françaises de taille intermédiaire, le coût de mise en conformité est estimé entre 5 et 15 M€.",
+        "key_facts": ["Intégration ESG dans ICAAP", "Stress tests climatiques requis", "Délai : 12 mois"],
         "entities": ["EBA", "ACPR"],
         "priority": 1,
         "relevance": 9.0
     },
+    # --- Bloc 2 : Stratégies & marchés ---
     {
         "title": "BNP Paribas annonce un plan de transformation digitale de 500M€",
-        "source": "Finextra",
+        "source": "Les Echos",
         "category": "french_banks",
-        "summary": "BNP Paribas a dévoilé un plan d'investissement massif de 500 millions d'euros sur trois ans pour accélérer sa transformation digitale. Le plan prévoit notamment le déploiement de l'IA générative dans la relation client.",
-        "key_facts": [
-            "Investissement de 500M€ sur 2026-2028",
-            "Déploiement IA générative pour les conseillers",
-            "Objectif : 30% de gains de productivité"
-        ],
+        "summary": "BNP Paribas a dévoilé un plan d'investissement massif pour accélérer sa transformation digitale.",
+        "ai_summary": "BNP Paribas engage 500 millions d'euros sur trois ans pour déployer l'IA générative dans la relation client et moderniser son core banking. L'objectif affiché — 30% de gains de productivité — traduit une ambition de réduire un cost-to-income encore supérieur à 65%. Pour les concurrents français, ce plan crée une pression compétitive directe sur les budgets IT et l'attractivité des talents tech.",
+        "key_facts": ["500M€ sur 2026-2028", "IA générative pour les conseillers", "30% gains de productivité"],
         "entities": ["BNP Paribas", "Jean-Laurent Bonnafé"],
         "priority": 1,
         "relevance": 8.5
     },
     {
-        "title": "AMLA opérationnelle : transfert des compétences AML depuis l'EBA",
-        "source": "EBA - Press Releases",
-        "category": "regulation",
-        "summary": "L'Autorité européenne de lutte contre le blanchiment (AMLA) est désormais pleinement opérationnelle après le transfert de toutes les compétences AML/CFT depuis l'EBA. Un protocole de coopération a été signé entre les deux autorités.",
-        "key_facts": [
-            "Transfert effectif au 1er janvier 2026",
-            "AMLA basée à Francfort",
-            "Supervision directe des établissements à haut risque"
-        ],
-        "entities": ["AMLA", "EBA", "Commission Européenne"],
-        "priority": 1,
-        "relevance": 8.8
-    },
-    {
         "title": "Société Générale finalise la cession de ses activités en Russie",
         "source": "Les Echos",
-        "category": "french_banks",
-        "summary": "Société Générale a finalisé la vente de Rosbank et de ses filiales russes, mettant fin à sa présence historique en Russie. L'opération génère une perte comptable mais libère des fonds propres significatifs.",
-        "key_facts": [
-            "Cession de Rosbank finalisée",
-            "Impact CET1 positif de +20 points de base",
-            "Fin de 20 ans de présence en Russie"
-        ],
+        "category": "ma",
+        "summary": "Société Générale a finalisé la vente de Rosbank et de ses filiales russes.",
+        "ai_summary": "Société Générale clôt un chapitre de 20 ans en Russie avec la cession de Rosbank, libérant 20 points de base de CET1. L'opération permet au groupe de redéployer environ 3 Md€ de capital vers ses priorités stratégiques — la banque de détail en France et la BFI en Europe. Pour les autres banques françaises encore exposées aux marchés émergents, cette sortie confirme le recentrage européen du secteur.",
+        "key_facts": ["Impact CET1 +20 bps", "Fin de 20 ans de présence", "Recentrage européen"],
         "entities": ["Société Générale", "Rosbank", "Slawomir Krupa"],
         "priority": 2,
         "relevance": 7.5
     },
     {
-        "title": "France FinTech : record de levées de fonds pour les néobanques en 2025",
-        "source": "France FinTech",
+        "title": "HSBC France cède sa banque de détail à My Money Group pour 1,1 Md€",
+        "source": "Les Echos",
+        "category": "ma",
+        "summary": "Retrait stratégique du marché retail français pour la banque britannique.",
+        "ai_summary": "HSBC finalise la cession de ses 244 agences et 800 000 clients à My Money Group pour 1,1 Md€, soit 1,4x la valeur comptable. Le groupe britannique conserve uniquement la banque privée et la BFI en France. Cette opération illustre la difficulté pour un acteur international non-leader à atteindre une rentabilité suffisante sur le retail français — un signal pour les autres banques étrangères en position similaire.",
+        "key_facts": ["1,1 Md€", "244 agences", "800K clients transférés"],
+        "entities": ["HSBC", "My Money Group", "France"],
+        "priority": 1,
+        "relevance": 8.7
+    },
+    # --- Bloc 3 : Nouveaux modèles ---
+    {
+        "title": "Crédit Agricole lance une offre de Banking-as-a-Service",
+        "source": "Mind Fintech",
         "category": "innovation",
-        "summary": "L'écosystème fintech français a enregistré un record de levées de fonds en 2025, porté notamment par les néobanques et les solutions de paiement B2B. Le total atteint 2,3 milliards d'euros.",
-        "key_facts": [
-            "2,3 milliards d'euros levés en 2025",
-            "Croissance de 40% vs 2024",
-            "Paiement B2B : segment le plus dynamique"
-        ],
-        "entities": ["France FinTech", "Qonto", "Pennylane"],
+        "summary": "Crédit Agricole annonce le lancement de CA BaaS pour les entreprises.",
+        "ai_summary": "Le Crédit Agricole a ouvert en bêta fermée sa plateforme Banking-as-a-Service permettant à des enseignes retail d'intégrer des services financiers directement dans leur parcours client. L'offre cible d'abord la grande distribution et le e-commerce. Cette initiative positionne CA comme infrastructure financière pour des acteurs non-bancaires — un renversement de posture qui transforme un concurrent potentiel en client.",
+        "key_facts": ["Plateforme API complète", "3 fintechs partenaires", "50 clients visés en 2026"],
+        "entities": ["Crédit Agricole", "CACIB"],
         "priority": 2,
-        "relevance": 7.8
+        "relevance": 7.2,
+        "notre_lecture": "le BaaS bancaire en France en est encore à la phase de preuve de concept ; les banques qui n'auront pas de plateforme crédible d'ici 2027 se retrouveront reléguées au rang de fournisseurs de tuyaux."
     },
     {
-        "title": "Report d'un an pour le FRTB : la Commission européenne accorde un délai",
+        "title": "Open Banking : l'usage des APIs explose en Europe (+70%)",
+        "source": "Fintech Futures",
+        "category": "innovation",
+        "summary": "Le nombre d'appels API en Open Banking a augmenté de 70% en Europe en 2025.",
+        "ai_summary": "Le volume d'appels API Open Banking a bondi de 70% en Europe en 2025, porté par l'agrégation de comptes et l'initiation de paiements. La France se positionne comme 3ème marché européen derrière le Royaume-Uni et l'Allemagne. L'adoption du paiement par virement instantané progresse rapidement et pourrait capter 15% des transactions e-commerce d'ici 2028, réduisant la dépendance aux schémas cartes.",
+        "key_facts": ["+70% appels API en 2025", "France 3ème marché", "15% e-commerce d'ici 2028"],
+        "entities": ["Berlin Group", "STET", "DSP2"],
+        "priority": 2,
+        "relevance": 7.0
+    },
+    # --- Bloc 4 : Régulation & supervision ---
+    {
+        "title": "AMLA opérationnelle : transfert des compétences AML depuis l'EBA",
+        "source": "EBA - Communiqué officiel",
+        "category": "regulation",
+        "summary": "L'Autorité européenne de lutte contre le blanchiment est désormais pleinement opérationnelle.",
+        "ai_summary": "L'AMLA (Anti-Money Laundering Authority) est pleinement opérationnelle depuis le 1er janvier 2026 après le transfert de toutes les compétences LCB-FT de l'EBA. Basée à Francfort, elle exercera une supervision directe sur les 40 établissements européens à plus haut risque. Pour les banques françaises concernées, cela implique un double reporting — ACPR et AMLA — et une révision complète des dispositifs de conformité d'ici mi-2027.",
+        "key_facts": ["Transfert effectif au 1er janvier 2026", "AMLA à Francfort", "40 établissements supervisés"],
+        "entities": ["AMLA", "EBA", "ACPR"],
+        "priority": 1,
+        "relevance": 8.8
+    },
+    {
+        "title": "Report d'un an pour le FRTB : application au 1er janvier 2027",
         "source": "Commission Européenne",
         "category": "regulation",
-        "summary": "La Commission européenne a adopté un acte délégué reportant d'un an supplémentaire l'application du Fundamental Review of the Trading Book (FRTB). Les exigences de risque de marché s'appliqueront au 1er janvier 2027.",
-        "key_facts": [
-            "Report au 1er janvier 2027",
-            "Alignement avec les calendriers internationaux",
-            "Banques saluent cette décision"
-        ],
+        "summary": "La Commission européenne reporte d'un an l'application du FRTB.",
+        "ai_summary": "La Commission européenne accorde un an supplémentaire pour l'application du Fundamental Review of the Trading Book (FRTB), repoussant l'échéance au 1er janvier 2027. Ce report aligne le calendrier européen sur celui du Comité de Bâle. Pour les banques françaises actives en BFI, ce délai est l'occasion d'affiner les modèles internes — mais aussi le risque de reporter une charge en capital estimée entre 5 et 15% sur les desks de marché.",
+        "key_facts": ["Report au 1er janvier 2027", "Alignement Bâle", "+5-15% charge capital estimée"],
         "entities": ["Commission Européenne", "EBA", "Comité de Bâle"],
         "priority": 1,
         "relevance": 8.2
     },
     {
-        "title": "Crédit Agricole lance une offre de Banking-as-a-Service",
-        "source": "Finextra",
-        "category": "innovation",
-        "summary": "Crédit Agricole a annoncé le lancement de CA BaaS, une plateforme permettant aux entreprises d'intégrer des services bancaires via API. L'offre cible les marketplaces et les fintechs.",
-        "key_facts": [
-            "Plateforme API complète (comptes, paiements, KYC)",
-            "Partenariat avec 3 fintechs au lancement",
-            "Objectif : 50 clients entreprises en 2026"
-        ],
-        "entities": ["Crédit Agricole", "CACIB"],
-        "priority": 2,
-        "relevance": 7.2
-    },
-    {
-        "title": "DORA : les banques européennes finalisent leur mise en conformité",
-        "source": "EBA - Press Releases",
+        "title": "DORA : 85% des banques européennes conformes ou en voie de l'être",
+        "source": "EBA - Communiqué officiel",
         "category": "regulation",
-        "summary": "À l'approche de l'échéance de janvier 2026, les banques européennes accélèrent leur mise en conformité avec le règlement DORA sur la résilience opérationnelle numérique. L'EBA publie un état des lieux.",
-        "key_facts": [
-            "85% des banques conformes ou en voie de l'être",
-            "Tests de résilience cyber obligatoires",
-            "Cartographie des prestataires IT critiques"
-        ],
+        "summary": "État des lieux de la mise en conformité DORA dans le secteur bancaire.",
+        "ai_summary": "L'EBA publie un état des lieux de la conformité DORA : 85% des banques européennes déclarent être conformes ou en voie de l'être. Les 15% restants sont principalement des établissements de taille intermédiaire confrontés à la cartographie de leurs prestataires IT critiques. L'ACPR prévoit des contrôles ciblés dès le T2 2026 — un signal clair que les retardataires s'exposent à des recommandations voire des injonctions.",
+        "key_facts": ["85% conformes", "Tests cyber obligatoires", "Contrôles ACPR au T2 2026"],
         "entities": ["EBA", "DORA", "ACPR"],
         "priority": 1,
         "relevance": 8.0
-    },
-    {
-        "title": "Open Banking : l'usage des APIs explose en Europe",
-        "source": "Fintech Futures",
-        "category": "innovation",
-        "summary": "Le nombre d'appels API en Open Banking a augmenté de 70% en Europe en 2025, porté par l'agrégation de comptes et l'initiation de paiements. Le Royaume-Uni reste leader mais la France progresse.",
-        "key_facts": [
-            "+70% d'appels API en 2025",
-            "France : 3ème marché européen",
-            "Paiement par virement : adoption croissante"
-        ],
-        "entities": ["Berlin Group", "STET", "DSP2"],
-        "priority": 2,
-        "relevance": 7.0
     }
 ]
 
@@ -174,9 +149,7 @@ MOCK_ARTICLES = [
 def generate_mock_articles():
     """Génère des articles simulés"""
     articles = []
-
     for i, data in enumerate(MOCK_ARTICLES):
-        # Date aléatoire dans les 30 derniers jours
         days_ago = random.randint(1, 28)
         pub_date = datetime.now() - timedelta(days=days_ago)
 
@@ -192,47 +165,45 @@ def generate_mock_articles():
             priority=data["priority"]
         )
         articles.append(article)
-
     return articles
 
 
 def generate_mock_analyzed_articles(articles):
     """Génère des articles analysés simulés"""
     analyzed = []
-
     for article in articles:
-        # Trouver les données mock correspondantes
         mock_data = next(
             (m for m in MOCK_ARTICLES if m["title"] == article.title),
             None
         )
-
         if mock_data:
             analyzed.append(AnalyzedArticle(
                 article=article,
-                ai_summary=mock_data["summary"],
+                ai_summary=mock_data["ai_summary"],
                 relevance_score=mock_data["relevance"],
                 assigned_category=mock_data["category"],
                 key_facts=mock_data["key_facts"],
                 entities=mock_data["entities"],
                 sentiment="neutral",
-                newsletter_priority=mock_data["priority"]
+                newsletter_priority=mock_data["priority"],
+                title_fr=mock_data["title"]
             ))
-
     return analyzed
 
 
 def run_demo():
-    """Exécute la démo complète"""
-    month = "Janvier 2026"
+    """Exécute la démo V3 complète"""
+    month = "Mars 2026"
 
     banner = f"""
 [bold blue]╔══════════════════════════════════════════════════════════════╗
 ║                                                                ║
-║   📰  BANKING NEWSLETTER AGENT - MODE DÉMO                     ║
+║   📰  BANKING NEWSLETTER AGENT V3 - MODE DÉMO                  ║
 ║       Ares & Co - Conseil en Stratégie                         ║
 ║                                                                ║
-║   Démonstration avec données simulées                          ║
+║   Structure : Édito → Essentiel → Stratégies →                 ║
+║               Modèles → Régulation → Terrain → CTA             ║
+║                                                                ║
 ║   Période : {month:^20}                            ║
 ║                                                                ║
 ╚══════════════════════════════════════════════════════════════╝[/bold blue]
@@ -244,61 +215,82 @@ def run_demo():
     articles = generate_mock_articles()
     console.print(f"\n[green]✓ {len(articles)} articles simulés générés[/green]\n")
 
-    for a in articles[:3]:
-        console.print(f"  • [cyan]{a.source}[/cyan]: {a.title[:50]}...")
-    console.print("  ...")
-
     # ÉTAPE 2: Analyse simulée
     console.print(Panel("[bold]ÉTAPE 2/4 : ANALYSE (simulée)[/bold]", style="blue"))
     analyzed = generate_mock_analyzed_articles(articles)
     console.print(f"\n[green]✓ {len(analyzed)} articles analysés[/green]\n")
 
-    # ÉTAPE 3: Curation
-    console.print(Panel("[bold]ÉTAPE 3/4 : CURATION[/bold]", style="blue"))
+    # ÉTAPE 3: Curation V3
+    console.print(Panel("[bold]ÉTAPE 3/4 : CURATION V3 — 4 blocs éditoriaux[/bold]", style="blue"))
     curator = Curator(
-        min_relevance_score=7.0,
-        max_articles_per_category=3,
-        max_total_articles=10
+        min_relevance_score=3.0,
+        max_total_articles=12
     )
     selection = curator.curate(analyzed)
 
-    # ÉTAPE 4: Génération
-    console.print(Panel("[bold]ÉTAPE 4/4 : GÉNÉRATION[/bold]", style="blue"))
+    # ÉTAPE 4: Génération V3
+    console.print(Panel("[bold]ÉTAPE 4/4 : GÉNÉRATION V3[/bold]", style="blue"))
 
-    # Editorial simulé (sans API)
-    editorial = """Le mois de février 2026 a été marqué par une actualité réglementaire dense, avec notamment l'entrée en vigueur effective de l'AMLA et les derniers ajustements du calendrier Bâle III. La BCE, de son côté, maintient le cap de sa politique monétaire restrictive, dans un contexte d'inflation sous-jacente encore élevée.
+    # Éditorial simulé (sans API) — format V3 en 4 parties
+    editorial = """Vos clients épargnent de plus en plus hors de chez vous — et ce n'est pas qu'une question de taux.
 
-Du côté des banques françaises, les initiatives de transformation digitale se multiplient. BNP Paribas a dévoilé un plan ambitieux d'investissement dans l'IA, tandis que Crédit Agricole accélère sur le Banking-as-a-Service. Ces mouvements témoignent d'une industrie en pleine mutation, sous la pression conjuguée des fintechs et des nouvelles attentes clients.
+En 2025, 34% de la collecte nette en assurance-vie a été captée par des acteurs non-bancaires — contre 18% cinq ans plus tôt (Banque de France, janvier 2026). Les banques françaises perdent du terrain sur leur métier historique de collecte.
 
-L'écosystème fintech français continue par ailleurs de démontrer son dynamisme, avec des levées de fonds record en 2025. Le paiement B2B et les solutions d'embedded finance émergent comme les segments les plus porteurs pour 2026."""
+Trois dynamiques convergent. Premièrement, la montée en puissance des assureurs et gestionnaires d'actifs dans la distribution de produits d'épargne retraite rogne les parts de marché bancaires sur leur terrain historique. Deuxièmement, la digitalisation des parcours souscription — portée par des acteurs comme Yomoni ou Nalo — abaisse le coût d'entrée pour le client et réduit l'avantage de la relation en agence. Troisièmement, la directive CSRD et les nouvelles exigences ESG créent un besoin de conseil patrimonial complexe que les réseaux bancaires généralistes peinent à adresser faute de formation.
+
+<strong>Notre conviction :</strong> d'ici 2028, les banques françaises qui n'auront pas construit une offre d'épargne retraite autonome — hors réseaux tiers — auront perdu entre 15 et 20% de leur PNB patrimonial sans possibilité de retour."""
+
+    terrain = {
+        "title": "Optimisation du réseau d'agences d'une banque régionale",
+        "problem": "Une banque régionale avec 150 agences faisait face à une baisse de 30% de la fréquentation en 3 ans et une hausse des coûts fixes de 12%, menaçant la rentabilité du réseau.",
+        "approach": "Diagnostic point de vente par point de vente, segmentation en 3 formats (flagship conseil, agence légère, automate+), redéploiement des effectifs vers les formats à forte valeur ajoutée.",
+        "results": "Réduction de 25% des coûts de réseau en 18 mois, hausse de 15% du PNB par conseiller, NPS en progression de 12 points. Le modèle est en cours de réplication sur l'ensemble du réseau."
+    }
 
     writer = NewsletterWriter()
 
-    # Générer Markdown
-    md_content = writer.generate_markdown(selection, month, editorial)
-    md_path = writer.save_markdown(md_content, "output/newsletters", "demo-newsletter.md")
+    # Markdown V3
+    md_content = writer.generate_markdown_v3(
+        selection, month, editorial,
+        partner_name="Olivier Dupin",
+        terrain=terrain
+    )
+    md_path = writer.save_markdown(md_content, "output/newsletters", "demo-newsletter-v3.md")
 
-    # Générer HTML
-    html_content = writer.generate_html(selection, month, editorial)
-    html_path = writer.save_html(html_content, "output/newsletters", "demo-newsletter.html")
+    # HTML V3
+    html_content = writer.generate_html_v3(
+        selection=selection,
+        month=month,
+        editorial=editorial,
+        terrain=terrain,
+        partner_name="Olivier Dupin",
+        logo_url=None
+    )
+    html_path = writer.save_html(html_content, "output/newsletters", "demo-newsletter-v3.html")
 
     # Résumé final
+    blocs_detail = ""
+    if hasattr(selection, 'blocs'):
+        for bloc_id in ["essentiel", "strategies_marches", "nouveaux_modeles", "regulation"]:
+            arts = selection.blocs.get(bloc_id, [])
+            if arts:
+                bloc_name = Curator.BLOC_NAMES.get(bloc_id, bloc_id)
+                blocs_detail += f"\n- **{bloc_name}** : {len(arts)} articles"
+
     summary = f"""
-## Démonstration terminée
+## Démonstration V3 terminée
 
 - **Articles simulés** : {len(articles)}
 - **Articles analysés** : {len(analyzed)}
 - **Articles sélectionnés** : {selection.total_selected}
 
+### Distribution par bloc :{blocs_detail}
+
 ### Fichiers générés :
 - `{md_path}`
 - `{html_path}`
-
-### Aperçu de la newsletter :
-
-{md_content[:1500]}...
 """
-    console.print(Panel(Markdown(summary), title="[bold green]✅ DÉMO RÉUSSIE[/bold green]", style="green"))
+    console.print(Panel(Markdown(summary), title="[bold green]✅ DÉMO V3 RÉUSSIE[/bold green]", style="green"))
 
     return md_path, html_path
 

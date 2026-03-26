@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsletter Banque - {{ month }} | Ares &amp; Co</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a2a3a;
+            --text-color: #333333;
+            --text-light: #6b7280;
+            --light-bg: #f9fafb;
+            --accent-blue: #57AEE0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: #eef1f5;
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        /* HEADER */
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 48px 40px;
+            text-align: left;
+        }
+        .header img { max-height: 44px; margin-bottom: 24px; filter: brightness(0) invert(1); }
+        .header .baseline {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            opacity: 0.7;
+            margin-bottom: 28px;
+            font-weight: 300;
+        }
+        .header .separator {
+            width: 40px;
+            height: 1px;
+            background-color: rgba(255,255,255,0.4);
+            margin: 20px 0;
+        }
+        .header h1 {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 30px;
+            font-weight: 400;
+            letter-spacing: -0.3px;
+        }
+        .header .month {
+            font-size: 13px;
+            margin-top: 12px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        /* SECTIONS */
+        .section { padding: 36px 40px; border-bottom: 1px solid #e5e7eb; }
+        .section-title {
+            color: var(--primary-color);
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 18px;
+            font-weight: 400;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--primary-color);
+            letter-spacing: 0.3px;
+        }
+
+        /* ÉDITORIAL */
+        .edito p {
+            margin-bottom: 16px;
+            text-align: justify;
+            line-height: 1.75;
+            font-size: 14px;
+            font-weight: 300;
+            color: #444;
+        }
+        .edito .conviction {
+            background-color: var(--light-bg);
+            padding: 18px 20px;
+            margin: 24px 0;
+            border-left: 2px solid var(--primary-color);
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--primary-color);
+        }
+        .edito .signature {
+            text-align: right;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 13px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            font-weight: 300;
+        }
+
+        /* ARTICLES */
+        .bloc-article {
+            margin-bottom: 28px;
+            padding: 0 0 24px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .bloc-article:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+        .bloc-article h3 {
+            color: var(--primary-color);
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 15px;
+            font-weight: 400;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .bloc-article h3 .item-number {
+            color: var(--accent-blue);
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+        .bloc-article .body {
+            margin-bottom: 10px;
+            font-size: 13.5px;
+            line-height: 1.7;
+            color: #555;
+            font-weight: 300;
+        }
+        .bloc-article .source-line {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 8px;
+            font-weight: 400;
+        }
+        .bloc-article .source-line a {
+            color: var(--text-light);
+            text-decoration: none;
+            border-bottom: 1px solid #d1d5db;
+        }
+        .bloc-article .source-line a:hover { border-bottom-color: var(--primary-color); color: var(--primary-color); }
+
+        /* Conviction "Notre lecture" */
+        .notre-lecture {
+            font-style: italic;
+            color: var(--primary-color);
+            margin-top: 10px;
+            padding: 10px 14px;
+            background-color: var(--light-bg);
+            font-size: 13px;
+            border-left: 2px solid var(--primary-color);
+            font-weight: 400;
+        }
+
+        /* CTA */
+        .cta-section {
+            background: linear-gradient(135deg, #051E3B, #051E5B);
+            text-align: center;
+            padding: 44px 40px;
+        }
+        .cta-section h2 {
+            color: white;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 20px;
+            font-weight: 400;
+            margin-bottom: 24px;
+        }
+        .cta-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .cta-button {
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+            transition: transform 0.2s;
+        }
+        .cta-button:hover { transform: translateY(-2px); }
+        .cta-button.primary { background-color: #57AEE0; color: white; }
+        .cta-button.secondary { background-color: white; color: #051E3B; }
+        .share-section {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .share-text { color: rgba(255,255,255,0.85); font-size: 13px; margin-bottom: 14px; font-weight: 300; }
+        .cta-button.share { background-color: #25D366; color: white; }
+
+        /* FOOTER */
+        .footer {
+            background-color: #051E3B;
+            color: white;
+            padding: 36px 40px;
+            text-align: center;
+        }
+        .footer img { max-height: 40px; margin-bottom: 12px; filter: brightness(0) invert(1); }
+        .footer p { font-size: 13px; opacity: 0.9; margin-bottom: 8px; }
+        .footer .contact-info { margin: 20px 0; font-size: 13px; }
+        .footer .contact-info p { margin: 5px 0; opacity: 0.85; }
+        .footer .social-links { margin: 16px 0; }
+        .footer .social-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 12px;
+            font-size: 13px;
+            opacity: 0.85;
+        }
+        .footer .social-links a:hover { opacity: 1; }
+        .footer .legal {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 11px;
+            opacity: 0.7;
+        }
+        .footer .legal a { color: white; text-decoration: none; }
+        .footer .legal a:hover { text-decoration: underline; }
+        .footer .generation-date { margin-top: 12px; font-size: 10px; opacity: 0.5; }
+
+        @media (max-width: 600px) {
+            .header { padding: 32px 24px; }
+            .header h1 { font-size: 24px; }
+            .section { padding: 28px 24px; }
+            .cta-section { padding: 36px 24px; }
+            .footer { padding: 28px 24px; }
+            .cta-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <img src="{{ logo_url if logo_url else 'https://www.aresandco.com/images/common-contents/logo-image/62c2a7a87e751_logo.png' }}" alt="Ares & Co">
+            <div class="baseline">Cabinet de conseil de Direction G&eacute;n&eacute;rale</div>
+            <div class="separator"></div>
+            <h1>Newsletter Banque</h1>
+            <div class="month">{{ month }}</div>
+            {% if hashtags %}
+            <div style="margin-top: 20px; font-size: 12px; font-weight: 300; letter-spacing: 0.5px; opacity: 0.85; line-height: 1.8;">
+                {% for tag in hashtags %}
+                <span style="display: inline-block; background: rgba(255,255,255,0.12); padding: 3px 10px; border-radius: 12px; margin: 2px 4px 2px 0; font-size: 11px;">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- SOMMAIRE -->
+        {% if sommaire %}
+        <div class="section" style="padding: 24px 40px; background-color: var(--light-bg); border-bottom: 1px solid #e5e7eb;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-light); margin-bottom: 12px; font-weight: 500;">Sommaire</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                {% for s in sommaire %}
+                <a href="#{{ s.anchor }}" style="text-decoration: none; font-size: 13px; color: var(--primary-color); padding: 6px 14px; border: 1px solid #d1d5db; border-radius: 20px; font-weight: 400; transition: all 0.2s;">
+                    {{ s.name }} <span style="color: var(--text-light); font-size: 11px;">({{ s.count }})</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ÉDITORIAL -->
+        <div class="section edito">
+            <h2 class="section-title">Notre &eacute;ditorial</h2>
+            {% for paragraph in editorial.split('\n\n') %}
+            {% set p_stripped = paragraph.strip() %}
+            {% if p_stripped.startswith('—') or p_stripped.startswith('&mdash;') %}
+            {# Signature déjà dans l'éditorial — on la met dans le div signature #}
+            {% elif 'notre conviction' in paragraph|lower or 'Notre conviction' in paragraph %}
+            <div class="conviction">{{ paragraph|safe }}</div>
+            {% else %}
+            <p>{{ paragraph|safe }}</p>
+            {% endif %}
+            {% endfor %}
+            <div class="signature">&mdash; {{ partner_name }}, Partner, Ares &amp; Co</div>
+        </div>
+
+        <!-- CHIFFRE DU MOIS -->
+        {% if chiffre_du_mois and chiffre_du_mois.value %}
+        <div class="section" style="text-align: center; padding: 44px 40px; background: linear-gradient(135deg, #f8fafc, #eef2f7); border-bottom: 1px solid #e5e7eb;">
+            <!-- Decorative SVG accent -->
+            <svg width="60" height="4" viewBox="0 0 60 4" style="margin-bottom: 20px;">
+                <rect width="60" height="4" rx="2" fill="var(--accent-blue, #57AEE0)" opacity="0.6"/>
+            </svg>
+            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: var(--text-light); margin-bottom: 20px; font-weight: 600;">Le chiffre du mois</div>
+            <div style="font-family: Georgia, 'Times New Roman', serif; font-size: 48px; font-weight: 400; color: var(--primary-color); line-height: 1.1; margin-bottom: 14px; letter-spacing: -1px;">{{ chiffre_du_mois.value }}</div>
+            <!-- Decorative underline bar -->
+            <svg width="120" height="3" viewBox="0 0 120 3" style="margin: 0 auto 16px auto; display: block;">
+                <rect width="120" height="3" rx="1.5" fill="var(--primary-color, #1a2a3a)" opacity="0.15"/>
+                <rect width="40" height="3" rx="1.5" fill="var(--accent-blue, #57AEE0)"/>
+            </svg>
+            <div style="font-size: 15px; font-weight: 500; color: var(--primary-color); margin-bottom: 10px; letter-spacing: 0.2px;">{{ chiffre_du_mois.label }}</div>
+            {% if chiffre_du_mois.context %}
+            <div style="font-size: 12px; color: var(--text-light); font-style: italic; font-weight: 300; max-width: 400px; margin: 0 auto;">{{ chiffre_du_mois.context }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- BLOC 1 — L'ESSENTIEL -->
+        {% if blocs.essentiel %}
+        <div class="section" id="essentiel">
+            <h2 class="section-title">L&rsquo;essentiel</h2>
+            {% for article in blocs.essentiel %}
+            <div class="bloc-article">
+                <h3><span class="item-number">#{{ item_numbers.essentiel[loop.index0] }}.</span> {{ article.title_fr if article.title_fr else article.article.title }}</h3>
+                <div class="body">{{ article.ai_summary }}</div>
+                <div class="source-line">
+                    <a href="{{ article.article.url }}" target="_blank">{{ article.article.source }}</a>
+                    {% if article.article.published_date %}
+                    | {{ article.article.published_date|date_fr }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- BLOC 2 — STRATÉGIES & MARCHÉS -->
+        {% if blocs.strategies_marches %}
+        <div class="section" id="strategies">
+            <h2 class="section-title">Strat&eacute;gies &amp; march&eacute;s</h2>
+            {% for article in blocs.strategies_marches %}
+            <div class="bloc-article">
+                <h3><span class="item-number">#{{ item_numbers.strategies_marches[loop.index0] }}.</span> {{ article.title_fr if article.title_fr else article.article.title }}</h3>
+                <div class="body">{{ article.ai_summary }}</div>
+                <div class="source-line">
+                    <a href="{{ article.article.url }}" target="_blank">{{ article.article.source }}</a>
+                    {% if article.article.published_date %}
+                    | {{ article.article.published_date|date_fr }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- BLOC 3 — NOUVEAUX MODÈLES -->
+        {% if blocs.nouveaux_modeles %}
+        <div class="section" id="modeles">
+            <h2 class="section-title">Nouveaux mod&egrave;les</h2>
+            {% for article in blocs.nouveaux_modeles %}
+            <div class="bloc-article">
+                <h3><span class="item-number">#{{ item_numbers.nouveaux_modeles[loop.index0] }}.</span> {{ article.title_fr if article.title_fr else article.article.title }}</h3>
+                <div class="body">{{ article.ai_summary }}</div>
+                {% if article.notre_lecture is defined and article.notre_lecture %}
+                <div class="notre-lecture">&rarr; Notre lecture : {{ article.notre_lecture }}</div>
+                {% endif %}
+                <div class="source-line">
+                    <a href="{{ article.article.url }}" target="_blank">{{ article.article.source }}</a>
+                    {% if article.article.published_date %}
+                    | {{ article.article.published_date|date_fr }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- BLOC 4 — RÉGULATION & SUPERVISION -->
+        {% if blocs.regulation %}
+        <div class="section" id="regulation">
+            <h2 class="section-title">R&eacute;gulation &amp; supervision</h2>
+            {% for article in blocs.regulation %}
+            <div class="bloc-article">
+                <h3><span class="item-number">#{{ item_numbers.regulation[loop.index0] }}.</span> {{ article.title_fr if article.title_fr else article.article.title }}</h3>
+                <div class="body">{{ article.ai_summary }}</div>
+                <div class="source-line">
+                    <a href="{{ article.article.url }}" target="_blank">{{ article.article.source }}</a>
+                    {% if article.article.published_date %}
+                    | {{ article.article.published_date|date_fr }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- CALL TO ACTION -->
+        <div class="cta-section">
+            <h2>Continuons la conversation</h2>
+            <div class="cta-buttons">
+                <a href="mailto:contact@aresandco.com?subject=Newsletter Banque - Contact" class="cta-button primary">
+                    <i class="fas fa-envelope"></i> Nous contacter
+                </a>
+                <a href="https://www.linkedin.com/company/ares-&-company/" class="cta-button secondary" target="_blank">
+                    <i class="fab fa-linkedin"></i> Suivre sur LinkedIn
+                </a>
+            </div>
+            <div class="share-section">
+                <p class="share-text">Cette newsletter vous a plu ? Partagez-la avec vos contacts :</p>
+                <a href="mailto:?subject={{ 'Newsletter Banque Ares %26 Co - ' ~ month }}&body={{ 'Bonjour,%0D%0A%0D%0AJe vous partage la derni%C3%A8re newsletter bancaire d%27Ares %26 Co.%0D%0A%0D%0ABonne lecture !%0D%0A%0D%0A---%0D%0APour recevoir cette newsletter chaque mois, contactez contact@aresandco.com' }}" class="cta-button share">
+                    <i class="fas fa-share-alt"></i> Partager par email
+                </a>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <a href="https://www.aresandco.com/fr" target="_blank">
+                <img src="https://www.aresandco.com/images/common-contents/logo-image/62c2a7a87e751_logo.png" alt="Ares & Co">
+            </a>
+            <p>Cabinet de conseil de Direction G&eacute;n&eacute;rale</p>
+
+            <div class="contact-info">
+                <p><i class="fas fa-map-marker-alt"></i> 15 Av. de la Grande Arm&eacute;e, 75116 Paris</p>
+                <p><i class="fas fa-phone"></i> +33 1 40 20 44 49</p>
+                <p><i class="fas fa-envelope"></i> <a href="mailto:contact@aresandco.com" style="color: white;">contact@aresandco.com</a></p>
+            </div>
+
+            <div class="social-links">
+                <a href="https://www.aresandco.com/fr"><i class="fas fa-globe"></i> Site web</a>
+                <a href="https://www.linkedin.com/company/ares-&-company/"><i class="fab fa-linkedin"></i> LinkedIn</a>
+            </div>
+
+            <div class="legal">
+                <p>Cette newsletter est envoy&eacute;e aux clients et partenaires d&rsquo;Ares &amp; Co.</p>
+                <p>
+                    <a href="#">Mentions l&eacute;gales</a> |
+                    <a href="#">Politique de confidentialit&eacute;</a> |
+                    <a href="mailto:contact@aresandco.com?subject=D%C3%A9sabonnement Newsletter">Se d&eacute;sabonner</a>
+                </p>
+            </div>
+
+            <div class="generation-date">G&eacute;n&eacute;r&eacute; le {{ generation_date }}</div>
+        </div>
+    </div>
+</body>
+</html>
