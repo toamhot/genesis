@@ -68,6 +68,7 @@ from collector import Collector, Article
 from analyzer import Analyzer, AnalyzedArticle
 from curator import Curator, CuratedSelection
 from writer import NewsletterWriter
+from enricher import Enricher
 from audit_trail import AuditTrail
 
 console = Console()
@@ -110,6 +111,7 @@ class BankingNewsletterAgent:
             themes_config_path=themes_config_path
         )
         self.writer = NewsletterWriter(api_key=self.api_key)
+        self.enricher = Enricher(api_key=self.api_key)
 
         if self.api_key:
             self.analyzer = Analyzer(api_key=self.api_key)
@@ -179,7 +181,8 @@ class BankingNewsletterAgent:
         skip_analysis: bool = False,
         logo_url: Optional[str] = None,
         terrain: Optional[Dict[str, str]] = None,
-        skip_terrain: bool = False
+        skip_terrain: bool = False,
+        skip_enrichment: bool = False
     ) -> dict:
         """
         Exécute le pipeline complet de génération de newsletter V3.
@@ -252,7 +255,7 @@ class BankingNewsletterAgent:
             # ═══════════════════════════════════════════════════════════
             # ÉTAPE 1 : COLLECTE
             # ═══════════════════════════════════════════════════════════
-            console.print(Panel("[bold]ÉTAPE 1/4 : COLLECTE[/bold]", style="blue"))
+            console.print(Panel("[bold]ÉTAPE 1/5 : COLLECTE[/bold]", style="blue"))
 
             articles = self.collector.collect_all(days_back=days_back)
             results["articles_collected"] = len(articles)
@@ -280,7 +283,7 @@ class BankingNewsletterAgent:
             # ═══════════════════════════════════════════════════════════
             # ÉTAPE 2 : ANALYSE
             # ═══════════════════════════════════════════════════════════
-            console.print(Panel("[bold]ÉTAPE 2/4 : ANALYSE[/bold]", style="blue"))
+            console.print(Panel("[bold]ÉTAPE 2/5 : ANALYSE[/bold]", style="blue"))
 
             if skip_analysis or not self.analyzer:
                 if not self.analyzer:
@@ -325,7 +328,7 @@ class BankingNewsletterAgent:
             # ═══════════════════════════════════════════════════════════
             # ÉTAPE 3 : CURATION V3 (distribution en 4 blocs)
             # ═══════════════════════════════════════════════════════════
-            console.print(Panel("[bold]ÉTAPE 3/4 : CURATION V3 — 4 blocs éditoriaux[/bold]", style="blue"))
+            console.print(Panel("[bold]ÉTAPE 3/5 : CURATION V3 — 4 blocs éditoriaux[/bold]", style="blue"))
 
             if theme_id:
                 console.print(f"[cyan]🎯 Filtrage par thème: {theme_info.get('name', theme_id)}[/cyan]")
@@ -364,9 +367,24 @@ class BankingNewsletterAgent:
                 return results
 
             # ═══════════════════════════════════════════════════════════
-            # ÉTAPE 4 : GÉNÉRATION V3
+            # ÉTAPE 4 : ENRICHISSEMENT DES ARTICLES SÉLECTIONNÉS
             # ═══════════════════════════════════════════════════════════
-            console.print(Panel("[bold]ÉTAPE 4/4 : GÉNÉRATION V3[/bold]", style="blue"))
+            if not skip_enrichment:
+                console.print(Panel("[bold]ÉTAPE 4/5 : ENRICHISSEMENT[/bold]", style="blue"))
+                console.print("[dim]  → Récupération du contenu complet et amélioration des résumés...[/dim]")
+                selection = self.enricher.enrich_selection(selection)
+                results["articles_enriched"] = self.enricher.stats.get("summaries_improved", 0)
+            else:
+                console.print(Panel("[bold]ÉTAPE 4/5 : ENRICHISSEMENT (ignoré)[/bold]", style="yellow"))
+
+            # ═══════════════════════════════════════════════════════════
+            # ÉTAPE 5 : GÉNÉRATION V3
+            # ═══════════════════════════════════════════════════════════
+            console.print(Panel("[bold]ÉTAPE 5/5 : GÉNÉRATION V3[/bold]", style="blue"))
+
+            # Générer "Notre lecture" pour le Bloc 3 (avant les hashtags)
+            console.print("[dim]  → Génération de 'Notre lecture' pour le Bloc 3...[/dim]")
+            self.writer.generate_notre_lecture(selection)
 
             # Générer les hashtags d'accroche
             console.print("[dim]  → Génération des hashtags d'accroche...[/dim]")
@@ -485,7 +503,8 @@ class BankingNewsletterAgent:
 - **Mois** : {results['month']}{theme_line}
 - **Articles collectés** : {results['articles_collected']}
 - **Articles analysés** : {results['articles_analyzed']}
-- **Articles sélectionnés** : {results['articles_selected']}{blocs_line}
+- **Articles sélectionnés** : {results['articles_selected']}
+- **Résumés enrichis** : {results.get('articles_enriched', 0)}{blocs_line}
 
 ### Fichiers générés :
 """
@@ -587,6 +606,7 @@ Exemples d'utilisation :
     parser.add_argument("--themes-config", default="config/themes.yaml", help="Config des thèmes")
     parser.add_argument("--logo-url", help="URL du logo")
     parser.add_argument("--skip-terrain", action="store_true", help="Ne pas générer le Terrain")
+    parser.add_argument("--skip-enrichment", action="store_true", help="Ne pas enrichir les articles après curation")
     parser.add_argument("--interactive", "-i", action="store_true", help="Mode interactif")
     parser.add_argument("--test", "-t", action="store_true", help="Mode test (sans analyse IA)")
 
@@ -637,7 +657,8 @@ Exemples d'utilisation :
             max_articles=args.max_articles,
             skip_analysis=args.test,
             logo_url=args.logo_url,
-            skip_terrain=args.skip_terrain
+            skip_terrain=args.skip_terrain,
+            skip_enrichment=args.skip_enrichment
         )
 
     sys.exit(0 if results["status"] == "success" else 1)
