@@ -20,6 +20,7 @@ from jinja2 import Template, Environment, BaseLoader
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, before_sleep_log
 import logging
 import httpx
+from httpx import Timeout
 from rich.console import Console
 
 from curator import CuratedSelection
@@ -147,7 +148,10 @@ Réponds UNIQUEMENT avec les hashtags séparés par des espaces, sur une seule l
         self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
         self.client = None
         if self.api_key:
-            self.client = anthropic.Anthropic(api_key=self.api_key)
+            self.client = anthropic.Anthropic(
+                api_key=self.api_key,
+                timeout=Timeout(120.0, connect=10.0),
+            )
         self.model = "claude-sonnet-4-20250514"
 
     @retry(

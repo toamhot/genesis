@@ -17,6 +17,7 @@ import json
 import logging
 import anthropic
 import httpx
+from httpx import Timeout
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, before_sleep_log
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
@@ -140,7 +141,10 @@ Réponds UNIQUEMENT en JSON valide, avec TOUT le contenu EN FRANÇAIS."""
                 "Clé API Anthropic requise. "
                 "Définir ANTHROPIC_API_KEY ou passer api_key au constructeur."
             )
-        self.client = anthropic.Anthropic(api_key=self.api_key)
+        self.client = anthropic.Anthropic(
+            api_key=self.api_key,
+            timeout=Timeout(120.0, connect=10.0),
+        )
         self.model = "claude-sonnet-4-20250514"
 
     def _sample_articles_by_period(
@@ -375,6 +379,7 @@ Réponds en JSON avec cette structure exacte :
         console.print(f"\n[bold blue]🔍 Analyse optimisée de {len(articles)} articles...[/bold blue]\n")
 
         analyzed = []
+        rate_limit_backoff = 30  # Backoff adaptatif pour rate limit (augmente à chaque hit)
 
         # Diviser en lots
         batches = [articles[i:i + batch_size] for i in range(0, len(articles), batch_size)]
@@ -412,12 +417,14 @@ Réponds en JSON avec cette structure exacte :
                             except Exception as ind_e:
                                 console.print(f"[red]  → {article.title[:30]}: {str(ind_e)[:50]}[/red]")
                 except anthropic.RateLimitError as e:
-                    console.print(f"[yellow]⚠ Rate limit atteint, pause de 30s...[/yellow]")
-                    time.sleep(30)
+                    console.print(f"[yellow]⚠ Rate limit atteint, pause de {rate_limit_backoff}s...[/yellow]")
+                    time.sleep(rate_limit_backoff)
+                    rate_limit_backoff = min(rate_limit_backoff * 2, 300)  # Double à chaque hit, max 5min
                     # Réessayer après pause
                     try:
                         batch_results = self._analyze_batch_single_call(batch)
                         analyzed.extend(batch_results)
+                        rate_limit_backoff = max(rate_limit_backoff // 2, 30)  # Réduire si succès
                     except Exception as retry_e:
                         console.print(f"[red]✗ Échec après retry: {str(retry_e)[:80]}[/red]")
                 except anthropic.APIError as e:

@@ -37,7 +37,7 @@ NETWORK_EXCEPTIONS = (
 )
 
 
-def _fetch_feed_with_retry(url: str, max_retries: int = 3) -> feedparser.FeedParserDict:
+def _fetch_feed_with_retry(url: str, max_retries: int = 5) -> feedparser.FeedParserDict:
     """Parse un flux RSS avec retry sur erreurs réseau"""
     for attempt in range(max_retries):
         feed = feedparser.parse(url)
@@ -48,7 +48,7 @@ def _fetch_feed_with_retry(url: str, max_retries: int = 3) -> feedparser.FeedPar
             if isinstance(exc, (IOError, OSError, TimeoutError)):
                 if attempt < max_retries - 1:
                     wait = 2 ** (attempt + 1)
-                    console.print(f"[yellow]  ⚠ Erreur réseau RSS, retry dans {wait}s...[/yellow]")
+                    console.print(f"[yellow]  ⚠ Erreur réseau RSS ({attempt+1}/{max_retries}), retry dans {wait}s...[/yellow]")
                     time.sleep(wait)
                     continue
         return feed
@@ -56,12 +56,12 @@ def _fetch_feed_with_retry(url: str, max_retries: int = 3) -> feedparser.FeedPar
 
 
 @retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=2, max=15),
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(multiplier=2, min=2, max=30),
     retry=retry_if_exception_type(NETWORK_EXCEPTIONS),
     before_sleep=before_sleep_log(logger, logging.WARNING)
 )
-def _fetch_web_with_retry(url: str, headers: dict, timeout: int = 10) -> requests.Response:
+def _fetch_web_with_retry(url: str, headers: dict, timeout: int = 20) -> requests.Response:
     """Requête HTTP avec retry sur erreurs réseau"""
     return requests.get(url, headers=headers, timeout=timeout)
 

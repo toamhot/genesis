@@ -27,6 +27,7 @@ import os
 import sys
 import json
 import pickle
+import signal
 import yaml
 from datetime import datetime
 from pathlib import Path
@@ -117,6 +118,43 @@ class BankingNewsletterAgent:
 
         # Dossier pour les checkpoints de reprise
         self.checkpoint_dir = os.path.join(self.output_dir, "..", ".checkpoints")
+
+        # Gestion gracieuse des interruptions (SIGINT/SIGTERM)
+        self._current_stage = None
+        self._current_stage_data = None
+        signal.signal(signal.SIGINT, self._handle_shutdown)
+        signal.signal(signal.SIGTERM, self._handle_shutdown)
+
+    def _handle_shutdown(self, signum, frame):
+        """Sauvegarde le checkpoint courant avant arrêt propre"""
+        sig_name = "SIGINT (Ctrl+C)" if signum == signal.SIGINT else "SIGTERM"
+        console.print(f"\n[bold yellow]⚠ Signal {sig_name} reçu — arrêt propre en cours...[/bold yellow]")
+        if self._current_stage and self._current_stage_data is not None:
+            self._save_checkpoint(self._current_stage, self._current_stage_data)
+            console.print(f"[green]💾 Checkpoint '{self._current_stage}' sauvegardé. Relancez avec --resume pour reprendre.[/green]")
+        else:
+            console.print("[yellow]💡 Aucun checkpoint intermédiaire à sauvegarder. Relancez avec --resume si des checkpoints existaient.[/yellow]")
+        sys.exit(130 if signum == signal.SIGINT else 143)
+
+    def _check_api_connection(self) -> bool:
+        """Vérifie la connexion à l'API Claude avant de lancer le pipeline"""
+        if not self.api_key:
+            return False
+        try:
+            import anthropic
+            client = anthropic.Anthropic(api_key=self.api_key)
+            # Appel minimal pour tester la connexion
+            client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=10,
+                messages=[{"role": "user", "content": "ping"}]
+            )
+            console.print("[green]  ✓ Connexion API Claude OK[/green]")
+            return True
+        except Exception as e:
+            console.print(f"[bold red]✗ Connexion API Claude échouée: {type(e).__name__}: {str(e)[:100]}[/bold red]")
+            console.print("[yellow]  Vérifiez votre clé API et votre connexion réseau.[/yellow]")
+            return False
 
     def _checkpoint_path(self, stage: str) -> str:
         """Chemin du fichier checkpoint pour une étape donnée"""
@@ -263,6 +301,12 @@ class BankingNewsletterAgent:
 
         self._display_banner(month, theme_id)
 
+        # Vérifier la connexion API avant de lancer le pipeline
+        if self.api_key and not skip_analysis:
+            if not self._check_api_connection():
+                console.print("[bold red]❌ Impossible de continuer sans connexion API.[/bold red]")
+                return {"status": "connection_error", "month": month, "error": "API connection failed"}
+
         theme_info = self._get_theme_info(theme_id) if theme_id else {}
 
         results = {
@@ -292,14 +336,16 @@ class BankingNewsletterAgent:
             # ═══════════════════════════════════════════════════════════
             # ÉTAPE 1 : COLLECTE (avec reprise sur checkpoint)
             # ═══════════════════════════════════════════════════════════
+            self._current_stage = "collecte"
             cached_articles = self._load_checkpoint("collecte")
             if cached_articles is not None:
-                console.print(Panel("[bold]ÉTAPE 1/4 : COLLECTE ♻ (reprise depuis checkpoint)[/bold]", style="green"))
+                console.print(Panel("[bold]ÉTAPE 1/5 : COLLECTE ♻ (reprise depuis checkpoint)[/bold]", style="green"))
                 articles = cached_articles
             else:
-                console.print(Panel("[bold]ÉTAPE 1/4 : COLLECTE[/bold]", style="blue"))
+                console.print(Panel("[bold]ÉTAPE 1/5 : COLLECTE[/bold]", style="blue"))
                 articles = self.collector.collect_all(days_back=days_back)
                 self._save_checkpoint("collecte", articles)
+            self._current_stage_data = articles
 
             results["articles_collected"] = len(articles)
 
@@ -326,12 +372,13 @@ class BankingNewsletterAgent:
             # ═══════════════════════════════════════════════════════════
             # ÉTAPE 2 : ANALYSE (avec reprise sur checkpoint)
             # ═══════════════════════════════════════════════════════════
+            self._current_stage = "analyse"
             cached_analysis = self._load_checkpoint("analyse")
             if cached_analysis is not None:
-                console.print(Panel("[bold]ÉTAPE 2/4 : ANALYSE ♻ (reprise depuis checkpoint)[/bold]", style="green"))
+                console.print(Panel("[bold]ÉTAPE 2/5 : ANALYSE ♻ (reprise depuis checkpoint)[/bold]", style="green"))
                 analyzed_articles = cached_analysis
             else:
-                console.print(Panel("[bold]ÉTAPE 2/4 : ANALYSE[/bold]", style="blue"))
+                console.print(Panel("[bold]ÉTAPE 2/5 : ANALYSE[/bold]", style="blue"))
 
                 if skip_analysis or not self.analyzer:
                     if not self.analyzer:
@@ -367,6 +414,7 @@ class BankingNewsletterAgent:
                     )
 
                 self._save_checkpoint("analyse", analyzed_articles)
+            self._current_stage_data = analyzed_articles
 
             # Audit : logger les analyses
             for aa in analyzed_articles:
@@ -378,18 +426,20 @@ class BankingNewsletterAgent:
             # ═══════════════════════════════════════════════════════════
             # ÉTAPE 3 : CURATION V3 (distribution en 4 blocs, avec reprise)
             # ═══════════════════════════════════════════════════════════
+            self._current_stage = "curation"
             cached_curation = self._load_checkpoint("curation")
             if cached_curation is not None:
-                console.print(Panel("[bold]ÉTAPE 3/4 : CURATION V3 ♻ (reprise depuis checkpoint)[/bold]", style="green"))
+                console.print(Panel("[bold]ÉTAPE 3/5 : CURATION V3 ♻ (reprise depuis checkpoint)[/bold]", style="green"))
                 selection = cached_curation
             else:
-                console.print(Panel("[bold]ÉTAPE 3/4 : CURATION V3 — 4 blocs éditoriaux[/bold]", style="blue"))
+                console.print(Panel("[bold]ÉTAPE 3/5 : CURATION V3 — 4 blocs éditoriaux[/bold]", style="blue"))
 
                 if theme_id:
                     console.print(f"[cyan]🎯 Filtrage par thème: {theme_info.get('name', theme_id)}[/cyan]")
 
                 selection = self.curator.curate(analyzed_articles, theme_id=theme_id)
                 self._save_checkpoint("curation", selection)
+            self._current_stage_data = selection
             results["articles_selected"] = selection.total_selected
 
             # Résumé des blocs
@@ -423,35 +473,64 @@ class BankingNewsletterAgent:
                 return results
 
             # ═══════════════════════════════════════════════════════════
-            # ÉTAPE 4 : GÉNÉRATION V3
+            # ÉTAPE 4 : RÉDACTION (appels Claude — avec checkpoint)
             # ═══════════════════════════════════════════════════════════
-            console.print(Panel("[bold]ÉTAPE 4/4 : GÉNÉRATION V3[/bold]", style="blue"))
+            self._current_stage = "redaction"
+            cached_redaction = self._load_checkpoint("redaction")
+            if cached_redaction is not None:
+                console.print(Panel("[bold]ÉTAPE 4/5 : RÉDACTION ♻ (reprise depuis checkpoint)[/bold]", style="green"))
+                editorial = cached_redaction["editorial"]
+                chiffre_du_mois = cached_redaction["chiffre_du_mois"]
+                hashtags = cached_redaction["hashtags"]
+                sommaire = cached_redaction["sommaire"]
+                terrain = cached_redaction.get("terrain", terrain)
+            else:
+                console.print(Panel("[bold]ÉTAPE 4/5 : RÉDACTION (appels Claude)[/bold]", style="blue"))
 
-            # Générer les hashtags d'accroche
-            console.print("[dim]  → Génération des hashtags d'accroche...[/dim]")
-            hashtags = self.writer.generate_hashtags(selection)
+                # Générer les hashtags d'accroche
+                console.print("[dim]  → Génération des hashtags d'accroche...[/dim]")
+                hashtags = self.writer.generate_hashtags(selection)
 
-            # Générer le sommaire
-            sommaire = self.writer.generate_sommaire(selection)
+                # Générer le sommaire
+                sommaire = self.writer.generate_sommaire(selection)
 
-            # Générer l'éditorial V3 (250-300 mots, 4 parties)
-            console.print("[dim]  → Génération de l'éditorial V3 (4 parties, 250-300 mots)...[/dim]")
-            editorial = self.writer.generate_editorial(
-                selection, month,
-                tension_point=tension_point,
-                partner_name=partner_name
-            )
+                # Générer l'éditorial V3 (250-300 mots, 4 parties)
+                console.print("[dim]  → Génération de l'éditorial V3 (4 parties, 250-300 mots)...[/dim]")
+                editorial = self.writer.generate_editorial(
+                    selection, month,
+                    tension_point=tension_point,
+                    partner_name=partner_name
+                )
 
-            # Générer le Chiffre du mois (bandeau post-éditorial)
-            console.print("[dim]  → Génération du Chiffre du mois...[/dim]")
-            chiffre_du_mois = self.writer.generate_chiffre_du_mois(
-                selection, month, editorial
-            )
+                # Générer le Chiffre du mois (bandeau post-éditorial)
+                console.print("[dim]  → Génération du Chiffre du mois...[/dim]")
+                chiffre_du_mois = self.writer.generate_chiffre_du_mois(
+                    selection, month, editorial
+                )
 
-            # Générer le Terrain (optionnel)
-            if not skip_terrain and terrain is None:
-                console.print("[dim]  → Génération du Terrain Ares & Co...[/dim]")
-                terrain = self.writer.generate_terrain(selection, month)
+                # Générer le Terrain (optionnel)
+                if not skip_terrain and terrain is None:
+                    console.print("[dim]  → Génération du Terrain Ares & Co...[/dim]")
+                    terrain = self.writer.generate_terrain(selection, month)
+
+                # Sauvegarder le checkpoint rédaction
+                self._save_checkpoint("redaction", {
+                    "editorial": editorial,
+                    "chiffre_du_mois": chiffre_du_mois,
+                    "hashtags": hashtags,
+                    "sommaire": sommaire,
+                    "terrain": terrain,
+                })
+            self._current_stage_data = {
+                "editorial": editorial, "chiffre_du_mois": chiffre_du_mois,
+                "hashtags": hashtags, "sommaire": sommaire, "terrain": terrain,
+            }
+
+            # ═══════════════════════════════════════════════════════════
+            # ÉTAPE 5 : EXPORT (Markdown / HTML)
+            # ═══════════════════════════════════════════════════════════
+            self._current_stage = "export"
+            console.print(Panel("[bold]ÉTAPE 5/5 : EXPORT[/bold]", style="blue"))
 
             # Markdown
             if output_format in ("markdown", "both"):
