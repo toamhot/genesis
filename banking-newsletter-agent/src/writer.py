@@ -55,11 +55,77 @@ class NewsletterWriter:
 
     BLOC_ORDER = ["essentiel", "strategies_marches", "nouveaux_modeles", "regulation"]
 
+    BLOC_ANCHORS = {
+        "essentiel": "essentiel",
+        "strategies_marches": "strategies",
+        "nouveaux_modeles": "modeles",
+        "regulation": "regulation",
+    }
+
     # Gouvernance éditoriale
     DEFAULT_PARTNER = "Olivier Dupin"
 
     # Prompt éditorial V3
     EDITORIAL_SYSTEM_PROMPT = get_editorial_system_prompt()
+
+    def generate_hashtags(self, selection: CuratedSelection, max_tags: int = 6) -> List[str]:
+        """
+        Génère 5-6 hashtags accroche à partir des articles sélectionnés.
+        Ex: #BCE_taux #SocGen_Arkéa #IA_bancaire #FRTB_report
+        """
+        if not self.client:
+            # Fallback: extraire les entités les plus fréquentes
+            tags = []
+            for a in selection.top_articles[:max_tags]:
+                title = a.title_fr or a.article.title
+                # Prendre les 2 premiers mots significatifs
+                words = [w for w in title.split() if len(w) > 3 and w[0].isupper()]
+                if words:
+                    tags.append(f"#{words[0]}")
+            return tags[:max_tags]
+
+        articles_titles = "\n".join([
+            f"- {a.title_fr or a.article.title}"
+            for a in selection.top_articles[:12]
+        ])
+
+        prompt = f"""À partir de ces titres d'articles de newsletter bancaire, génère exactement {max_tags} hashtags accroche.
+
+ARTICLES :
+{articles_titles}
+
+RÈGLES :
+- Format : #MotClé (CamelCase ou underscore, ex: #BCE_taux, #SocGen_Arkéa, #IA_bancaire)
+- Court : 1-3 mots max par hashtag
+- Percutant : doit donner envie de lire
+- Pas de hashtag générique (#banque, #finance, #actualité)
+- Chaque hashtag doit référencer un sujet SPÉCIFIQUE de la newsletter
+
+Réponds UNIQUEMENT avec les hashtags séparés par des espaces, sur une seule ligne."""
+
+        response = self._call_claude(
+            "Tu es un éditeur de newsletter bancaire premium.",
+            prompt, max_tokens=128
+        )
+
+        tags = [t.strip() for t in response.strip().split() if t.startswith("#")]
+        return tags[:max_tags]
+
+    def generate_sommaire(self, selection: CuratedSelection) -> List[Dict[str, str]]:
+        """
+        Génère le sommaire cliquable avec les titres de section et le nombre d'items.
+        """
+        blocs = getattr(selection, 'blocs', {})
+        sommaire = []
+        for bloc_id in self.BLOC_ORDER:
+            articles = blocs.get(bloc_id, [])
+            if articles:
+                sommaire.append({
+                    "name": self.BLOC_NAMES.get(bloc_id, bloc_id),
+                    "anchor": self.BLOC_ANCHORS.get(bloc_id, bloc_id),
+                    "count": len(articles),
+                })
+        return sommaire
 
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
@@ -315,7 +381,9 @@ RÈGLES :
         editorial: Optional[str] = None,
         partner_name: Optional[str] = None,
         terrain: Optional[dict] = None,
-        chiffre_du_mois: Optional[Dict[str, str]] = None
+        chiffre_du_mois: Optional[Dict[str, str]] = None,
+        hashtags: Optional[List[str]] = None,
+        sommaire: Optional[List[Dict[str, str]]] = None
     ) -> str:
         """Génère la newsletter V3 au format Markdown."""
         console.print("\n[bold blue]📝 Génération du Markdown V3...[/bold blue]")
@@ -341,8 +409,23 @@ RÈGLES :
         lines.append("")
         lines.append("**Ares & Co** | Cabinet de conseil de Direction Générale")
         lines.append("")
+
+        # Hashtags d'accroche
+        if hashtags:
+            lines.append(" ".join(hashtags))
+            lines.append("")
+
         lines.append(sep)
         lines.append("")
+
+        # Sommaire
+        if sommaire:
+            lines.append("**SOMMAIRE**")
+            for s in sommaire:
+                lines.append(f"- [{s['name']}](#{s['anchor']}) ({s['count']} articles)")
+            lines.append("")
+            lines.append(sep)
+            lines.append("")
 
         # Bloc 0 — Éditorial
         lines.append("## NOTRE ÉDITORIAL")
@@ -401,8 +484,13 @@ RÈGLES :
                 lines.append(article.ai_summary)
                 lines.append("")
 
-                # Source
-                source_line = f"📰 {article.article.source}"
+                # Source avec lien
+                source_name = article.article.source
+                source_url = article.article.url
+                if source_url and source_url != "":
+                    source_line = f"📰 [{source_name}]({source_url})"
+                else:
+                    source_line = f"📰 {source_name}"
                 if article.article.published_date:
                     source_line += f" | {article.article.published_date.strftime('%d/%m/%Y')}"
                 lines.append(source_line)
@@ -447,7 +535,9 @@ RÈGLES :
         terrain: Optional[dict] = None,
         partner_name: Optional[str] = None,
         logo_url: Optional[str] = None,
-        chiffre_du_mois: Optional[Dict[str, str]] = None
+        chiffre_du_mois: Optional[Dict[str, str]] = None,
+        hashtags: Optional[List[str]] = None,
+        sommaire: Optional[List[Dict[str, str]]] = None
     ) -> str:
         """
         Génère la newsletter V3 avec la structure 5 blocs :
@@ -492,6 +582,8 @@ RÈGLES :
             item_numbers=item_numbers,
             terrain=terrain,
             chiffre_du_mois=chiffre_du_mois,
+            hashtags=hashtags or [],
+            sommaire=sommaire or [],
             generation_date=datetime.now().strftime('%d/%m/%Y'),
             logo_url=logo_url or ""
         )

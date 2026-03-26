@@ -252,7 +252,28 @@
             <div class="separator"></div>
             <h1>Newsletter Banque</h1>
             <div class="month">{{ month }}</div>
+            {% if hashtags %}
+            <div style="margin-top: 20px; font-size: 12px; font-weight: 300; letter-spacing: 0.5px; opacity: 0.85; line-height: 1.8;">
+                {% for tag in hashtags %}
+                <span style="display: inline-block; background: rgba(255,255,255,0.12); padding: 3px 10px; border-radius: 12px; margin: 2px 4px 2px 0; font-size: 11px;">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
+
+        <!-- SOMMAIRE -->
+        {% if sommaire %}
+        <div class="section" style="padding: 24px 40px; background-color: var(--light-bg); border-bottom: 1px solid #e5e7eb;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-light); margin-bottom: 12px; font-weight: 500;">Sommaire</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                {% for s in sommaire %}
+                <a href="#{{ s.anchor }}" style="text-decoration: none; font-size: 13px; color: var(--primary-color); padding: 6px 14px; border: 1px solid #d1d5db; border-radius: 20px; font-weight: 400; transition: all 0.2s;">
+                    {{ s.name }} <span style="color: var(--text-light); font-size: 11px;">({{ s.count }})</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
 
         <!-- ÉDITORIAL -->
         <div class="section edito">
@@ -272,19 +293,28 @@
 
         <!-- CHIFFRE DU MOIS -->
         {% if chiffre_du_mois and chiffre_du_mois.value %}
-        <div class="section" style="text-align: center; padding: 40px; background: linear-gradient(135deg, #f8fafc, #eef2f7);">
-            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px; color: var(--text-light); margin-bottom: 16px; font-weight: 500;">Le chiffre du mois</div>
-            <div style="font-family: Georgia, 'Times New Roman', serif; font-size: 42px; font-weight: 400; color: var(--primary-color); line-height: 1.2; margin-bottom: 12px;">{{ chiffre_du_mois.value }}</div>
-            <div style="font-size: 14px; font-weight: 500; color: var(--primary-color); margin-bottom: 8px;">{{ chiffre_du_mois.label }}</div>
+        <div class="section" style="text-align: center; padding: 44px 40px; background: linear-gradient(135deg, #f8fafc, #eef2f7); border-bottom: 1px solid #e5e7eb;">
+            <!-- Decorative SVG accent -->
+            <svg width="60" height="4" viewBox="0 0 60 4" style="margin-bottom: 20px;">
+                <rect width="60" height="4" rx="2" fill="var(--accent-blue, #57AEE0)" opacity="0.6"/>
+            </svg>
+            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: var(--text-light); margin-bottom: 20px; font-weight: 600;">Le chiffre du mois</div>
+            <div style="font-family: Georgia, 'Times New Roman', serif; font-size: 48px; font-weight: 400; color: var(--primary-color); line-height: 1.1; margin-bottom: 14px; letter-spacing: -1px;">{{ chiffre_du_mois.value }}</div>
+            <!-- Decorative underline bar -->
+            <svg width="120" height="3" viewBox="0 0 120 3" style="margin: 0 auto 16px auto; display: block;">
+                <rect width="120" height="3" rx="1.5" fill="var(--primary-color, #1a2a3a)" opacity="0.15"/>
+                <rect width="40" height="3" rx="1.5" fill="var(--accent-blue, #57AEE0)"/>
+            </svg>
+            <div style="font-size: 15px; font-weight: 500; color: var(--primary-color); margin-bottom: 10px; letter-spacing: 0.2px;">{{ chiffre_du_mois.label }}</div>
             {% if chiffre_du_mois.context %}
-            <div style="font-size: 12px; color: var(--text-light); font-style: italic; font-weight: 300;">{{ chiffre_du_mois.context }}</div>
+            <div style="font-size: 12px; color: var(--text-light); font-style: italic; font-weight: 300; max-width: 400px; margin: 0 auto;">{{ chiffre_du_mois.context }}</div>
             {% endif %}
         </div>
         {% endif %}
 
         <!-- BLOC 1 — L'ESSENTIEL -->
         {% if blocs.essentiel %}
-        <div class="section">
+        <div class="section" id="essentiel">
             <h2 class="section-title">L&rsquo;essentiel</h2>
             {% for article in blocs.essentiel %}
             <div class="bloc-article">
@@ -303,7 +333,7 @@
 
         <!-- BLOC 2 — STRATÉGIES & MARCHÉS -->
         {% if blocs.strategies_marches %}
-        <div class="section">
+        <div class="section" id="strategies">
             <h2 class="section-title">Strat&eacute;gies &amp; march&eacute;s</h2>
             {% for article in blocs.strategies_marches %}
             <div class="bloc-article">
@@ -322,7 +352,7 @@
 
         <!-- BLOC 3 — NOUVEAUX MODÈLES -->
         {% if blocs.nouveaux_modeles %}
-        <div class="section">
+        <div class="section" id="modeles">
             <h2 class="section-title">Nouveaux mod&egrave;les</h2>
             {% for article in blocs.nouveaux_modeles %}
             <div class="bloc-article">
@@ -344,7 +374,7 @@
 
         <!-- BLOC 4 — RÉGULATION & SUPERVISION -->
         {% if blocs.regulation %}
-        <div class="section">
+        <div class="section" id="regulation">
             <h2 class="section-title">R&eacute;gulation &amp; supervision</h2>
             {% for article in blocs.regulation %}
             <div class="bloc-article">

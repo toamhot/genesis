@@ -174,24 +174,32 @@ Chaque item comporte : un titre en gras, un corps (max 6 lignes), la source et l
 Pas de "key takeaway" séparé — l'implication est intégrée dans le corps du texte, en dernière phrase.
 """
 
-# Prompt spécifique Bloc 1 — L'essentiel
+# Prompt spécifique Bloc 1 — L'essentiel (RÉSUMÉ LONG — 4-6 phrases)
 BLOC_ESSENTIEL_PROMPT = """
-Ce bloc documente le point de tension de l'éditorial avec 1 à 3 faits concrets.
+Ce bloc documente le point de tension de l'éditorial avec 2 à 4 faits concrets.
 Ce n'est PAS un "top news" généraliste — c'est une sélection au service d'une thèse.
+
+PROFONDEUR : ÉLEVÉE (4-6 phrases, 80-120 mots par item)
+Les items de ce bloc sont les plus détaillés de la newsletter.
 
 Structure d'un item :
 - Phrase 1 : contexte — pourquoi ce fait compte maintenant
-- Phrase 2 : le fait lui-même — chiffre, annonce, décision
-- Phrase 3 : implication immédiate pour les établissements FS français
+- Phrase 2-3 : le fait lui-même — chiffre, annonce, décision, avec sous-points si pertinent
+- Phrase 4 : implication immédiate pour les établissements FS français
+- **→ À retenir : [implication clé en 1 phrase, en gras]** — OBLIGATOIRE sur chaque item
 
-Chaque item se termine par une phrase d'implication — ce que ce fait change ou devrait changer.
-Pas un commentaire général mais une conséquence opérationnelle ou stratégique précise.
+Le "À retenir" est la ligne que le DG retient et cite en COMEX. Elle doit être :
+- Concrète et actionnable
+- Spécifique (pas de "il faudra suivre l'évolution")
+- Formulée comme une conséquence opérationnelle ou stratégique
 """
 
-# Prompt spécifique Bloc 2 — Stratégies & marchés
+# Prompt spécifique Bloc 2 — Stratégies & marchés (RÉSUMÉ MOYEN — 3-4 phrases)
 BLOC_STRATEGIES_PROMPT = """
 Ce bloc couvre le jeu d'acteurs : qui fait quoi, avec qui, à quel prix.
 Actualité concurrentielle et stratégique des banques, assureurs et acteurs connexes.
+
+PROFONDEUR : MOYENNE (3-4 phrases, 60-80 mots par item)
 
 Sont éligibles :
 - M&A, rapprochements, prises de participation, OPA
@@ -208,10 +216,12 @@ Structure d'un item :
 Chaque item doit répondre à : "En quoi ce mouvement redessine-t-il les équilibres compétitifs ?"
 """
 
-# Prompt spécifique Bloc 3 — Nouveaux modèles
+# Prompt spécifique Bloc 3 — Nouveaux modèles (RÉSUMÉ MOYEN — 3-4 phrases)
 BLOC_MODELES_PROMPT = """
 Ce bloc est le plus prospectif. Innovations, disruptions et nouveaux modèles d'affaires
 qui reconfigurent le secteur à 2-5 ans.
+
+PROFONDEUR : MOYENNE (3-4 phrases, 60-80 mots par item)
 
 Sont éligibles :
 - Nouveaux business models : BaaS, embedded finance, open banking, plateformes
@@ -235,11 +245,14 @@ Convention "Notre lecture" :
 - PAS systématique — seulement quand le cabinet a vraiment quelque chose à dire
 """
 
-# Prompt spécifique Bloc 4 — Régulation & supervision
+# Prompt spécifique Bloc 4 — Régulation & supervision (RÉSUMÉ COURT — 2-3 phrases)
 BLOC_REGULATION_PROMPT = """
 Ce bloc informe sur les évolutions du cadre réglementaire et de la supervision bancaire.
 Sa valeur ajoutée n'est PAS de répliquer les communiqués officiels — c'est de traduire chaque évolution
 en implication opérationnelle ou stratégique concrète.
+
+PROFONDEUR : CONCISE (2-3 phrases, 40-60 mots par item)
+Les items de régulation sont factuels et denses. Pas de contexte superflu.
 
 Sont éligibles :
 - Publications officielles BCE, EBA, AMF, ACPR, Banque de France
@@ -250,9 +263,8 @@ Sont éligibles :
 - Calendriers réglementaires : dates d'entrée en vigueur approchantes
 
 Structure d'un item :
-- Phrase 1 : contexte réglementaire — de quoi il s'agit et pourquoi maintenant
-- Phrase 2 : la mesure — ce qui est décidé, publié ou entré en vigueur
-- Phrase 3 : implication concrète — ce que ça change pour un établissement français (délai, coût, process)
+- Phrase 1 : la mesure — ce qui est décidé/publié (avec date d'effet si applicable)
+- Phrase 2 : implication concrète — ce que ça change pour un établissement français (délai, coût, process)
 
 RÈGLE ABSOLUE : ne jamais résumer un communiqué officiel sans en tirer une implication concrète.
 Question à se poser : "Un DAF ou un DRC d'une banque française, qu'est-ce qu'il doit faire à cause de ça ?"

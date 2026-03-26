@@ -65,10 +65,10 @@ class Curator:
     }
 
     BLOC_LIMITS = {
-        "essentiel": (1, 3),        # 1 à 3 items
-        "strategies_marches": (2, 3),  # 2 à 3 items
-        "nouveaux_modeles": (2, 3),    # 2 à 3 items
-        "regulation": (2, 3),          # 2 à 3 items
+        "essentiel": (2, 4),          # 2 à 4 items (thème du mois, profondeur élevée)
+        "strategies_marches": (3, 6),  # 3 à 6 items
+        "nouveaux_modeles": (3, 5),    # 3 à 5 items
+        "regulation": (3, 5),          # 3 à 5 items
     }
 
     BLOC_ORDER = ["essentiel", "strategies_marches", "nouveaux_modeles", "regulation"]
@@ -606,8 +606,8 @@ class Curator:
         deduplicated = self.deduplicate_similar(ranked)
         console.print(f"  [dim]• {len(deduplicated)} articles après déduplication[/dim]")
 
-        # Étape 4b: Plafonner par source (max 2 articles/source)
-        diversified = self.cap_per_source(deduplicated, max_per_source=2)
+        # Étape 4b: Plafonner par source (max 3 articles/source)
+        diversified = self.cap_per_source(deduplicated, max_per_source=3)
         console.print(f"  [dim]• {len(diversified)} articles après diversification sources[/dim]")
 
         # Étape 5: Distribuer dans les 4 blocs

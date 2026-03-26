@@ -18,8 +18,8 @@ V3 — Structure 5 blocs :
 + Terrain Ares & Co (optionnel)
 + CTA
 
-Numérotation continue #1 à #12 max.
-Volume cible : 1 450 à 1 700 mots (éditorial inclus).
+Numérotation continue #1 à #20 max.
+Volume cible : 2 500 à 3 500 mots (éditorial inclus).
 """
 
 import argparse
@@ -105,7 +105,7 @@ class BankingNewsletterAgent:
         self.analyzer = None
         self.curator = Curator(
             min_relevance_score=3.0,
-            max_total_articles=12,   # V3 : jusqu'à 12 items
+            max_total_articles=20,   # V4 : jusqu'à 20 items (gradient de profondeur)
             themes_config_path=themes_config_path
         )
         self.writer = NewsletterWriter(api_key=self.api_key)
@@ -316,6 +316,13 @@ class BankingNewsletterAgent:
             # ═══════════════════════════════════════════════════════════
             console.print(Panel("[bold]ÉTAPE 4/4 : GÉNÉRATION V3[/bold]", style="blue"))
 
+            # Générer les hashtags d'accroche
+            console.print("[dim]  → Génération des hashtags d'accroche...[/dim]")
+            hashtags = self.writer.generate_hashtags(selection)
+
+            # Générer le sommaire
+            sommaire = self.writer.generate_sommaire(selection)
+
             # Générer l'éditorial V3 (250-300 mots, 4 parties)
             console.print("[dim]  → Génération de l'éditorial V3 (4 parties, 250-300 mots)...[/dim]")
             editorial = self.writer.generate_editorial(
@@ -342,7 +349,9 @@ class BankingNewsletterAgent:
                     selection, month, editorial,
                     partner_name=partner_name,
                     terrain=terrain,
-                    chiffre_du_mois=chiffre_du_mois
+                    chiffre_du_mois=chiffre_du_mois,
+                    hashtags=hashtags,
+                    sommaire=sommaire
                 )
                 md_path = self.writer.save_markdown(md_content, self.output_dir)
                 results["output_files"].append(md_path)
@@ -357,7 +366,9 @@ class BankingNewsletterAgent:
                     terrain=terrain,
                     partner_name=partner_name,
                     logo_url=logo_url,
-                    chiffre_du_mois=chiffre_du_mois
+                    chiffre_du_mois=chiffre_du_mois,
+                    hashtags=hashtags,
+                    sommaire=sommaire
                 )
                 html_path = self.writer.save_html(html_content, self.output_dir)
                 results["output_files"].append(html_path)
