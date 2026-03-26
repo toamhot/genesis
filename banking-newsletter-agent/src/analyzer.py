@@ -14,8 +14,11 @@ import re
 from typing import List, Dict, Optional
 from dataclasses import dataclass
 import json
+import logging
 import anthropic
-from tenacity import retry, stop_after_attempt, wait_exponential
+import httpx
+from httpx import Timeout
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, before_sleep_log
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 
@@ -23,6 +26,20 @@ from collector import Article
 from persona import get_analysis_system_prompt, get_article_summary_guidelines
 
 console = Console()
+logger = logging.getLogger(__name__)
+
+# Exceptions réseau transitoires qui méritent un retry
+TRANSIENT_EXCEPTIONS = (
+    anthropic.APIConnectionError,
+    anthropic.RateLimitError,
+    anthropic.InternalServerError,
+    httpx.ConnectError,
+    httpx.ReadTimeout,
+    httpx.WriteTimeout,
+    httpx.PoolTimeout,
+    ConnectionError,
+    TimeoutError,
+)
 
 
 def clean_json_response(response: str) -> str:
@@ -124,7 +141,10 @@ Réponds UNIQUEMENT en JSON valide, avec TOUT le contenu EN FRANÇAIS."""
                 "Clé API Anthropic requise. "
                 "Définir ANTHROPIC_API_KEY ou passer api_key au constructeur."
             )
-        self.client = anthropic.Anthropic(api_key=self.api_key)
+        self.client = anthropic.Anthropic(
+            api_key=self.api_key,
+            timeout=Timeout(120.0, connect=10.0),
+        )
         self.model = "claude-sonnet-4-20250514"
 
     def _sample_articles_by_period(
@@ -214,18 +234,24 @@ Réponds UNIQUEMENT en JSON valide, avec TOUT le contenu EN FRANÇAIS."""
         return selected
 
     @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=10)
+        stop=stop_after_attempt(5),
+        wait=wait_exponential(multiplier=2, min=2, max=60),
+        retry=retry_if_exception_type(TRANSIENT_EXCEPTIONS),
+        before_sleep=before_sleep_log(logger, logging.WARNING)
     )
     def _call_claude(self, prompt: str, max_tokens: int = 2048) -> str:
-        """Appelle Claude API avec retry automatique"""
-        message = self.client.messages.create(
-            model=self.model,
-            max_tokens=max_tokens,
-            system=self.SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return message.content[0].text
+        """Appelle Claude API avec retry automatique sur erreurs réseau transitoires"""
+        try:
+            message = self.client.messages.create(
+                model=self.model,
+                max_tokens=max_tokens,
+                system=self.SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return message.content[0].text
+        except TRANSIENT_EXCEPTIONS as e:
+            console.print(f"[yellow]⚠ Erreur réseau Claude API (retry auto): {type(e).__name__}: {str(e)[:80]}[/yellow]")
+            raise  # Laisser tenacity gérer le retry
 
     def analyze_article(self, article: Article) -> AnalyzedArticle:
         """Analyse un article individuel avec Claude"""
@@ -353,6 +379,7 @@ Réponds en JSON avec cette structure exacte :
         console.print(f"\n[bold blue]🔍 Analyse optimisée de {len(articles)} articles...[/bold blue]\n")
 
         analyzed = []
+        rate_limit_backoff = 30  # Backoff adaptatif pour rate limit (augmente à chaque hit)
 
         # Diviser en lots
         batches = [articles[i:i + batch_size] for i in range(0, len(articles), batch_size)]
@@ -370,13 +397,34 @@ Réponds en JSON avec cette structure exacte :
                 try:
                     batch_results = self._analyze_batch_single_call(batch)
                     analyzed.extend(batch_results)
+                except (anthropic.APIConnectionError, httpx.ConnectError, ConnectionError, TimeoutError) as e:
+                    console.print(f"[yellow]⚠ Perte de connexion lot {batch_num+1}: {type(e).__name__}[/yellow]")
+                    console.print(f"[yellow]  → Attente de 15s avant reconnexion...[/yellow]")
+                    time.sleep(15)
+                    # Réessayer le lot après reconnexion
+                    try:
+                        batch_results = self._analyze_batch_single_call(batch)
+                        analyzed.extend(batch_results)
+                        console.print(f"[green]  → Reconnexion réussie, lot {batch_num+1} analysé[/green]")
+                    except Exception as retry_e:
+                        console.print(f"[red]✗ Échec après reconnexion: {str(retry_e)[:80]}[/red]")
+                        # Fallback : analyser individuellement avec délais plus longs
+                        for article in batch:
+                            try:
+                                time.sleep(3)
+                                result = self.analyze_article(article)
+                                analyzed.append(result)
+                            except Exception as ind_e:
+                                console.print(f"[red]  → {article.title[:30]}: {str(ind_e)[:50]}[/red]")
                 except anthropic.RateLimitError as e:
-                    console.print(f"[yellow]⚠ Rate limit atteint, pause de 30s...[/yellow]")
-                    time.sleep(30)
+                    console.print(f"[yellow]⚠ Rate limit atteint, pause de {rate_limit_backoff}s...[/yellow]")
+                    time.sleep(rate_limit_backoff)
+                    rate_limit_backoff = min(rate_limit_backoff * 2, 300)  # Double à chaque hit, max 5min
                     # Réessayer après pause
                     try:
                         batch_results = self._analyze_batch_single_call(batch)
                         analyzed.extend(batch_results)
+                        rate_limit_backoff = max(rate_limit_backoff // 2, 30)  # Réduire si succès
                     except Exception as retry_e:
                         console.print(f"[red]✗ Échec après retry: {str(retry_e)[:80]}[/red]")
                 except anthropic.APIError as e:
@@ -384,7 +432,7 @@ Réponds en JSON avec cette structure exacte :
                     # Fallback : analyser individuellement avec délai
                     for article in batch:
                         try:
-                            time.sleep(1)  # Petit délai entre chaque
+                            time.sleep(1)
                             result = self.analyze_article(article)
                             analyzed.append(result)
                         except Exception as ind_e:
