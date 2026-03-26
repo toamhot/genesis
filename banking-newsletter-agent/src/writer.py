@@ -17,7 +17,9 @@ from datetime import datetime
 from typing import Optional, Dict, List
 import anthropic
 from jinja2 import Template, Environment, BaseLoader
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, before_sleep_log
+import logging
+import httpx
 from rich.console import Console
 
 from curator import CuratedSelection
@@ -29,6 +31,20 @@ from persona import (
 )
 
 console = Console()
+logger = logging.getLogger(__name__)
+
+# Exceptions réseau transitoires qui méritent un retry
+TRANSIENT_EXCEPTIONS = (
+    anthropic.APIConnectionError,
+    anthropic.RateLimitError,
+    anthropic.InternalServerError,
+    httpx.ConnectError,
+    httpx.ReadTimeout,
+    httpx.WriteTimeout,
+    httpx.PoolTimeout,
+    ConnectionError,
+    TimeoutError,
+)
 
 
 def format_date_fr(dt) -> str:
@@ -135,11 +151,13 @@ Réponds UNIQUEMENT avec les hashtags séparés par des espaces, sur une seule l
         self.model = "claude-sonnet-4-20250514"
 
     @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=10)
+        stop=stop_after_attempt(5),
+        wait=wait_exponential(multiplier=2, min=2, max=60),
+        retry=retry_if_exception_type(TRANSIENT_EXCEPTIONS),
+        before_sleep=before_sleep_log(logger, logging.WARNING)
     )
     def _call_claude(self, system: str, prompt: str, max_tokens: int = 1024) -> str:
-        """Appelle Claude API"""
+        """Appelle Claude API avec retry sur erreurs réseau transitoires"""
         if not self.client:
             console.print("[yellow]⚠ Pas de client Claude API[/yellow]")
             return "[Contenu à rédiger manuellement - Clé API manquante]"
@@ -152,8 +170,11 @@ Réponds UNIQUEMENT avec les hashtags séparés par des espaces, sur une seule l
                 messages=[{"role": "user", "content": prompt}]
             )
             return message.content[0].text
+        except TRANSIENT_EXCEPTIONS as e:
+            console.print(f"[yellow]⚠ Erreur réseau Claude API (retry auto): {type(e).__name__}: {str(e)[:80]}[/yellow]")
+            raise  # Laisser tenacity gérer le retry
         except Exception as e:
-            console.print(f"[red]✗ Erreur API Claude: {str(e)[:100]}[/red]")
+            console.print(f"[red]✗ Erreur API Claude (non-récupérable): {str(e)[:100]}[/red]")
             return f"[Erreur génération: {str(e)[:50]}]"
 
     def generate_editorial(
