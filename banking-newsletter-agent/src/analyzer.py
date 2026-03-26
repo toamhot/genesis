@@ -82,6 +82,7 @@ class AnalyzedArticle:
     sentiment: str  # positive, negative, neutral
     newsletter_priority: int  # 1-5, 1 = très important
     title_fr: str = ""  # Titre traduit en français si source anglaise
+    notre_lecture: str = ""  # Conviction Ares & Co pour Bloc 3 (optionnel)
 
 
 class Analyzer:

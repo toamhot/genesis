@@ -174,39 +174,60 @@ Chaque item comporte : un titre en gras, un corps (max 6 lignes), la source et l
 Pas de "key takeaway" séparé — l'implication est intégrée dans le corps du texte, en dernière phrase.
 """
 
-# Prompt spécifique Bloc 1 — L'essentiel (RÉSUMÉ LONG — 4-6 phrases)
+# Prompt spécifique Bloc 1 — L'essentiel (4-5 lignes de corps, 1-3 items)
 BLOC_ESSENTIEL_PROMPT = """
-Ce bloc documente le point de tension de l'éditorial avec 2 à 4 faits concrets.
-Ce n'est PAS un "top news" généraliste — c'est une sélection au service d'une thèse.
+Ce bloc est la CAISSE DE RÉSONANCE de l'éditorial. Il documente le point de tension
+avec 1 à 3 faits concrets. Le lecteur qui a lu l'édito cherche ici la PREUVE que
+la tension est réelle et actuelle. Ce n'est PAS un "top news" généraliste — c'est
+une sélection au service d'une thèse.
 
-PROFONDEUR : ÉLEVÉE (4-6 phrases, 80-120 mots par item)
-Les items de ce bloc sont les plus détaillés de la newsletter.
+PROFONDEUR : 4-5 lignes de corps par item, jamais plus de 6 lignes.
+
+Critères de sélection (par ordre de priorité) :
+1. Lien direct avec le point de tension de l'éditorial
+2. Nouveauté — annonce, publication, décision datant des 2 derniers mois
+3. Significance — fait structurant : chiffre macro, décision institutionnelle, mouvement majeur
+4. Priorité France — sources et acteurs français en premier
+5. Pas de doublon avec les blocs suivants
 
 Structure d'un item :
 - Phrase 1 : contexte — pourquoi ce fait compte maintenant
-- Phrase 2-3 : le fait lui-même — chiffre, annonce, décision, avec sous-points si pertinent
-- Phrase 4 : implication immédiate pour les établissements FS français
-- **→ À retenir : [implication clé en 1 phrase, en gras]** — OBLIGATOIRE sur chaque item
+- Phrase 2 : le fait lui-même — chiffre, annonce, décision
+- Phrase 3 : implication immédiate pour les établissements FS français
+L'implication est intégrée dans le corps, en dernière phrase. Pas de "key takeaway" séparé.
 
-Le "À retenir" est la ligne que le DG retient et cite en COMEX. Elle doit être :
-- Concrète et actionnable
-- Spécifique (pas de "il faudra suivre l'évolution")
-- Formulée comme une conséquence opérationnelle ou stratégique
+Sources prioritaires : BCE, Banque de France, AMF, ACPR, Les Echos, L'Agefi, FT (1 max)
+
+ANTI-PATTERNS :
+- ❌ Sélectionner un item parce qu'il est récent mais sans lien avec l'éditorial
+- ❌ Reprendre un titre sans reformulation — l'item doit apporter une lecture, pas un résumé
+- ❌ Dépasser 5 lignes de corps — si c'est plus long, c'est un item "Stratégies & marchés"
+- ❌ Mettre 3 items si 1 seul est vraiment lié à l'éditorial
 """
 
-# Prompt spécifique Bloc 2 — Stratégies & marchés (RÉSUMÉ MOYEN — 3-4 phrases)
+# Prompt spécifique Bloc 2 — Stratégies & marchés (4-6 lignes de corps, 2-3 items)
 BLOC_STRATEGIES_PROMPT = """
 Ce bloc couvre le jeu d'acteurs : qui fait quoi, avec qui, à quel prix.
 Actualité concurrentielle et stratégique des banques, assureurs et acteurs connexes.
+Le lecteur y cherche ce qui REDESSINE les équilibres du marché — pas ce qui confirme
+ce qu'il sait déjà.
 
-PROFONDEUR : MOYENNE (3-4 phrases, 60-80 mots par item)
+PROFONDEUR : 4-6 lignes de corps par item, jamais plus de 6 lignes.
 
 Sont éligibles :
 - M&A, rapprochements, prises de participation, OPA
-- Résultats financiers STRUCTURANTS (pas les résultats routiniers)
+- Résultats financiers STRUCTURANTS (pas les résultats routiniers — sauf rupture ou surprise)
 - Mouvements stratégiques majeurs : nouvelle offre, nouveau marché, abandon d'activité
+- Partenariats stratégiques à fort impact sur le modèle d'affaires
 - Plans de transformation ou restructuration significatifs
-- Nominations dirigeantes de premier rang
+- Nominations dirigeantes de premier rang (PDG, DG, CDO de grandes banques françaises)
+
+Ne sont PAS éligibles :
+- Résultats trimestriels conformes aux attentes sans signal particulier
+- Partenariats commerciaux mineurs ou locaux
+- Communiqués de presse promotionnels sans fait stratégique
+
+Priorité géographique : France d'abord, puis Europe (si impact FR), puis international.
 
 Structure d'un item :
 - Phrase 1 : contexte — situation avant le mouvement
@@ -214,22 +235,39 @@ Structure d'un item :
 - Phrase 3 : implication concurrentielle — ce que ça change pour les autres acteurs
 
 Chaque item doit répondre à : "En quoi ce mouvement redessine-t-il les équilibres compétitifs ?"
+
+Sources prioritaires : Les Echos, L'Agefi, La Tribune, FT, WSJ, Reuters
+
+ANTI-PATTERNS :
+- ❌ Mettre 2 items sur le même acteur dans la même édition
+- ❌ Items sans chiffre ni date précise — le flou nuit à la crédibilité
+- ❌ Traiter une nomination sans expliquer ce qu'elle signale stratégiquement
+- ❌ Résumé neutre sans prise de position sur l'enjeu compétitif
 """
 
-# Prompt spécifique Bloc 3 — Nouveaux modèles (RÉSUMÉ MOYEN — 3-4 phrases)
+# Prompt spécifique Bloc 3 — Nouveaux modèles (4-6 lignes de corps, 2-3 items)
 BLOC_MODELES_PROMPT = """
-Ce bloc est le plus prospectif. Innovations, disruptions et nouveaux modèles d'affaires
-qui reconfigurent le secteur à 2-5 ans.
+Ce bloc est le plus prospectif. Il couvre les innovations, disruptions et nouveaux modèles
+d'affaires qui reconfigurent le secteur à 2-5 ans. C'est ici qu'on monte en abstraction
+par rapport aux faits du jour. C'est aussi le SEUL bloc (hors éditorial) où le cabinet
+prend position via "Notre lecture".
 
-PROFONDEUR : MOYENNE (3-4 phrases, 60-80 mots par item)
+PROFONDEUR : 4-6 lignes de corps par item, jamais plus de 6 lignes.
 
 Sont éligibles :
-- Nouveaux business models : BaaS, embedded finance, open banking, plateformes
-- Innovations technologiques à impact démontré : IA générative, core banking, paiements instantanés
-- Initiatives fintech significatives ou partenariats banque × tech
+- Nouveaux business models bancaires : BaaS, embedded finance, open banking, plateformes
+- Innovations technologiques à impact sectoriel démontré ou imminent : IA générative, core banking, paiements instantanés, tokenisation d'actifs
+- Initiatives fintech significatives ou partenariats banque × tech à fort potentiel de réplication
+- Expérimentations clients à l'étranger susceptibles d'arriver en France (benchmark international)
 - Signaux faibles qui redéfiniront les pratiques dans 18-36 mois
 
 Critère discriminant : "En quoi ce modèle remet-il en question une pratique établie chez les banques françaises ?"
+Si la réponse est vague, l'item n'est PAS éligible.
+
+Ne sont PAS éligibles :
+- Innovations purement technologiques sans implication sur le modèle d'affaires
+- Annonces de levées de fonds sans nouveau modèle derrière
+- Tendances déjà traitées dans les 2 éditions précédentes sans fait nouveau
 
 Structure d'un item :
 - Phrase 1 : de quoi s'agit-il — description concise du modèle ou de l'innovation
@@ -239,35 +277,61 @@ Structure d'un item :
 
 Convention "Notre lecture" :
 - Introduite par "→ Notre lecture :" en italique
-- Prise de position, pas un commentaire
-- Porte sur l'implication stratégique pour les banques françaises
+- Prise de position, PAS un commentaire ("c'est une tendance intéressante à suivre" = REJETÉ)
+- Porte sur l'implication stratégique pour les banques françaises spécifiquement
 - 1 phrase, 20-30 mots max
 - PAS systématique — seulement quand le cabinet a vraiment quelque chose à dire
+
+Sources prioritaires : Finextra, Mind Fintech, C'est pas mon idée, France FinTech, Les Echos (tech), The Financial Brand
+
+ANTI-PATTERNS :
+- ❌ Item sur une levée de fonds sans nouveau modèle derrière ("X lève 50M€" n'est pas un nouveau modèle)
+- ❌ Conviction systématique sur chaque item — elle perd sa valeur si elle est partout
+- ❌ Innovation purement technologique sans implication métier claire
+- ❌ Benchmark international sans traduction pour le marché français
 """
 
-# Prompt spécifique Bloc 4 — Régulation & supervision (RÉSUMÉ COURT — 2-3 phrases)
+# Prompt spécifique Bloc 4 — Régulation & supervision (4-6 lignes de corps, 2-3 items)
 BLOC_REGULATION_PROMPT = """
-Ce bloc informe sur les évolutions du cadre réglementaire et de la supervision bancaire.
-Sa valeur ajoutée n'est PAS de répliquer les communiqués officiels — c'est de traduire chaque évolution
-en implication opérationnelle ou stratégique concrète.
+Ce bloc informe sur les évolutions du cadre réglementaire et de la supervision bancaire
+en France et en Europe. Sa valeur ajoutée n'est PAS de répliquer les communiqués officiels
+— c'est de TRADUIRE chaque évolution en implication opérationnelle ou stratégique concrète
+pour un établissement français. Le lecteur doit sortir de ce bloc en sachant ce qu'il doit
+FAIRE ou SURVEILLER, pas seulement ce qui s'est passé.
 
-PROFONDEUR : CONCISE (2-3 phrases, 40-60 mots par item)
-Les items de régulation sont factuels et denses. Pas de contexte superflu.
+PROFONDEUR : 4-6 lignes de corps par item, jamais plus de 6 lignes.
 
 Sont éligibles :
-- Publications officielles BCE, EBA, AMF, ACPR, Banque de France
-- Nouvelles réglementations : Bâle IV/FRTB, DORA, MiCA, DSP3, CSRD/ESG, AML/AMLA
-- Décisions de politique monétaire impactant les bilans bancaires
-- Résultats de stress tests, rapports de stabilité financière
+- Publications officielles BCE, EBA, AMF, ACPR, Banque de France avec impact concret
+- Nouvelles réglementations ou consultations à enjeu fort : Bâle IV/FRTB, DORA, MiCA, DSP3, CSRD/ESG, AML/AMLA
+- Décisions de politique monétaire impactant les bilans bancaires (taux, liquidité, TLTRO)
+- Résultats de stress tests, rapports de stabilité financière révélant des vulnérabilités
 - Évolutions prudentielles ou comptables (IFRS 9, CRR/CRD)
-- Calendriers réglementaires : dates d'entrée en vigueur approchantes
+- Jurisprudences réglementaires significatives (sanctions, décisions d'agrément)
+- Calendriers réglementaires : dates d'entrée en vigueur, délais de mise en conformité approchants
+
+Ne sont PAS éligibles :
+- Consultations en phase initiale sans impact visible avant 18 mois
+- Communications génériques de régulateurs sans mesure nouvelle
+- Doublon avec ce qui a été traité dans l'édition précédente sauf fait nouveau
 
 Structure d'un item :
-- Phrase 1 : la mesure — ce qui est décidé/publié (avec date d'effet si applicable)
-- Phrase 2 : implication concrète — ce que ça change pour un établissement français (délai, coût, process)
+- Phrase 1 : contexte réglementaire — de quoi il s'agit et pourquoi maintenant
+- Phrase 2 : la mesure — ce qui est décidé/publié (avec date d'effet si applicable)
+- Phrase 3 : implication concrète — ce que ça change pour un établissement français (délai, coût, process, organisation)
+
+Les implications peuvent être :
+- Opérationnelle : mise en conformité, adaptation des systèmes, révision des process
+- Financière : impact sur les fonds propres, les provisions, le coût du risque
+- Stratégique : révision d'un modèle d'affaires, sortie d'une activité, repositionnement
 
 RÈGLE ABSOLUE : ne jamais résumer un communiqué officiel sans en tirer une implication concrète.
 Question à se poser : "Un DAF ou un DRC d'une banque française, qu'est-ce qu'il doit faire à cause de ça ?"
+
+Sources prioritaires (hiérarchie) :
+1. Sources primaires (à citer directement) : BCE, EBA, AMF, ACPR, Banque de France, Commission européenne
+2. Sources secondaires (pour l'interprétation) : Revue Banque, L'Agefi, blogs réglementaires (Linklaters, Clifford Chance)
+Les sources secondaires ne remplacent JAMAIS les sources primaires.
 
 Nomenclature réglementaire :
 - Bâle IV / FRTB : Capital réglementaire risque de marché
@@ -279,6 +343,12 @@ Nomenclature réglementaire :
 - CRR3 / CRD6 : Capital Requirements Regulation/Directive
 - IFRS 9 : International Financial Reporting Standard 9
 - SREP : Supervisory Review and Evaluation Process
+
+ANTI-PATTERNS :
+- ❌ Résumer un communiqué officiel sans implication concrète — c'est ce que fait déjà la revue de presse
+- ❌ Traiter un sujet réglementaire trop en amont (consultation en phase initiale, texte sans date d'entrée en vigueur)
+- ❌ Utiliser un acronyme sans l'avoir défini au moins une fois dans l'édition
+- ❌ Deux items sur le même régulateur dans la même édition sauf si les sujets sont très distincts
 """
 
 

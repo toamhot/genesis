@@ -65,10 +65,10 @@ class Curator:
     }
 
     BLOC_LIMITS = {
-        "essentiel": (2, 4),          # 2 à 4 items (thème du mois, profondeur élevée)
-        "strategies_marches": (3, 6),  # 3 à 6 items
-        "nouveaux_modeles": (3, 5),    # 3 à 5 items
-        "regulation": (3, 5),          # 3 à 5 items
+        "essentiel": (1, 3),          # 1 à 3 items (CDC: caisse de résonance de l'éditorial)
+        "strategies_marches": (2, 3),  # 2 à 3 items (CDC)
+        "nouveaux_modeles": (2, 3),    # 2 à 3 items (CDC)
+        "regulation": (2, 3),          # 2 à 3 items (CDC)
     }
 
     BLOC_ORDER = ["essentiel", "strategies_marches", "nouveaux_modeles", "regulation"]
@@ -107,7 +107,7 @@ class Curator:
     def __init__(
         self,
         min_relevance_score: float = 5.0,
-        max_total_articles: int = 12,
+        max_total_articles: int = 20,  # CDC: 12 max, étendu à 20 par choix éditorial
         target_month: Optional[datetime] = None,
         days_back: int = 30,
         themes_config_path: Optional[str] = None
@@ -469,6 +469,44 @@ class Curator:
 
         return capped
 
+    def _enforce_diversity(
+        self,
+        candidates: List[AnalyzedArticle],
+        max_items: int,
+        bloc_id: str
+    ) -> List[AnalyzedArticle]:
+        """
+        Sélectionne les articles en respectant les contraintes de diversité CDC :
+        - Bloc 2 (strategies_marches) : pas 2 items sur le même acteur
+        - Bloc 4 (regulation) : pas 2 items sur le même régulateur sauf sujets très distincts
+        """
+        selected = []
+        seen_entities = set()
+
+        for article in candidates:
+            if len(selected) >= max_items:
+                break
+
+            # Extraire l'acteur/régulateur principal depuis les entités
+            primary_entity = None
+            if article.entities:
+                primary_entity = article.entities[0].lower().strip()
+
+            # Vérifier la contrainte de diversité
+            if primary_entity and primary_entity in seen_entities:
+                if bloc_id in ("strategies_marches", "regulation"):
+                    console.print(
+                        f"  [dim]  ↳ Diversité: {(article.title_fr or article.article.title)[:45]}... "
+                        f"écarté (doublon acteur: {primary_entity})[/dim]"
+                    )
+                    continue
+
+            selected.append(article)
+            if primary_entity:
+                seen_entities.add(primary_entity)
+
+        return selected
+
     def distribute_to_blocs(
         self,
         articles: List[AnalyzedArticle],
@@ -492,10 +530,12 @@ class Curator:
             bloc = self.CATEGORY_TO_BLOC.get(article.assigned_category, "strategies_marches")
             candidates_by_bloc[bloc].append(article)
 
-        # Remplir les blocs 2-4 avec les limites
+        # Remplir les blocs 2-4 avec les limites + contraintes de diversité
         for bloc_id in ["strategies_marches", "nouveaux_modeles", "regulation"]:
             _, max_items = self.BLOC_LIMITS[bloc_id]
-            blocs[bloc_id] = candidates_by_bloc[bloc_id][:max_items]
+            blocs[bloc_id] = self._enforce_diversity(
+                candidates_by_bloc[bloc_id], max_items, bloc_id
+            )
 
         # ──────────────────────────────────────────────────
         # Bloc 1 "L'essentiel" — DOIT être lié au thème

@@ -196,9 +196,9 @@ Réponds UNIQUEMENT avec les hashtags séparés par des espaces, sur une seule l
         if tension_point:
             tension_instruction = f"\nPOINT DE TENSION DU MOIS (imposé) : {tension_point}\n"
 
-        prompt = f"""Tu es un Senior Partner d'un cabinet de conseil en stratégie spécialisé services financiers
-(profil McKinsey/BCG/Oliver Wyman, 25 ans d'expérience, marchés FR/EU/US).
-Tu rédiges l'éditorial d'une newsletter mensuelle adressée aux DG et COMEX de banques françaises.
+        prompt = f"""Tu rédiges l'éditorial de la newsletter mensuelle adressée aux DG et COMEX de banques françaises.
+L'éditorial est la VOIX DU CABINET. Ce n'est PAS un résumé de l'actualité — c'est une PRISE DE POSITION
+sur UN dilemme stratégique que vit le décideur FS en ce moment.
 {tension_instruction}
 Articles sélectionnés pour cette édition :
 {articles_summary}
@@ -206,21 +206,43 @@ Articles sélectionnés pour cette édition :
 Distribution par bloc :
 {blocs_context}
 
-Structure OBLIGATOIRE :
-1. Accroche (1-2 phrases) : formule la tension comme une affirmation provocante
-2. Constat ancré (2-3 phrases) : 1 chiffre qui fait mal, ancré FR/EU
-3. Analyse (4-6 phrases) : 2-3 dynamiques structurantes, connexions inattendues
-4. Conviction (1-2 phrases) : thèse tranchée, commencer par "**Notre conviction :**"
+STRUCTURE OBLIGATOIRE — 4 PARTIES :
 
-Règles absolues :
-- 250-300 mots maximum
-- Pas de "paradigm shift", "best practices", "synergies"
+**Partie 1 — L'accroche (1-2 phrases, ~30 mots)**
+Formuler le point de tension comme une affirmation provocante ou une question directe.
+- Nommer le problème sans détour
+- Créer une friction immédiate chez le lecteur
+- Ne pas annoncer la conclusion
+
+Exemples de BONNES accroches :
+- "Vos clients épargnent de plus en plus hors de chez vous — et ce n'est pas qu'une question de taux."
+- "Votre plan IA 2025 ressemble probablement à celui de vos concurrents. C'est un problème."
+
+Exemples de MAUVAISES accroches (À ÉVITER) :
+- "Dans un contexte de transformation digitale accélérée..." → trop générique
+- "Ce mois de mars a été riche en actualités pour le secteur bancaire." → revue de presse
+- "Ares & Co vous présente sa newsletter de mars." → autocentré
+
+**Partie 2 — Le constat ancré (2-3 phrases, ~60 mots)**
+Un SEUL chiffre — le plus percutant, sourcé (entre parenthèses). Ancré FR/EU.
+
+**Partie 3 — L'analyse (4-6 phrases, ~120 mots)**
+2-3 dynamiques structurantes, connexions FR ↔ EU ↔ US, court terme ↔ long terme.
+Ton assertif : pas de "il semblerait que", "on pourrait penser que".
+
+**Partie 4 — La conviction (1-2 phrases, ~40 mots)**
+Commencer par "**Notre conviction :**" en gras. Une SEULE thèse, CONTESTABLE. Ne pas se terminer par une question.
+
+RÈGLES ABSOLUES :
+- 250-300 mots — PAS AU-DELÀ
 - Pas de conditionnel sauf citation
-- 1 seul chiffre dans le constat, sourcé
 - Première personne du pluriel ("notre conviction", "nous observons")
 - Terminer par la signature : — {partner}, Partner, Ares & Co
 - JAMAIS de liste à puces — tout en prose fluide
 - Pas de titre ni de préambule — commence directement par l'accroche
+- Bannir : "paradigm shift", "best-in-class", "end-to-end", "synergies", "go-to-market"
+- Pas de conclusions vagues ("Il sera intéressant de suivre...")
+- Pas de formulations génériques ("Ce mois-ci a été riche en actualités...")
 
 Rédige directement l'éditorial."""
 
@@ -363,6 +385,53 @@ RÈGLES :
         console.print(f"[green]✓ Terrain généré: {terrain['title'][:50]}...[/green]")
         return terrain
 
+    def generate_notre_lecture(
+        self,
+        selection: CuratedSelection
+    ) -> None:
+        """
+        Génère "Notre lecture" pour les articles du Bloc 3 (Nouveaux modèles).
+        La conviction n'est PAS systématique — Claude décide si le cabinet a quelque chose à dire.
+        Modifie les articles in-place en renseignant article.notre_lecture.
+        """
+        blocs = getattr(selection, 'blocs', {})
+        modeles_articles = blocs.get("nouveaux_modeles", [])
+
+        if not modeles_articles or not self.client:
+            return
+
+        console.print("\n[bold blue]💡 Génération de 'Notre lecture' pour le Bloc 3...[/bold blue]")
+
+        for article in modeles_articles:
+            title = article.title_fr or article.article.title
+            prompt = f"""Voici un article du bloc "Nouveaux modèles" de la newsletter bancaire Ares & Co :
+
+TITRE : {title}
+RÉSUMÉ : {article.ai_summary}
+
+Dois-tu écrire une conviction "Notre lecture" pour cet article ?
+Critères :
+- Seulement si le cabinet a une prise de position TRANCHÉE à exprimer
+- PAS un commentaire vague ("c'est une tendance intéressante à suivre" = INTERDIT)
+- Doit porter sur l'implication stratégique pour les banques françaises spécifiquement
+- 1 phrase, 20-30 mots maximum
+
+Si oui, réponds UNIQUEMENT avec la phrase de conviction (sans "→ Notre lecture :" devant).
+Si non, réponds exactement : SKIP"""
+
+            response = self._call_claude(
+                SENIOR_PARTNER_PERSONA,
+                prompt,
+                max_tokens=128
+            )
+
+            response = response.strip()
+            if response and response.upper() != "SKIP" and len(response) < 200:
+                article.notre_lecture = response
+                console.print(f"  [green]✓ Notre lecture: {response[:60]}...[/green]")
+            else:
+                console.print(f"  [dim]  → Pas de conviction pour: {title[:50]}[/dim]")
+
     def _compute_item_numbers(self, blocs: Dict[str, List]) -> Dict[str, List[int]]:
         """Calcule la numérotation continue des items à travers les blocs."""
         item_numbers = {}
@@ -483,6 +552,11 @@ RÈGLES :
                 lines.append("")
                 lines.append(article.ai_summary)
                 lines.append("")
+
+                # Notre lecture (Bloc 3 uniquement)
+                if bloc_id == "nouveaux_modeles" and getattr(article, 'notre_lecture', ''):
+                    lines.append(f"*→ Notre lecture : {article.notre_lecture}*")
+                    lines.append("")
 
                 # Source avec lien
                 source_name = article.article.source
