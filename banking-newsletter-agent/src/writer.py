@@ -290,6 +290,81 @@ RÈGLES :
 
         return None
 
+    def generate_notre_lecture(
+        self,
+        selection: CuratedSelection
+    ) -> None:
+        """
+        Génère "Notre lecture" pour 1-2 articles du Bloc 3 (Nouveaux modèles).
+
+        Convention CDC :
+        - Introduite par "→ Notre lecture :" en italique
+        - Prise de position, pas un commentaire
+        - Porte sur l'implication stratégique pour les banques françaises
+        - 1 phrase, 20-30 mots max
+        - PAS systématique — seulement quand le cabinet a vraiment quelque chose à dire
+        """
+        console.print("\n[bold blue]💡 Génération de 'Notre lecture' (Bloc 3)...[/bold blue]")
+
+        if not self.client:
+            console.print("[yellow]⚠ Pas de client Claude — Notre lecture non générée[/yellow]")
+            return
+
+        blocs = getattr(selection, 'blocs', {})
+        modeles_articles = blocs.get("nouveaux_modeles", [])
+
+        if not modeles_articles:
+            return
+
+        # Générer pour max 2 articles sur les plus pertinents
+        candidates = modeles_articles[:min(2, len(modeles_articles))]
+
+        for article in candidates:
+            title = article.title_fr or article.article.title
+            summary = article.ai_summary
+
+            prompt = f"""Tu es un Senior Partner FS. Pour cet article de la section "Nouveaux modèles"
+de la newsletter bancaire, génère UNE conviction Ares & Co ("Notre lecture").
+
+ARTICLE :
+Titre : {title}
+Résumé : {summary}
+
+RÈGLES ABSOLUES :
+- Format : "→ Notre lecture : [conviction en 1 phrase]"
+- 20-30 mots MAXIMUM
+- Prise de POSITION, pas un commentaire ("c'est une tendance intéressante" = INTERDIT)
+- Porte sur l'implication stratégique pour les BANQUES FRANÇAISES spécifiquement
+- Doit être CONTESTABLE — si tout le monde est d'accord, ce n'est pas une conviction
+
+BON EXEMPLE :
+→ Notre lecture : les banques qui traiteront l'IA générative comme un sujet IT auront pris 3 ans de retard sur celles qui en ont fait un sujet de direction générale.
+
+MAUVAIS EXEMPLE :
+→ Notre lecture : c'est une tendance intéressante à suivre.
+→ PAS une conviction, un non-dit.
+
+Réponds UNIQUEMENT avec la phrase de conviction (sans le préfixe "→ Notre lecture :").
+"""
+
+            response = self._call_claude(
+                self.EDITORIAL_SYSTEM_PROMPT,
+                prompt,
+                max_tokens=128
+            )
+
+            conviction = response.strip()
+            # Nettoyer si Claude a inclus le préfixe
+            conviction = conviction.replace("→ Notre lecture :", "").replace("→ Notre lecture:", "").strip()
+            conviction = conviction.strip('"').strip("'")
+
+            if conviction and len(conviction.split()) <= 40:
+                # Stocker dans l'article (attribut dynamique)
+                article.notre_lecture = conviction
+                console.print(f"  [green]✓ Notre lecture: {conviction[:60]}...[/green]")
+            else:
+                console.print(f"  [dim]  ✗ Conviction trop longue ou vide, ignorée[/dim]")
+
     def generate_terrain(
         self,
         selection: CuratedSelection,

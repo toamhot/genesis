@@ -65,6 +65,7 @@ from rich.markdown import Markdown
 sys.path.insert(0, str(Path(__file__).parent))
 
 from collector import Collector, Article
+from newsapi_collector import collect_newsapi
 from analyzer import Analyzer, AnalyzedArticle
 from curator import Curator, CuratedSelection
 from writer import NewsletterWriter
@@ -255,6 +256,21 @@ class BankingNewsletterAgent:
             console.print(Panel("[bold]ÉTAPE 1/4 : COLLECTE[/bold]", style="blue"))
 
             articles = self.collector.collect_all(days_back=days_back)
+
+            # Collecte complémentaire via NewsAPI (si NEWSAPI_KEY est définie)
+            if os.environ.get("NEWSAPI_KEY"):
+                newsapi_articles = collect_newsapi(days_back=days_back)
+                if newsapi_articles:
+                    # Dédupliquer par URL (basé sur l'id = hash de l'URL)
+                    existing_ids = {a.id for a in articles}
+                    new_count = 0
+                    for na in newsapi_articles:
+                        if na.id not in existing_ids:
+                            articles.append(na)
+                            existing_ids.add(na.id)
+                            new_count += 1
+                    console.print(f"[green]✓ {new_count} articles NewsAPI ajoutés (après déduplication)[/green]")
+
             results["articles_collected"] = len(articles)
 
             # Audit : logger les sources
@@ -382,6 +398,10 @@ class BankingNewsletterAgent:
                 tension_point=tension_point,
                 partner_name=partner_name
             )
+
+            # Générer "Notre lecture" pour Bloc 3 (Nouveaux modèles)
+            console.print("[dim]  → Génération de 'Notre lecture' (Bloc 3)...[/dim]")
+            self.writer.generate_notre_lecture(selection)
 
             # Générer le Chiffre du mois (bandeau post-éditorial)
             console.print("[dim]  → Génération du Chiffre du mois...[/dim]")

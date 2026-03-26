@@ -469,6 +469,68 @@ class Curator:
 
         return capped
 
+    def enforce_bloc_diversity(
+        self,
+        blocs: Dict[str, List['AnalyzedArticle']]
+    ) -> Dict[str, List['AnalyzedArticle']]:
+        """
+        Applique les contraintes de diversité du CDC par bloc :
+        - Bloc 2 (Stratégies) : pas 2 items sur le même acteur
+        - Bloc 4 (Régulation) : pas 2 items sur le même régulateur sauf sujets très distincts
+        """
+        # Bloc 2 — max 1 article par acteur principal
+        if "strategies_marches" in blocs:
+            seen_actors = set()
+            diversified = []
+            removed_actors = 0
+            for article in blocs["strategies_marches"]:
+                # L'acteur principal est la première entité identifiée
+                main_actor = None
+                if article.entities:
+                    main_actor = article.entities[0].lower().strip()
+
+                if main_actor and main_actor in seen_actors:
+                    removed_actors += 1
+                    continue
+                if main_actor:
+                    seen_actors.add(main_actor)
+                diversified.append(article)
+
+            if removed_actors > 0:
+                console.print(f"  [yellow]• Bloc Stratégies: {removed_actors} items retirés (même acteur)[/yellow]")
+            blocs["strategies_marches"] = diversified
+
+        # Bloc 4 — max 1 article par régulateur
+        if "regulation" in blocs:
+            regulators = {"bce", "ecb", "eba", "amf", "acpr", "banque de france",
+                          "commission européenne", "european commission"}
+            seen_regulators = set()
+            diversified = []
+            removed_regs = 0
+            for article in blocs["regulation"]:
+                source_lower = article.article.source.lower()
+                entities_lower = [e.lower() for e in article.entities] if article.entities else []
+
+                # Identifier le régulateur principal
+                main_reg = None
+                for reg in regulators:
+                    if reg in source_lower or any(reg in e for e in entities_lower):
+                        main_reg = reg
+                        break
+
+                if main_reg and main_reg in seen_regulators:
+                    removed_regs += 1
+                    continue
+                if main_reg:
+                    seen_regulators.add(main_reg)
+                diversified.append(article)
+
+            if removed_regs > 0:
+                console.print(f"  [yellow]• Bloc Régulation: {removed_regs} items retirés (même régulateur)[/yellow]")
+            blocs["regulation"] = diversified
+
+        return blocs
+
     def distribute_to_blocs(
         self,
         articles: List[AnalyzedArticle],
@@ -612,6 +674,9 @@ class Curator:
 
         # Étape 5: Distribuer dans les 4 blocs
         blocs = self.distribute_to_blocs(diversified, theme_id=theme_id)
+
+        # Étape 6: Contraintes de diversité par bloc (CDC anti-patterns)
+        blocs = self.enforce_bloc_diversity(blocs)
 
         # Construire la liste plate (ordonnée par bloc)
         top_articles = []
