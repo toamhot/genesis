@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsletter Banque - Mars 2026 | Ares &amp; Co</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a2a3a;
+            --text-color: #333333;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+            --light-bg: #f9fafb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: #eef1f5;
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        /* HEADER */
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 48px 40px;
+            text-align: left;
+        }
+        .header img { max-height: 44px; margin-bottom: 24px; filter: brightness(0) invert(1); }
+        .header .baseline {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            opacity: 0.7;
+            margin-bottom: 28px;
+            font-weight: 300;
+        }
+        .header .separator {
+            width: 40px;
+            height: 1px;
+            background-color: rgba(255,255,255,0.4);
+            margin: 20px 0;
+        }
+        .header h1 {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 30px;
+            font-weight: 400;
+            letter-spacing: -0.3px;
+        }
+        .header .month {
+            font-size: 13px;
+            margin-top: 12px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        /* SECTIONS */
+        .section { padding: 36px 40px; border-bottom: 1px solid #e5e7eb; }
+        .section-title {
+            color: var(--primary-color);
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 18px;
+            font-weight: 400;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--primary-color);
+            letter-spacing: 0.3px;
+        }
+
+        /* &#201;DITORIAL */
+        .edito p {
+            margin-bottom: 16px;
+            text-align: justify;
+            line-height: 1.75;
+            font-size: 14px;
+            font-weight: 300;
+            color: #444;
+        }
+        .edito .conviction {
+            background-color: var(--light-bg);
+            padding: 18px 20px;
+            margin: 24px 0;
+            border-left: 2px solid var(--primary-color);
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--primary-color);
+        }
+        .edito .signature {
+            text-align: right;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 13px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            font-weight: 300;
+        }
+
+        /* ARTICLES */
+        .bloc-article {
+            margin-bottom: 28px;
+            padding: 0 0 24px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .bloc-article:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+        .bloc-article h3 {
+            color: var(--primary-color);
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 15px;
+            font-weight: 400;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .bloc-article h3 .item-number {
+            color: #57AEE0;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+        .bloc-article .body {
+            margin-bottom: 10px;
+            font-size: 13.5px;
+            line-height: 1.7;
+            color: #555;
+            font-weight: 300;
+        }
+        .bloc-article .source-line {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 8px;
+            font-weight: 400;
+        }
+        .bloc-article .source-line a {
+            color: var(--text-light);
+            text-decoration: none;
+            border-bottom: 1px solid #d1d5db;
+        }
+        .bloc-article .source-line a:hover { border-bottom-color: var(--primary-color); color: var(--primary-color); }
+
+        /* CTA */
+        .cta-section {
+            background: linear-gradient(135deg, #051E3B, #051E5B);
+            text-align: center;
+            padding: 44px 40px;
+        }
+        .cta-section h2 {
+            color: white;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 20px;
+            font-weight: 400;
+            margin-bottom: 24px;
+        }
+        .cta-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .cta-button {
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+            transition: transform 0.2s;
+        }
+        .cta-button:hover { transform: translateY(-2px); }
+        .cta-button.primary { background-color: #57AEE0; color: white; }
+        .cta-button.secondary { background-color: white; color: #051E3B; }
+        .share-section {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .share-text { color: rgba(255,255,255,0.85); font-size: 13px; margin-bottom: 14px; font-weight: 300; }
+        .cta-button.share { background-color: #25D366; color: white; }
+
+        /* FOOTER */
+        .footer {
+            background-color: #051E3B;
+            color: white;
+            padding: 36px 40px;
+            text-align: center;
+        }
+        .footer img { max-height: 40px; margin-bottom: 12px; filter: brightness(0) invert(1); }
+        .footer p { font-size: 13px; opacity: 0.9; margin-bottom: 8px; }
+        .footer .contact-info { margin: 20px 0; font-size: 13px; }
+        .footer .contact-info p { margin: 5px 0; opacity: 0.85; }
+        .footer .social-links { margin: 16px 0; }
+        .footer .social-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 12px;
+            font-size: 13px;
+            opacity: 0.85;
+        }
+        .footer .social-links a:hover { opacity: 1; }
+        .footer .legal {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 11px;
+            opacity: 0.7;
+        }
+        .footer .legal a { color: white; text-decoration: none; }
+        .footer .legal a:hover { text-decoration: underline; }
+        .footer .generation-date { margin-top: 12px; font-size: 10px; opacity: 0.5; }
+
+        @media (max-width: 600px) {
+            .header { padding: 32px 24px; }
+            .header h1 { font-size: 24px; }
+            .section { padding: 28px 24px; }
+            .cta-section { padding: 36px 24px; }
+            .footer { padding: 28px 24px; }
+            .cta-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <img src="https://www.aresandco.com/images/common-contents/logo-image/62c2a7a87e751_logo.png" alt="Ares & Co">
+            <div class="baseline">Cabinet de conseil de Direction G&#233;n&#233;rale</div>
+            <div class="separator"></div>
+            <h1>Newsletter Banque</h1>
+            <div class="month">Mars 2026</div>
+        </div>
+
+        <!-- &#201;DITORIAL -->
+        <div class="section edito">
+            <h2 class="section-title">Notre &#233;ditorial</h2>
+
+            <p>Vos clients &#233;pargnent de plus en plus hors de chez vous &#8212; et ce n&#8217;est pas qu&#8217;une question de taux.</p>
+
+            <p>En 2025, 34% de la collecte nette en assurance-vie a &#233;t&#233; capt&#233;e par des acteurs non-bancaires &#8212; contre 18% cinq ans plus t&#244;t (Banque de France, janvier 2026). Les banques fran&#231;aises perdent du terrain sur leur m&#233;tier historique de collecte.</p>
+
+            <p>Trois dynamiques convergent. Premi&#232;rement, la mont&#233;e en puissance des assureurs et gestionnaires d&#8217;actifs dans la distribution de produits d&#8217;&#233;pargne retraite rogne les parts de march&#233; bancaires sur leur terrain historique. Deuxi&#232;mement, la digitalisation des parcours souscription &#8212; port&#233;e par des acteurs comme Yomoni ou Nalo &#8212; abaisse le co&#251;t d&#8217;entr&#233;e pour le client et r&#233;duit l&#8217;avantage de la relation en agence. Troisi&#232;mement, la directive CSRD et les nouvelles exigences ESG cr&#233;ent un besoin de conseil patrimonial complexe que les r&#233;seaux bancaires g&#233;n&#233;ralistes peinent &#224; adresser faute de formation.</p>
+
+            <div class="conviction"><strong>Notre conviction :</strong> d&#8217;ici 2028, les banques fran&#231;aises qui n&#8217;auront pas construit une offre d&#8217;&#233;pargne retraite autonome &#8212; hors r&#233;seaux tiers &#8212; auront perdu entre 15 et 20% de leur PNB patrimonial sans possibilit&#233; de retour.</div>
+
+            <div class="signature">&#8212; Olivier Dupin, Partner, Ares &amp; Co</div>
+        </div>
+
+        <!-- L'ESSENTIEL -->
+        <div class="section">
+            <h2 class="section-title">L&#8217;essentiel</h2>
+
+            <div class="bloc-article">
+                <h3><span class="item-number">#1.</span> La BCE maintient ses taux directeurs inchang&#233;s &#224; 2,00%</h3>
+                <div class="body">R&#233;unie le 6 mars, la BCE a confirm&#233; le statu quo mon&#233;taire malgr&#233; une inflation sous-jacente toujours au-dessus de l&#8217;objectif. Le sc&#233;nario d&#8217;une baisse avant l&#8217;&#233;t&#233; s&#8217;&#233;loigne. Pour les banques fran&#231;aises, cela prolonge la fen&#234;tre de compression des marges sur les d&#233;p&#244;ts &#224; vue &#8212; mais aussi la pression sur la production de cr&#233;dit immobilier, qui reste an&#233;mique &#224; 3,4% sur 20 ans.</div>
+                <div class="source-line">
+                    <a href="https://example.com/article/0" target="_blank">BCE - Communiqu&#233;s</a> &#124; 15 mars 2026
+                </div>
+            </div>
+        </div>
+
+        <!-- STRAT&#201;GIES & MARCH&#201;S -->
+        <div class="section">
+            <h2 class="section-title">Strat&#233;gies &amp; march&#233;s</h2>
+
+            <div class="bloc-article">
+                <h3><span class="item-number">#2.</span> HSBC France c&#232;de sa banque de d&#233;tail &#224; My Money Group pour 1,1 Md&#8364;</h3>
+                <div class="body">HSBC finalise la cession de ses 244 agences et 800 000 clients &#224; My Money Group pour 1,1 Md&#8364;, soit 1,4x la valeur comptable. Le groupe britannique conserve uniquement la banque priv&#233;e et la BFI en France. Cette op&#233;ration illustre la difficult&#233; pour un acteur international non-leader &#224; atteindre une rentabilit&#233; suffisante sur le retail fran&#231;ais &#8212; un signal pour les autres banques &#233;trang&#232;res en position similaire.</div>
+                <div class="source-line">
+                    <a href="https://example.com/article/4" target="_blank">Les Echos</a> &#124; 13 mars 2026
+                </div>
+            </div>
+
+            <div class="bloc-article">
+                <h3><span class="item-number">#3.</span> BNP Paribas annonce un plan de transformation digitale de 500M&#8364;</h3>
+                <div class="body">BNP Paribas engage 500 millions d&#8217;euros sur trois ans pour d&#233;ployer l&#8217;IA g&#233;n&#233;rative dans la relation client et moderniser son core banking. L&#8217;objectif affich&#233; &#8212; 30% de gains de productivit&#233; &#8212; traduit une ambition de r&#233;duire un cost-to-income encore sup&#233;rieur &#224; 65%. Pour les concurrents fran&#231;ais, ce plan cr&#233;e une pression comp&#233;titive directe sur les budgets IT et l&#8217;attractivit&#233; des talents tech.</div>
+                <div class="source-line">
+                    <a href="https://example.com/article/2" target="_blank">Les Echos</a> &#124; 25 f&#233;vrier 2026
+                </div>
+            </div>
+
+            <div class="bloc-article">
+                <h3><span class="item-number">#4.</span> Soci&#233;t&#233; G&#233;n&#233;rale finalise la cession de ses activit&#233;s en Russie</h3>
+                <div class="body">Soci&#233;t&#233; G&#233;n&#233;rale cl&#244;t un chapitre de 20 ans en Russie avec la cession de Rosbank, lib&#233;rant 20 points de base de CET1. L&#8217;op&#233;ration permet au groupe de red&#233;ployer environ 3 Md&#8364; de capital vers ses priorit&#233;s strat&#233;giques &#8212; la banque de d&#233;tail en France et la BFI en Europe. Pour les autres banques fran&#231;aises encore expos&#233;es aux march&#233;s &#233;mergents, cette sortie confirme le recentrage europ&#233;en du secteur.</div>
+                <div class="source-line">
+                    <a href="https://example.com/article/3" target="_blank">Les Echos</a> &#124; 12 mars 2026
+                </div>
+            </div>
+        </div>
+
+        <!-- NOUVEAUX MOD&#200;LES -->
+        <div class="section">
+            <h2 class="section-title">Nouveaux mod&#232;les</h2>
+
+            <div class="bloc-article">
+                <h3><span class="item-number">#5.</span> Open Banking : l&#8217;usage des APIs explose en Europe (+70%)</h3>
+                <div class="body">Le volume d&#8217;appels API Open Banking a bondi de 70% en Europe en 2025, port&#233; par l&#8217;agr&#233;gation de comptes et l&#8217;initiation de paiements. La France se positionne comme 3&#232;me march&#233; europ&#233;en derri&#232;re le Royaume-Uni et l&#8217;Allemagne. L&#8217;adoption du paiement par virement instantan&#233; progresse rapidement et pourrait capter 15% des transactions e-commerce d&#8217;ici 2028, r&#233;duisant la d&#233;pendance aux sch&#233;mas cartes.</div>
+                <div class="source-line">
+                    <a href="https://example.com/article/6" target="_blank">Fintech Futures</a> &#124; 16 mars 2026
+                </div>
+            </div>
+
+            <div class="bloc-article">
+                <h3><span class="item-number">#6.</span> Cr&#233;dit Agricole lance une offre de Banking-as-a-Service</h3>
+                <div class="body">Le Cr&#233;dit Agricole a ouvert en b&#234;ta ferm&#233;e sa plateforme Banking-as-a-Service permettant &#224; des enseignes retail d&#8217;int&#233;grer des services financiers directement dans leur parcours client. L&#8217;offre cible d&#8217;abord la grande distribution et le e-commerce. Cette initiative positionne CA comme infrastructure financi&#232;re pour des acteurs non-bancaires &#8212; un renversement de posture qui transforme un concurrent potentiel en client.</div>
+                <div class="source-line">
+                    <a href="https://example.com/article/5" target="_blank">Mind Fintech</a> &#124; 9 mars 2026
+                </div>
+            </div>
+        </div>
+
+        <!-- R&#201;GULATION & SUPERVISION -->
+        <div class="section">
+            <h2 class="section-title">R&#233;gulation &amp; supervision</h2>
+
+            <div class="bloc-article">
+                <h3><span class="item-number">#7.</span> AMLA op&#233;rationnelle : transfert des comp&#233;tences AML depuis l&#8217;EBA</h3>
+                <div class="body">L&#8217;AMLA (Anti-Money Laundering Authority) est pleinement op&#233;rationnelle depuis le 1er janvier 2026 apr&#232;s le transfert de toutes les comp&#233;tences LCB-FT de l&#8217;EBA. Bas&#233;e &#224; Francfort, elle exercera une supervision directe sur les 40 &#233;tablissements europ&#233;ens &#224; plus haut risque. Pour les banques fran&#231;aises concern&#233;es, cela implique un double reporting &#8212; ACPR et AMLA &#8212; et une r&#233;vision compl&#232;te des dispositifs de conformit&#233; d&#8217;ici mi-2027.</div>
+                <div class="source-line">
+                    <a href="https://example.com/article/7" target="_blank">EBA - Communiqu&#233; officiel</a> &#124; 12 mars 2026
+                </div>
+            </div>
+
+            <div class="bloc-article">
+                <h3><span class="item-number">#8.</span> Report d&#8217;un an pour le FRTB : application au 1er janvier 2027</h3>
+                <div class="body">La Commission europ&#233;enne accorde un an suppl&#233;mentaire pour l&#8217;application du Fundamental Review of the Trading Book (FRTB), repoussant l&#8217;&#233;ch&#233;ance au 1er janvier 2027. Ce report aligne le calendrier europ&#233;en sur celui du Comit&#233; de B&#226;le. Pour les banques fran&#231;aises actives en BFI, ce d&#233;lai est l&#8217;occasion d&#8217;affiner les mod&#232;les internes &#8212; mais aussi le risque de reporter une charge en capital estim&#233;e entre 5 et 15% sur les desks de march&#233;.</div>
+                <div class="source-line">
+                    <a href="https://example.com/article/8" target="_blank">Commission Europ&#233;enne</a> &#124; 5 mars 2026
+                </div>
+            </div>
+        </div>
+
+        <!-- CALL TO ACTION -->
+        <div class="cta-section">
+            <h2>Continuons la conversation</h2>
+            <div class="cta-buttons">
+                <a href="mailto:contact@aresandco.com?subject=Newsletter Banque - Contact" class="cta-button primary">
+                    <i class="fas fa-envelope"></i> Nous contacter
+                </a>
+                <a href="https://www.linkedin.com/company/ares-&-company/" class="cta-button secondary" target="_blank">
+                    <i class="fab fa-linkedin"></i> Suivre sur LinkedIn
+                </a>
+            </div>
+            <div class="share-section">
+                <p class="share-text">Cette newsletter vous a plu ? Partagez-la avec vos contacts :</p>
+                <a href="mailto:?subject=Newsletter Banque Ares %26 Co - Mars 2026&body=Bonjour,%0D%0A%0D%0AJe vous partage la derni%C3%A8re newsletter bancaire d%27Ares %26 Co.%0D%0A%0D%0ABonne lecture !%0D%0A%0D%0A---%0D%0APour recevoir cette newsletter chaque mois, contactez contact@aresandco.com" class="cta-button share">
+                    <i class="fas fa-share-alt"></i> Partager par email
+                </a>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <a href="https://www.aresandco.com/fr" target="_blank">
+                <img src="https://www.aresandco.com/images/common-contents/logo-image/62c2a7a87e751_logo.png" alt="Ares & Co">
+            </a>
+            <p>Cabinet de conseil de Direction G&#233;n&#233;rale</p>
+
+            <div class="contact-info">
+                <p><i class="fas fa-map-marker-alt"></i> 15 Av. de la Grande Arm&#233;e, 75116 Paris</p>
+                <p><i class="fas fa-phone"></i> +33 1 40 20 44 49</p>
+                <p><i class="fas fa-envelope"></i> <a href="mailto:contact@aresandco.com" style="color: white;">contact@aresandco.com</a></p>
+            </div>
+
+            <div class="social-links">
+                <a href="https://www.aresandco.com/fr"><i class="fas fa-globe"></i> Site web</a>
+                <a href="https://www.linkedin.com/company/ares-&-company/"><i class="fab fa-linkedin"></i> LinkedIn</a>
+            </div>
+
+            <div class="legal">
+                <p>Cette newsletter est envoy&#233;e aux clients et partenaires d&#8217;Ares &amp; Co.</p>
+                <p>
+                    <a href="#">Mentions l&#233;gales</a> |
+                    <a href="#">Politique de confidentialit&#233;</a> |
+                    <a href="mailto:contact@aresandco.com?subject=D%C3%A9sabonnement Newsletter">Se d&#233;sabonner</a>
+                </p>
+            </div>
+
+            <div class="generation-date">G&#233;n&#233;r&#233; le 24/03/2026</div>
+        </div>
+    </div>
+</body>
+</html>

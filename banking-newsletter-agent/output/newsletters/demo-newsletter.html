@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsletter Banque - Janvier 2026 | Ares & Co</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #051E3B;
+            --secondary-color: #051E5B;
+            --accent-color: #57AEE0;
+            --text-color: #2d3748;
+            --light-bg: #f7fafc;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f0f4f8;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: white;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header .month {
+            font-size: 18px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .editorial {
+            padding: 30px;
+            background-color: var(--light-bg);
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .editorial h2 {
+            color: var(--primary-color);
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .editorial p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .category {
+            padding: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .category h2 {
+            color: var(--primary-color);
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .article {
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .article:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .article h3 {
+            color: var(--secondary-color);
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .article .meta {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 10px;
+        }
+
+        .article .summary {
+            margin-bottom: 12px;
+        }
+
+        .article .key-facts {
+            background-color: var(--light-bg);
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 12px;
+        }
+
+        .article .key-facts strong {
+            color: var(--primary-color);
+            font-size: 13px;
+        }
+
+        .article .key-facts ul {
+            margin: 8px 0 0 20px;
+            font-size: 14px;
+        }
+
+        .article .read-more {
+            display: inline-block;
+            color: var(--accent-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .article .read-more:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .footer h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .footer p {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .footer .generation-date {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 30px 20px;
+            }
+            .header h1 {
+                font-size: 24px;
+            }
+            .editorial, .category {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://www.aresandco.com/images/common-contents/logo-image/62c2a7a87e751_logo.png" alt="Ares & Co" style="max-height: 60px; margin-bottom: 15px; filter: brightness(0) invert(1);">
+            <div class="baseline" style="font-size: 12px; opacity: 0.9; margin-bottom: 20px; letter-spacing: 1px;">Cabinet de conseil de Direction Générale</div>
+            <h1>Newsletter Banque</h1>
+            <div class="month">Janvier 2026</div>
+        </div>
+
+        <div class="editorial">
+            <h2>Éditorial</h2>
+            
+            <p>Le mois de février 2026 a été marqué par une actualité réglementaire dense, avec notamment l'entrée en vigueur effective de l'AMLA et les derniers ajustements du calendrier Bâle III. La BCE, de son côté, maintient le cap de sa politique monétaire restrictive, dans un contexte d'inflation sous-jacente encore élevée.</p>
+            
+            <p>Du côté des banques françaises, les initiatives de transformation digitale se multiplient. BNP Paribas a dévoilé un plan ambitieux d'investissement dans l'IA, tandis que Crédit Agricole accélère sur le Banking-as-a-Service. Ces mouvements témoignent d'une industrie en pleine mutation, sous la pression conjuguée des fintechs et des nouvelles attentes clients.</p>
+            
+            <p>L'écosystème fintech français continue par ailleurs de démontrer son dynamisme, avec des levées de fonds record en 2025. Le paiement B2B et les solutions d'embedded finance émergent comme les segments les plus porteurs pour 2026.</p>
+            
+        </div>
+
+        
+        
+        <div class="category">
+            <h2><i class="fas fa-euro-sign" style="margin-right: 10px; color: var(--accent-color);"></i>Politique Monétaire</h2>
+
+            
+            <div class="article">
+                <h3>La BCE maintient ses taux directeurs inchangés à 2,00%</h3>
+                <div class="meta">
+                    BCE - Communiqués
+                    
+                    | 21/01/2026
+                    
+                </div>
+                <p class="summary">Le Conseil des gouverneurs de la BCE a décidé de maintenir les trois taux directeurs inchangés. Le taux de la facilité de dépôt reste à 2,00%, le taux des opérations principales de refinancement à 2,15% et le taux de la facilité de prêt marginal à 2,40%.</p>
+
+                
+                <div class="key-facts">
+                    <strong>Points clés :</strong>
+                    <ul>
+                    
+                        <li>Taux de dépôt maintenu à 2,00%</li>
+                    
+                        <li>Inflation sous-jacente toujours au-dessus de l'objectif</li>
+                    
+                        <li>Prochaine réunion le 6 mars 2026</li>
+                    
+                    </ul>
+                </div>
+                
+
+                <a href="https://example.com/article/0" class="read-more">Lire l'article →</a>
+            </div>
+            
+        </div>
+        
+        
+        
+        <div class="category">
+            <h2><i class="fas fa-scale-balanced" style="margin-right: 10px; color: var(--accent-color);"></i>Actualités Réglementaires</h2>
+
+            
+            <div class="article">
+                <h3>AMLA opérationnelle : transfert des compétences AML depuis l'EBA</h3>
+                <div class="meta">
+                    EBA - Press Releases
+                    
+                    | 25/01/2026
+                    
+                </div>
+                <p class="summary">L'Autorité européenne de lutte contre le blanchiment (AMLA) est désormais pleinement opérationnelle après le transfert de toutes les compétences AML/CFT depuis l'EBA. Un protocole de coopération a été signé entre les deux autorités.</p>
+
+                
+                <div class="key-facts">
+                    <strong>Points clés :</strong>
+                    <ul>
+                    
+                        <li>Transfert effectif au 1er janvier 2026</li>
+                    
+                        <li>AMLA basée à Francfort</li>
+                    
+                        <li>Supervision directe des établissements à haut risque</li>
+                    
+                    </ul>
+                </div>
+                
+
+                <a href="https://example.com/article/3" class="read-more">Lire l'article →</a>
+            </div>
+            
+            <div class="article">
+                <h3>L'EBA publie les nouvelles guidelines sur les risques ESG</h3>
+                <div class="meta">
+                    EBA - Press Releases
+                    
+                    | 06/01/2026
+                    
+                </div>
+                <p class="summary">L'Autorité bancaire européenne a publié ses lignes directrices finales sur la gestion des risques environnementaux, sociaux et de gouvernance (ESG). Ces guidelines entrent en application immédiate et concernent toutes les banques européennes.</p>
+
+                
+                <div class="key-facts">
+                    <strong>Points clés :</strong>
+                    <ul>
+                    
+                        <li>Intégration ESG obligatoire dans le processus ICAAP</li>
+                    
+                        <li>Nouveaux stress tests climatiques requis</li>
+                    
+                        <li>Délai de mise en conformité : 12 mois</li>
+                    
+                    </ul>
+                </div>
+                
+
+                <a href="https://example.com/article/1" class="read-more">Lire l'article →</a>
+            </div>
+            
+            <div class="article">
+                <h3>DORA : les banques européennes finalisent leur mise en conformité</h3>
+                <div class="meta">
+                    EBA - Press Releases
+                    
+                    | 30/01/2026
+                    
+                </div>
+                <p class="summary">À l'approche de l'échéance de janvier 2026, les banques européennes accélèrent leur mise en conformité avec le règlement DORA sur la résilience opérationnelle numérique. L'EBA publie un état des lieux.</p>
+
+                
+                <div class="key-facts">
+                    <strong>Points clés :</strong>
+                    <ul>
+                    
+                        <li>85% des banques conformes ou en voie de l'être</li>
+                    
+                        <li>Tests de résilience cyber obligatoires</li>
+                    
+                        <li>Cartographie des prestataires IT critiques</li>
+                    
+                    </ul>
+                </div>
+                
+
+                <a href="https://example.com/article/8" class="read-more">Lire l'article →</a>
+            </div>
+            
+        </div>
+        
+        
+        
+        <div class="category">
+            <h2><i class="fas fa-building-columns" style="margin-right: 10px; color: var(--accent-color);"></i>Banques Françaises</h2>
+
+            
+            <div class="article">
+                <h3>BNP Paribas annonce un plan de transformation digitale de 500M€</h3>
+                <div class="meta">
+                    Finextra
+                    
+                    | 19/01/2026
+                    
+                </div>
+                <p class="summary">BNP Paribas a dévoilé un plan d'investissement massif de 500 millions d'euros sur trois ans pour accélérer sa transformation digitale. Le plan prévoit notamment le déploiement de l'IA générative dans la relation client.</p>
+
+                
+                <div class="key-facts">
+                    <strong>Points clés :</strong>
+                    <ul>
+                    
+                        <li>Investissement de 500M€ sur 2026-2028</li>
+                    
+                        <li>Déploiement IA générative pour les conseillers</li>
+                    
+                        <li>Objectif : 30% de gains de productivité</li>
+                    
+                    </ul>
+                </div>
+                
+
+                <a href="https://example.com/article/2" class="read-more">Lire l'article →</a>
+            </div>
+            
+            <div class="article">
+                <h3>Société Générale finalise la cession de ses activités en Russie</h3>
+                <div class="meta">
+                    Les Echos
+                    
+                    | 11/01/2026
+                    
+                </div>
+                <p class="summary">Société Générale a finalisé la vente de Rosbank et de ses filiales russes, mettant fin à sa présence historique en Russie. L'opération génère une perte comptable mais libère des fonds propres significatifs.</p>
+
+                
+                <div class="key-facts">
+                    <strong>Points clés :</strong>
+                    <ul>
+                    
+                        <li>Cession de Rosbank finalisée</li>
+                    
+                        <li>Impact CET1 positif de +20 points de base</li>
+                    
+                        <li>Fin de 20 ans de présence en Russie</li>
+                    
+                    </ul>
+                </div>
+                
+
+                <a href="https://example.com/article/4" class="read-more">Lire l'article →</a>
+            </div>
+            
+        </div>
+        
+        
+        
+        <div class="category">
+            <h2><i class="fas fa-lightbulb" style="margin-right: 10px; color: var(--accent-color);"></i>Innovation & Digital</h2>
+
+            
+            <div class="article">
+                <h3>Open Banking : l'usage des APIs explose en Europe</h3>
+                <div class="meta">
+                    Fintech Futures
+                    
+                    | 29/01/2026
+                    
+                </div>
+                <p class="summary">Le nombre d'appels API en Open Banking a augmenté de 70% en Europe en 2025, porté par l'agrégation de comptes et l'initiation de paiements. Le Royaume-Uni reste leader mais la France progresse.</p>
+
+                
+                <div class="key-facts">
+                    <strong>Points clés :</strong>
+                    <ul>
+                    
+                        <li>+70% d'appels API en 2025</li>
+                    
+                        <li>France : 3ème marché européen</li>
+                    
+                        <li>Paiement par virement : adoption croissante</li>
+                    
+                    </ul>
+                </div>
+                
+
+                <a href="https://example.com/article/9" class="read-more">Lire l'article →</a>
+            </div>
+            
+            <div class="article">
+                <h3>France FinTech : record de levées de fonds pour les néobanques en 2025</h3>
+                <div class="meta">
+                    France FinTech
+                    
+                    | 13/01/2026
+                    
+                </div>
+                <p class="summary">L'écosystème fintech français a enregistré un record de levées de fonds en 2025, porté notamment par les néobanques et les solutions de paiement B2B. Le total atteint 2,3 milliards d'euros.</p>
+
+                
+                <div class="key-facts">
+                    <strong>Points clés :</strong>
+                    <ul>
+                    
+                        <li>2,3 milliards d'euros levés en 2025</li>
+                    
+                        <li>Croissance de 40% vs 2024</li>
+                    
+                        <li>Paiement B2B : segment le plus dynamique</li>
+                    
+                    </ul>
+                </div>
+                
+
+                <a href="https://example.com/article/5" class="read-more">Lire l'article →</a>
+            </div>
+            
+            <div class="article">
+                <h3>Crédit Agricole lance une offre de Banking-as-a-Service</h3>
+                <div class="meta">
+                    Finextra
+                    
+                    | 22/01/2026
+                    
+                </div>
+                <p class="summary">Crédit Agricole a annoncé le lancement de CA BaaS, une plateforme permettant aux entreprises d'intégrer des services bancaires via API. L'offre cible les marketplaces et les fintechs.</p>
+
+                
+                <div class="key-facts">
+                    <strong>Points clés :</strong>
+                    <ul>
+                    
+                        <li>Plateforme API complète (comptes, paiements, KYC)</li>
+                    
+                        <li>Partenariat avec 3 fintechs au lancement</li>
+                    
+                        <li>Objectif : 50 clients entreprises en 2026</li>
+                    
+                    </ul>
+                </div>
+                
+
+                <a href="https://example.com/article/7" class="read-more">Lire l'article →</a>
+            </div>
+            
+        </div>
+        
+        
+
+        <div class="footer">
+            <a href="https://www.aresandco.com/fr" target="_blank">
+                <img src="https://www.aresandco.com/img/footer-logo.png" alt="Ares & Co" style="max-height: 40px; margin-bottom: 10px; filter: brightness(0) invert(1);">
+            </a>
+            <p style="font-size: 12px; opacity: 0.9; margin-bottom: 15px;">Cabinet de conseil de Direction Générale</p>
+
+            <div class="contact-info" style="margin: 20px 0; font-size: 13px;">
+                <p style="margin: 5px 0;">
+                    <i class="fas fa-map-marker-alt" style="width: 16px; opacity: 0.8;"></i> 15 Av. de la Grande Armée, 75116 Paris, France
+                </p>
+                <p style="margin: 5px 0;">
+                    <i class="fas fa-phone" style="width: 16px; opacity: 0.8;"></i> +33 1 40 20 44 49
+                </p>
+                <p style="margin: 5px 0;">
+                    <i class="fas fa-envelope" style="width: 16px; opacity: 0.8;"></i> <a href="mailto:contact@aresandco.com" style="color: white;">contact@aresandco.com</a>
+                </p>
+            </div>
+
+            <div class="social-links" style="margin: 15px 0;">
+                <a href="https://www.aresandco.com/fr" style="color: white; text-decoration: none; margin: 0 10px;"><i class="fas fa-globe"></i> Site web</a>
+                <a href="https://www.linkedin.com/company/ares-&-company/" style="color: white; text-decoration: none; margin: 0 10px;"><i class="fab fa-linkedin"></i> LinkedIn</a>
+            </div>
+
+            <div class="legal" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 11px; opacity: 0.7;">
+                <p>Cette newsletter est envoyée aux clients et partenaires d'Ares & Co.</p>
+                <p style="margin-top: 5px;">
+                    <a href="#" style="color: white;">Mentions légales</a> |
+                    <a href="#" style="color: white;">Politique de confidentialité</a> |
+                    <a href="mailto:contact@aresandco.com?subject=Désabonnement Newsletter Banque" style="color: white;">Se désabonner</a>
+                </p>
+            </div>
+
+            <div class="generation-date" style="margin-top: 15px; font-size: 10px; opacity: 0.5;">
+                Généré le 03/02/2026
+            </div>
+        </div>
+    </div>
+</body>
+</html>

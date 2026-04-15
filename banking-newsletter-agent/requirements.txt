@@ -1,0 +1,30 @@
+# Banking Newsletter Agent - Dependencies
+# Ares & Co
+
+# Claude API
+anthropic>=0.40.0
+
+# RSS Feed parsing
+feedparser>=6.0.10
+
+# Web scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+
+# HTML/Markdown processing
+markdown>=3.5.0
+jinja2>=3.1.0
+
+# Data handling
+pyyaml>=6.0.0
+python-dateutil>=2.8.0
+
+# Audit trail & documentation
+openpyxl>=3.1.0  # Excel export for audit trail
+python-docx>=1.1.0  # Word export for methodology document
+
+# Utilities
+rich>=13.0.0  # Pretty console output
+tenacity>=8.2.0  # Retry logic for API calls
+python-dotenv>=1.0.0  # Load .env files

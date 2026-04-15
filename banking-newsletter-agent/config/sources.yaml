@@ -1,0 +1,183 @@
+# Configuration des sources de veille bancaire
+# Banking Newsletter Agent - Ares & Co
+
+rss_feeds:
+  # ============================================
+  # RÉGULATEURS (flux RSS directs - fonctionnels)
+  # ============================================
+  - name: "BCE - Communiqués de presse"
+    url: "https://www.ecb.europa.eu/rss/press.html"
+    category: "regulateur"
+    priority: 1
+
+  - name: "EBA - Press Releases"
+    url: "https://www.eba.europa.eu/news-press/news/rss.xml"
+    category: "regulateur"
+    priority: 1
+
+  - name: "AMF - Actualités"
+    url: "https://www.amf-france.org/fr/flux-rss/display/21"
+    category: "regulateur"
+    priority: 1
+
+  # ============================================
+  # MÉDIAS SPÉCIALISÉS (flux RSS directs - fonctionnels)
+  # ============================================
+  - name: "Finextra"
+    url: "https://www.finextra.com/rss/headlines.aspx"
+    category: "innovation"
+    priority: 1
+
+  - name: "Mind Fintech"
+    url: "https://www.mind.eu.com/fintech/feed/"
+    category: "fintech"
+    priority: 1
+
+  - name: "C'est pas mon idée"
+    url: "https://cestpasmonidee.blogspot.com/feeds/posts/default?alt=rss"
+    category: "innovation"
+    priority: 2
+
+  # ============================================
+  # PRESSE VIA GOOGLE NEWS RSS (contourne les paywalls)
+  # ============================================
+  - name: "Les Echos - Banque"
+    url: "https://news.google.com/rss/search?q=site:lesechos.fr+banque+OR+finance&hl=fr&gl=FR&ceid=FR:fr"
+    category: "french_banks"
+    priority: 1
+
+  - name: "L'Agefi - Finance"
+    url: "https://news.google.com/rss/search?q=site:agefi.fr+banque+OR+finance&hl=fr&gl=FR&ceid=FR:fr"
+    category: "french_banks"
+    priority: 1
+
+  - name: "La Tribune - Banque"
+    url: "https://news.google.com/rss/search?q=site:latribune.fr+banque+OR+finance&hl=fr&gl=FR&ceid=FR:fr"
+    category: "french_banks"
+    priority: 2
+
+  - name: "Option Finance"
+    url: "https://news.google.com/rss/search?q=site:optionfinance.fr&hl=fr&gl=FR&ceid=FR:fr"
+    category: "french_banks"
+    priority: 2
+
+  - name: "Revue Banque"
+    url: "https://news.google.com/rss/search?q=site:revue-banque.fr&hl=fr&gl=FR&ceid=FR:fr"
+    category: "french_banks"
+    priority: 1
+
+  # ============================================
+  # PRESSE INTERNATIONALE VIA GOOGLE NEWS RSS
+  # ============================================
+  - name: "Financial Times - Banking"
+    url: "https://news.google.com/rss/search?q=site:ft.com+banking+OR+banks&hl=en&gl=US&ceid=US:en"
+    category: "market"
+    priority: 1
+
+  - name: "Wall Street Journal - Finance"
+    url: "https://news.google.com/rss/search?q=site:wsj.com+banking+OR+finance&hl=en&gl=US&ceid=US:en"
+    category: "market"
+    priority: 1
+
+  # ============================================
+  # FINTECH VIA GOOGLE NEWS RSS
+  # ============================================
+  - name: "France FinTech"
+    url: "https://news.google.com/rss/search?q=site:francefintech.org&hl=fr&gl=FR&ceid=FR:fr"
+    category: "fintech"
+    priority: 2
+
+  - name: "Fintech Futures"
+    url: "https://news.google.com/rss/search?q=site:fintechfutures.com&hl=en&gl=US&ceid=US:en"
+    category: "innovation"
+    priority: 2
+
+web_sources:
+  # ============================================
+  # PAGES À SCRAPER (sources sans RSS ni Google News)
+  # ============================================
+  - name: "ACPR - Actualités"
+    url: "https://acpr.banque-france.fr/actualites"
+    category: "regulateur"
+    selector: ".news-item"
+    priority: 1
+
+  - name: "Banque de France - Publications"
+    url: "https://www.banque-france.fr/fr/publications-et-statistiques/actualites"
+    category: "regulateur"
+    selector: "article"
+    priority: 1
+
+# Mots-clés pour le filtrage et scoring
+keywords:
+  high_priority:
+    - "réglementation"
+    - "regulation"
+    - "Bâle"
+    - "Basel"
+    - "BCE"
+    - "ECB"
+    - "EBA"
+    - "ACPR"
+    - "AMF"
+    - "taux directeur"
+    - "interest rate"
+    - "banque française"
+    - "French bank"
+    - "BNP"
+    - "Société Générale"
+    - "Crédit Agricole"
+    - "BPCE"
+    - "fintech"
+    - "digital banking"
+    - "open banking"
+    - "DORA"
+    - "MiCA"
+    - "ESG"
+    - "AML"
+    - "M&A"
+    - "fusion"
+    - "acquisition"
+    - "Financial Times"
+    - "Wall Street Journal"
+
+  medium_priority:
+    - "paiement"
+    - "payment"
+    - "crédit"
+    - "credit"
+    - "innovation"
+    - "transformation"
+    - "digital"
+    - "IA"
+    - "AI"
+    - "blockchain"
+    - "crypto"
+    - "néobanque"
+    - "neobank"
+
+# Catégories pour la newsletter
+categories:
+  - id: "regulation"
+    name: "Actualités Réglementaires"
+    description: "Évolutions réglementaires et décisions des superviseurs"
+
+  - id: "monetary_policy"
+    name: "Politique Monétaire"
+    description: "Décisions BCE, évolution des taux"
+
+  - id: "french_banks"
+    name: "Banques Françaises"
+    description: "Actualités des grandes banques françaises"
+
+  - id: "innovation"
+    name: "Innovation & Digital"
+    description: "Fintech, digital banking, nouvelles technologies"
+
+  - id: "ma"
+    name: "M&A et Restructurations"
+    description: "Fusions, acquisitions, réorganisations"
+
+  - id: "market"
+    name: "Tendances Marché"
+    description: "Évolutions du marché bancaire européen et international"
